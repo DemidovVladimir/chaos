@@ -1,0 +1,52 @@
+{
+    email abuse@your-domain.app
+}
+
+relay.your-domain.app {
+    encode gzip zstd
+
+    # NIP-11 lookup at the root path
+    @nip11 {
+        header Accept application/nostr+json
+    }
+    handle @nip11 {
+        header Content-Type application/nostr+json
+        header Access-Control-Allow-Origin *
+        header Access-Control-Allow-Methods "GET"
+        respond `{
+            "name": "neuro-spati cars relay",
+            "description": "Curated Nostr relay for the neuro-spati cars marketplace. NIP-99 listings, NIP-17 sealed DMs.",
+            "pubkey": "<your-operator-pubkey-hex>",
+            "contact": "abuse@your-domain.app",
+            "supported_nips": [1, 9, 11, 12, 13, 15, 16, 17, 33, 40, 42, 50, 58, 99],
+            "software": "https://github.com/hoytech/strfry",
+            "version": "0.9",
+            "limitation": {
+                "min_pow_difficulty": 20,
+                "max_message_length": 131072,
+                "max_event_tags": 200,
+                "max_content_length": 8192
+            }
+        }`
+    }
+
+    # Everything else (websocket upgrade, queries) → strfry
+    reverse_proxy strfry:7777 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Real-IP {remote_host}
+    }
+
+    log {
+        output file /data/access.log {
+            roll_size 100mb
+            roll_keep 10
+        }
+        format json
+    }
+}
+
+moderation.your-domain.app {
+    encode gzip
+    file_server
+    root * /etc/caddy/moderation
+}

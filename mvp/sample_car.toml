@@ -1,0 +1,28 @@
+item_id = "8f4a2b1e-6c0d-4f29-9bd3-2b3a4e5f6c7d"
+
+title    = "2018 Mazda 6 hatchback"
+summary  = "65k mi, 1 owner, full service history."
+price_amount   = "15000"
+price_currency = "EUR"
+location = "EU/CZ/Prague"
+
+# Filter facets
+make          = "mazda"
+model         = "6"
+year          = "2018"
+body_type     = "hatchback"
+fuel_type     = "gasoline"
+transmission  = "manual"
+mileage_band  = "50k-75k"
+
+# Free-text body (markdown). Text only for the MVP — no photo URLs.
+# Photos are shared agent-to-agent via ACP in the post-weekend sprint;
+# the buyer's agent opens an ACP session against the seller's
+# acp_url and the seller streams ImageContentBlocks directly.
+content = """
+Bought new from Mazda CZ in March 2018. Single owner, garaged, non-smoker.
+Full dealer service history. No accidents. Recently passed STK (Czech MOT)
+with no issues. New tires (Continental PremiumContact) at 60k km.
+
+Photos and inspection report available on request via ACP session.
+"""

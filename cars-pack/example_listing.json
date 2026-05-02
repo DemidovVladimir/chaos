@@ -1,0 +1,63 @@
+{
+  "kind": 30402,
+  "pubkey": "7c4f3b8d2a1e6c0d4f29bd3a5e7f8c1d2b3a4e5f6c7d8b9a0e1f2d3c4b5a6e7f",
+  "created_at": 1714780800,
+  "tags": [
+    ["d", "8f4a2b1e-6c0d-4f29-9bd3-2b3a4e5f6c7d"],
+
+    ["title", "2018 Mazda 3 hatchback — manual, 1 owner"],
+    ["summary", "65k mi, full Mazda service history, no accidents. Asking 15,000 EUR. Pickup in Prague."],
+
+    ["t", "cars"],
+    ["t", "mazda"],
+    ["t", "mazda3"],
+    ["t", "hatchback"],
+    ["t", "manual"],
+
+    ["price", "15000", "EUR", ""],
+    ["price_band", "10k-20k EUR"],
+
+    ["location", "EU/CZ/Prague"],
+    ["region_geohash", "u2fkb"],
+
+    ["make", "mazda"],
+    ["model", "3"],
+    ["model_variant", "skyactiv"],
+    ["year", "2018"],
+    ["body_type", "hatchback"],
+    ["fuel_type", "gasoline"],
+    ["transmission", "manual"],
+    ["drivetrain", "fwd"],
+    ["engine_cc", "1998"],
+    ["power_kw", "88"],
+    ["mileage_band", "50k-75k"],
+
+    ["color_exterior", "soul red crystal"],
+    ["color_interior", "black"],
+
+    ["vin_last4", "8K2J"],
+
+    ["service_history", "full_records"],
+    ["accident_history", "none_known"],
+    ["owners_count", "1"],
+
+    ["accepts_offer", "yes"],
+    ["bid_min_cents", "1380000"],
+    ["delivery", "pickup"],
+    ["inspection", "welcome"],
+
+    ["acp", "https://a.io/acp"],
+    ["photos_via", "acp"],
+
+    ["badge", "30009:7c4f...:verified-private-seller"],
+
+    ["status", "available"],
+    ["expires_at", "1717372800"],
+    ["language", "en"],
+
+    ["schema_version", "1"]
+  ],
+  "content": "Bought new from Mazda CZ in March 2018. Single owner, garaged, non-smoker. Full dealer service history (every 15k km at official Mazda service in Prague-Karlín). No accidents, no panel repaints, no rust. Recently passed STK (Czech MOT) with no issues, valid until 2026-04. New tires (Continental PremiumContact) at 60k km, less than 5,000 km on them. Selling because the family is moving abroad. Open to inspection at any pre-purchase shop in Prague. Open to offers but the price reflects condition.\n\nPhotos and inspection report available on request via ACP session.",
+  "id": "<sha256 of serialized event — populated by signer>",
+  "sig": "<schnorr signature — populated by signer>"
+}

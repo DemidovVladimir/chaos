@@ -1,0 +1,111 @@
+<svg width="100%" viewBox="0 0 680 580" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Nostr-relay federation — neuro-spati discovery layer</title>
+  <desc>Seller and buyer agents publish and subscribe to a small set of Nostr relays. Operator runs one relay (Mode A) plus the cars-pack ships with 2-3 community relays in the default list. Federation provides resilience without single point of failure.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <style>
+    .t  { font: 500 14px var(--font-sans); fill: var(--color-text-primary); }
+    .ts { font: 400 12px var(--font-sans); fill: var(--color-text-secondary); }
+    .th { font: 500 14px var(--font-sans); fill: var(--color-text-primary); }
+    .tg { font: 500 12px var(--font-sans); fill: var(--color-text-tertiary); }
+  </style>
+
+  <text class="th" x="40" y="32">Federation — discovery without single point of failure</text>
+  <text class="ts" x="40" y="50">Sellers publish to N relays in parallel. Buyers fan in from M relays, dedupe by event id. No relay is required.</text>
+
+  <!-- Relay row -->
+  <g class="c-teal">
+    <rect x="40"  y="80" width="140" height="64" rx="10"/>
+    <text class="th" x="110" y="104" text-anchor="middle">your relay</text>
+    <text class="ts" x="110" y="122" text-anchor="middle">strfry · self-hosted</text>
+    <text class="ts" x="110" y="138" text-anchor="middle">≥ 20-bit PoW</text>
+  </g>
+  <g class="c-purple">
+    <rect x="200" y="80" width="140" height="64" rx="10"/>
+    <text class="th" x="270" y="104" text-anchor="middle">relay.damus.io</text>
+    <text class="ts" x="270" y="122" text-anchor="middle">community</text>
+  </g>
+  <g class="c-coral">
+    <rect x="360" y="80" width="140" height="64" rx="10"/>
+    <text class="th" x="430" y="104" text-anchor="middle">nos.lol</text>
+    <text class="ts" x="430" y="122" text-anchor="middle">community</text>
+  </g>
+  <g class="c-pink">
+    <rect x="520" y="80" width="120" height="64" rx="10"/>
+    <text class="th" x="580" y="104" text-anchor="middle">nostr.wine</text>
+    <text class="ts" x="580" y="122" text-anchor="middle">paid · low-spam</text>
+  </g>
+
+  <!-- Seller -->
+  <g class="c-amber">
+    <rect x="40" y="200" width="240" height="120" rx="10"/>
+    <text class="th"  x="160" y="224" text-anchor="middle">Seller agent</text>
+    <text class="ts"  x="56" y="246">publishes NIP-99 in parallel</text>
+    <text class="tg"  x="56" y="264">to all configured relays</text>
+    <text class="ts"  x="56" y="288">if any relay is down,</text>
+    <text class="tg"  x="56" y="306">the listing still propagates</text>
+  </g>
+
+  <!-- Buyer -->
+  <g class="c-green">
+    <rect x="400" y="200" width="240" height="120" rx="10"/>
+    <text class="th"  x="520" y="224" text-anchor="middle">Buyer agent</text>
+    <text class="ts"  x="416" y="246">REQ subscribes to N relays</text>
+    <text class="tg"  x="416" y="264">dedupes by event id</text>
+    <text class="ts"  x="416" y="288">if a relay disconnects,</text>
+    <text class="tg"  x="416" y="306">subscriber reconnects to peers</text>
+  </g>
+
+  <!-- Arrows seller→relays -->
+  <line x1="160" y1="200" x2="110" y2="144" stroke="#854F0B" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+  <line x1="160" y1="200" x2="270" y2="144" stroke="#854F0B" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+  <line x1="160" y1="200" x2="430" y2="144" stroke="#854F0B" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+  <line x1="160" y1="200" x2="580" y2="144" stroke="#854F0B" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Arrows relays→buyer -->
+  <line x1="110" y1="144" x2="520" y2="200" stroke="#3B6D11" stroke-width="0.8" fill="none" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+  <line x1="270" y1="144" x2="520" y2="200" stroke="#3B6D11" stroke-width="0.8" fill="none" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+  <line x1="430" y1="144" x2="520" y2="200" stroke="#3B6D11" stroke-width="0.8" fill="none" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+  <line x1="580" y1="144" x2="520" y2="200" stroke="#3B6D11" stroke-width="0.8" fill="none" marker-end="url(#arrow)" stroke-dasharray="3 3"/>
+
+  <!-- Three modes -->
+  <text class="th" x="40" y="356">Three operating modes — pick by infrastructure appetite</text>
+
+  <g class="c-gray">
+    <rect x="40"  y="370" width="200" height="120" rx="10"/>
+    <text class="th"  x="140" y="392" text-anchor="middle">Mode A — solo (default)</text>
+    <text class="ts"  x="56" y="412">You run one relay.</text>
+    <text class="ts"  x="56" y="428">Total moderation control.</text>
+    <text class="ts"  x="56" y="446">Single point of failure.</text>
+    <text class="ts"  x="56" y="464">~$5/mo VPS.</text>
+    <text class="ts"  x="56" y="480">Recommended for v1 launch.</text>
+  </g>
+  <g class="c-gray">
+    <rect x="248" y="370" width="200" height="120" rx="10"/>
+    <text class="th"  x="348" y="392" text-anchor="middle">Mode B — federated</text>
+    <text class="ts"  x="264" y="412">Yours + 3–4 community.</text>
+    <text class="ts"  x="264" y="428">No SPOF.</text>
+    <text class="ts"  x="264" y="446">Cross-network reach.</text>
+    <text class="ts"  x="264" y="464">Less moderation control.</text>
+    <text class="ts"  x="264" y="480">Migration target post-launch.</text>
+  </g>
+  <g class="c-gray">
+    <rect x="456" y="370" width="184" height="120" rx="10"/>
+    <text class="th"  x="548" y="392" text-anchor="middle">Mode C — no relay</text>
+    <text class="ts"  x="472" y="412">Community relays only.</text>
+    <text class="ts"  x="472" y="428">Zero infrastructure.</text>
+    <text class="ts"  x="472" y="446">Pure software vendor.</text>
+    <text class="ts"  x="472" y="464">Depends on community.</text>
+    <text class="ts"  x="472" y="480">Smallest reg surface.</text>
+  </g>
+
+  <!-- Note -->
+  <g class="c-blue">
+    <rect x="40" y="500" width="600" height="60" rx="10"/>
+    <text class="th"  x="56" y="522">Agent code does not change between modes — it's just a relay-list config setting.</text>
+    <text class="ts"  x="56" y="542">Migrate when product / market signals indicate; protocol is identical.</text>
+  </g>
+</svg>

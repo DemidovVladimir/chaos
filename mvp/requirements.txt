@@ -1,0 +1,2 @@
+pynostr==0.6.2
+tomli>=2.0; python_version<"3.11"

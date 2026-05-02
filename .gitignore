@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments — never commit these
+venv/
+.venv/
+env/
+
+# User-local Nostr keys — NEVER commit
+*.key
+.mvp/
+.neuro_spati/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type-check / lint caches
+.mypy_cache/
+.ruff_cache/
+.ty_cache/
+
+# Local config that may carry secrets
+*.local.yaml
+*.local.toml
+.env
+.env.*
+!.env.example
+
+# Backups / drafts
+*~
+*.bak
+*.draft
