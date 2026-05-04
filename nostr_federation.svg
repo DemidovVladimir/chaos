@@ -1,5 +1,5 @@
 <svg width="100%" viewBox="0 0 680 580" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>Nostr-relay federation — neuro-spati discovery layer</title>
+  <title>Nostr-relay federation — chaos discovery layer</title>
   <desc>Seller and buyer agents publish and subscribe to a small set of Nostr relays. Operator runs one relay (Mode A) plus the cars-pack ships with 2-3 community relays in the default list. Federation provides resilience without single point of failure.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">

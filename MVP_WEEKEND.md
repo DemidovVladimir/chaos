@@ -1,190 +1,185 @@
 # Weekend MVP — the smallest thing that proves the loop
 
-**Goal:** by Sunday night, two laptops can do this:
+The MVP is the working three-layer demo: **Nostr discovery →
+encrypted DM round-trip → MCP HTTP+SSE rich-content delivery with
+SHA-256 verification**, on two laptops, over public community
+relays, with no infrastructure on your side and no third-party file
+host anywhere in the data path.
 
-- Laptop A publishes a NIP-99 listing for a fictional car
-- Laptop B's filter matches it and surfaces it
-- Laptop B sends Laptop A a DM: "tell me more"
-- Laptop A replies with a longer description
-- The whole thing runs over **a public community Nostr relay** with
-  **no infrastructure on your side** and **no Hermes integration yet**
+The reference vertical we ship the demo against is `cars-pack@1` —
+a fictional used-car listing — but the loop is the protocol's
+loop, not cars-specific. The same publish / subscribe / MCP-fetch
+shape carries any vertical pack: a model offering, a dataset
+sample, a service quote, a compute job. The MVP is the protocol's
+proof, not the domain's.
 
-Everything beyond that is out of scope until this works.
+## What this MVP proves
+
+1. Two agents on different machines find each other via a Nostr
+   relay neither of them operates.
+2. They open an end-to-end encrypted DM channel using the user's
+   own secp256k1 keys — the relay can carry the ciphertext but
+   cannot read it.
+3. They open an MCP HTTP+SSE session and exchange binary content
+   (images + an inspection PDF) as `ImageContent` and
+   `EmbeddedResource` blocks returned from `tools/call` results,
+   verified by SHA-256 hash.
+4. **No third-party file host anywhere in the path.** Bytes flow
+   seller-disk → MCP tool result → buyer-disk.
+
+That's the whole protocol in miniature. Everything in `seller/`,
+`buyer/`, and `plugins/` is a more production-shaped version of the
+same loop — full grant policy, NIP-17 instead of NIP-04, full PoW,
+the cross-vertical capability MCPs wired in.
 
 ## What's IN, what's OUT
 
-| In (weekend) | Out (later) |
+| In (weekend MVP) | Out (production scaffolds) |
 |---|---|
-| One seller script: `seller.py` | Hermes plugin integration |
-| One buyer script: `buyer.py` | Mode A relay (your own strfry) |
+| One offering script: `seller.py` | Hermes plugin integration (`plugins/`) |
+| One seeking script: `buyer.py` | Mode A relay (your own strfry) |
 | Public community relays only (`wss://relay.damus.io`, `wss://nos.lol`) | Premium plugin tier, billing |
-| `pynostr` library — handles keypair + sig + WebSocket | Schnorr / NIP-44 hand-rolled |
-| **NIP-04 legacy DMs** (kind 4) — encrypted but simpler than NIP-17 | NIP-17 gift-wrap |
-| One JSON file as the seller's local "catalog" | Per-item catalogs, manifests, attestations |
-| **No photos in the MVP at all** — text inquiry / text reply only | ACP `ImageContentBlock` streamed agent-to-agent (no third-party host, no HTTP file server, ever) |
+| `pynostr` library — keypair + sig + WebSocket | Hand-rolled NIP-44 / Schnorr |
+| **NIP-04 legacy DMs** (kind 4) — encrypted but simpler than NIP-17 | NIP-17 sealed gift-wrap (production) |
+| One TOML file as the offering's local catalog | Full per-item catalog, manifests, attestations |
+| FastMCP server / client wired against the cars-pack tool surface | Full grant policy from `seller-cars` skill |
 | ~11 essential cars-pack tags | Full cars-pack tag schema |
 | Hardcoded buyer filter | Filter authoring UI |
-| No PoW (relays we use don't require it) | NIP-13 mining |
-| No verified-seller badges | NIP-58 issuer |
-| No reverse-image check | reverse-image-mcp |
-| No market comps | market-comp-mcp |
-| No moderation tooling | abuse@ inbox + appeal flow |
-
-The full cars-pack schema, the operations runbook, the launch plan,
-the business model — all stay as documents, none ship as code this
-weekend.
-
-## On photos — they don't exist in this MVP
-
-Photos move agent-to-agent via ACP content blocks
-(`ImageContentBlock`, `EmbeddedResourceContentBlock`). No HTTP file
-server, no signed URLs, no third-party host. **That layer ships in
-the post-weekend sprint when we wire ACP transport.** For the
-weekend, the entire demo is text. The seller can reference photos in
-the listing description as a sentence ("interior is gray cloth,
-clean") but no image bytes leave their machine until ACP is up.
-
-This is a deliberate scope cut, not a missing feature. The protocol
-does not require third-party file hosting; we don't need to fake
-one for the MVP.
+| No PoW (relays we use don't require it for MVP) | NIP-13 mining ≥ 20 bits |
+| No verified-issuer badges | NIP-58 issuer agent |
+| No reverse-image check | `reverse-image-mcp` |
+| No market comps | `market-comp-mcp` |
+| No reputation aggregation | `reputation-mcp` |
+| No moderation tooling | `abuse@` inbox + appeal flow |
 
 ## Stack
 
-- Python 3.11+ (you have it)
+- Python 3.11+
 - `pynostr` — `pip install pynostr` (handles keypair, signing,
-  WebSocket relay client, NIP-04 encrypt/decrypt). Mature.
-- `websockets` (transitive dep of pynostr)
+  WebSocket relay client, NIP-04 encrypt/decrypt)
+- `mcp` — the FastMCP Python SDK for the HTTP+SSE server / client
+- `httpx`, `websockets` (transitive)
 
-That's it. Two Python scripts and two relay URLs.
+That's it. Two Python scripts plus two relay URLs.
 
-## Time budget
+## Setup
 
-| Task | Time |
-|---|---|
-| Saturday morning — env setup, keypairs, hello-world publish | 2h |
-| Saturday afternoon — `seller.py`: publish a NIP-99 listing | 2h |
-| Saturday evening — `buyer.py`: subscribe, decode, render | 2h |
-| Sunday morning — DM round-trip (NIP-04) | 3h |
-| Sunday afternoon — pull it together: 30-second demo | 2h |
-| Sunday evening — slack | 2h |
+```bash
+git clone <repo> chaos && cd chaos/mvp
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
 
-**13 hours of focused work.**
+# Generate sovereign keypairs locally (mode 0600)
+python seller.py keygen
+python buyer.py keygen
+```
 
-## Files in this MVP
+That writes `~/.chaos/keys/seller.key` and
+`~/.chaos/keys/buyer.key` at mode 0600. There is no key
+recovery path — sovereignty has costs. Lose this file, you lose
+the identity.
+
+## Run the demo
+
+```bash
+# Terminal 1 — offering side
+python seller.py publish sample_listing.toml   # NIP-99 publish to relay set
+python seller.py serve                          # FastMCP HTTP+SSE server + DM listener
+
+# Terminal 2 — seeking side
+python buyer.py watch                           # subscribe + DM round-trip + MCP fetch
+```
+
+The reference `sample_listing.toml` describes a fictional used car —
+it's the cars-pack@1 example we shipped first. To experiment with
+another shape, write a new TOML against a different pack's tag
+schema; the publish flow is identical.
+
+## What you should see
+
+1. **Within ~5 seconds**, the `buyer.py watch` terminal prints:
+   `Match: <listing title>, <price>, <region>. DM seller? [y/N]`
+2. Press `y`, type a question. The seeking-side agent encrypts via
+   NIP-04, publishes the kind-4 event addressed to the offering
+   pubkey.
+3. The `seller.py serve` terminal prints:
+   `Inquiry from <buyer-pubkey>: <text>. Reply? [y/N]`
+4. Press `y`, type a reply (which includes a `mcp_url` and a
+   `session_token`). The buyer reads the reply and **opens an MCP
+   HTTP+SSE session** against the seller's URL.
+5. The buyer runs `tools/list`, then calls `request_photos` and
+   `request_inspection_report`. The seller's FastMCP server returns
+   `ImageContent` blocks for the photos and an `EmbeddedResource`
+   block for the PDF. The buyer verifies each block by SHA-256
+   against a hash the seller included in the previous DM.
+6. The buyer prints the photo count, the PDF size, and `OK — bytes
+   never touched a third-party host.`
+
+## What it doesn't do
+
+- **NIP-04, not NIP-17.** Production wires sealed gift-wraps; the
+  MVP keeps the simpler legacy DM format because `pynostr` ships an
+  `EncryptedDirectMessage` helper for it. NIP-17 wiring lives in
+  `seller/` and `buyer/`.
+- **No PoW.** Public relays we use don't require it; the production
+  publish flow mines ≥ 20 bits.
+- **No grant policy.** The MVP `seller.py` returns whatever the
+  buyer asks for. The full per-ask grant policy (auto-grant routine
+  asks; user-prompt for sensitive asks) lives in
+  `verticals/cars-pack/skills/seller-cars/SKILL.md` and is wired
+  into the production seller scaffold.
+- **No capability MCPs.** Reverse-image, market-comp, reputation,
+  and pack-local capability MCPs (e.g. `vin-decoder-mcp` for cars)
+  are not wired into the MVP loop. They are wired into the buyer
+  plugin scaffold under `plugins/cars-buyer/`.
+- **No NIP-58 badges, no NIP-51 mute lists, no admin-agent.** All
+  five trust layers are scaffolded under `reputation/` but not
+  active in the MVP loop.
+
+The production wiring lives in:
+
+- `seller/` and `buyer/` — universal engines, pack-driven
+- `plugins/cars-seller/`, `plugins/cars-buyer/`,
+  `plugins/cars-admin/` — Hermes install targets for the reference
+  vertical
+- `plugins/chaos-pro/` — cross-vertical paid upgrade
+- `shared-mcp/` — capability MCPs reused by every vertical
+- `reputation/` — kinds, scoring, dispute protocol
+
+## Files in `mvp/`
 
 ```
 mvp/
-├── README.md                  how to run it
-├── requirements.txt           pynostr only
-├── seller.py                  publish + listen for DMs + reply
-├── buyer.py                   subscribe + render matches + send DM
-├── shared.py                  helpers (keypair load/save, event builders)
-└── sample_car.toml            the demo car
+├── README.md                  detailed run notes
+├── requirements.txt           pynostr + mcp + httpx
+├── seller.py                  publish + DM listener + FastMCP server
+├── buyer.py                   subscribe + DM round-trip + FastMCP client
+├── shared.py                  helpers (keypair, event builders, hash verify)
+├── sample_listing.toml        the demo offering (cars reference)
+└── sample_photos/             local content the seller serves over MCP
 ```
-
-## The whole protocol, weekend-edition
-
-```
-seller.py                       relay.damus.io                         buyer.py
-   │                                  │                                     │
-   │ publish kind:30402 ─────────────▶│                                     │
-   │  tags: d, title, summary,        │                                     │
-   │        price, location, t=cars,  │                                     │
-   │        t=mazda, make, model,     │                                     │
-   │        year, mileage_band        │                                     │
-   │  content: full description       │                                     │
-   │                                  │                                     │
-   │                                  │◀─── REQ {kinds:[30402], #t:["cars"], │
-   │                                  │       #make:["mazda"]}              │
-   │                                  │                                     │
-   │                                  │─── EVENT (the listing) ────────────▶│
-   │                                  │                              prints:│
-   │                                  │                              "match │
-   │                                  │                              found, │
-   │                                  │                              DM y/n?"│
-   │                                  │                                     │
-   │                                  │◀──── publish kind:4 (NIP-04 DM)─────│
-   │                                  │  encrypted to seller's pubkey       │
-   │                                  │  content: "tell me more"            │
-   │                                  │                                     │
-   │◀── EVENT (the DM) ───────────────│                                     │
-   │                                  │                                     │
-   │ decrypt, print, reply            │                                     │
-   │ publish kind:4 to buyer ────────▶│                                     │
-   │  content: "<longer description>" │                                     │
-   │                                  │─── EVENT (reply DM) ───────────────▶│
-   │                                  │                              prints:│
-   │                                  │                              reply  │
-```
-
-Six round-trips with the relay. No infrastructure on your side.
-
-## DMs — NIP-04 not NIP-17
-
-For the weekend we use **NIP-04 legacy encrypted DMs** (kind 4), not
-NIP-17 gift wraps. Reasons:
-
-- `pynostr` ships an `EncryptedDirectMessage` helper for NIP-04
-- AES-256-CBC with shared ECDH secret. Encrypted. Works.
-- NIP-04 is "deprecated in favor of NIP-17" but every relay still
-  supports it
-- NIP-17 would add ~half a day on its own (gift-wrap + ephemeral
-  keypairs + NIP-44 encryption). Not weekend-shaped.
-
-**We migrate to NIP-17 in week 3 of the launch plan.**
-
-## Relay choice
-
-Two free, public, low-friction relays:
-
-- `wss://relay.damus.io` — popular, reliable, no PoW
-- `wss://nos.lol` — secondary
-
-That's it. Your own strfry comes in week 1 of the launch plan.
-
-## Demo script for Sunday evening
-
-The deliverable is a 30-second screen capture showing:
-
-1. Run `python seller.py publish sample_car.toml` on Laptop A.
-2. Run `python buyer.py watch` on Laptop B.
-3. Within ~5 seconds, Laptop B prints: "Match: 2018 Mazda 3
-   hatchback, 15,000 EUR, EU/CZ/Prague. DM seller? [y/N]".
-4. Press `y`. Type "tell me more about service history".
-5. Laptop A's `seller.py` listener prints: "Inquiry from
-   <buyer-pubkey>: tell me more about service history. Reply? [y/N]".
-6. Press `y`. Type "Full Mazda dealer service history. Recently
-   passed STK. New tires. Happy to share photos and inspection
-   report once we open an ACP session — book one when you're ready."
-7. Laptop B prints: "Reply from seller: <text>".
-
-The "open an ACP session" line is a placeholder for the next sprint;
-it makes explicit to the buyer that photos exist and are shared
-peer-to-peer, not via an external link.
-
-That's the whole MVP. ~150 lines of Python total, two free public
-relays, zero infrastructure. If it works by Sunday evening, you've
-validated the architecture and the launch plan sequences cleanly.
 
 ## After the weekend
 
-When the demo works, week-by-week:
+When the demo works, work continues in `LAUNCH_PLAN.md`. The
+sequence:
 
-- **Week 1**: Replace the hardcoded filter with a Hermes skill that
-  the agent invokes. Wire ACP transport between agents (Hermes ships
-  `acp_adapter/`) so the seller can stream `ImageContentBlock`s to
-  the buyer when asked. **Photos arrive in the buyer's ACP session,
-  never via HTTP.**
-- **Week 2**: Stand up your own strfry relay (the operations runbook
-  in `registry/` applies — a few hours of deployment work).
-- **Week 3**: Move from NIP-04 to NIP-17 sealed DMs.
-- **Week 4**: Add the cars-pack tag schema in full + the
-  reverse-image-mcp.
+- **Phase 1 (week 1)** — universal engines (`seller/` + `buyer/`)
+  wired into Hermes plugin loaders.
+- **Phase 2 (week 2)** — first vertical pack (cars) end-to-end
+  via Hermes plugin, full grant policy, NIP-17 instead of NIP-04,
+  PoW on publish.
+- **Phase 3 (week 3)** — second vertical pack as proof-of-generality
+  (one of the sketched verticals — see `VERTICALS.md`) +
+  `reputation-mcp` wiring.
+- **Phase 4 (week 4)** — admin-agent live, community arbitration,
+  Phase-1 staking research kicked off.
 
 ## Reality check
 
 If by Sunday evening the loop doesn't work, do not "scope creep"
-your way through Monday. Stop, identify the one failure point
-(almost certainly: relay choice, library issue, or NIP-04 encryption),
-and unblock it. The MVP either works in a weekend or there's something
-about the stack you didn't understand. That's information; act on it.
+through Monday. Stop, identify the one failure point (almost
+certainly: relay choice, library install issue, MCP transport
+auth, or NIP-04 encryption), and unblock it. The MVP either works
+in a weekend or there's something about the stack we didn't
+understand. That's information; act on it.

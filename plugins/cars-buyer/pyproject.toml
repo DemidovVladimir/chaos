@@ -1,0 +1,35 @@
+[project]
+name = "chaos-cars-buyer"
+version = "1.0.0"
+description = "Buy cars on the chaos Nostr-based marketplace (free tier, Hermes plugin)."
+requires-python = ">=3.11"
+authors = [{ name = "chaos contributors" }]
+license = { text = "MIT" }
+
+dependencies = [
+  "pynostr>=0.6.2,<0.7",
+  "mcp==1.27.0",
+  "pyyaml>=6.0,<7",
+  # Once buyer/ is implemented, switch to:
+  #   "chaos-buyer>=0.1",
+  # Capability MCPs listed in plugin.yaml are not pip deps — they're
+  # MCP servers the user installs separately (or that ship via
+  # chaos-pro).
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0,<9", "ruff>=0.4,<1"]
+
+[project.entry-points."hermes_agent.plugins"]
+cars-buyer = "chaos_cars_buyer:register"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

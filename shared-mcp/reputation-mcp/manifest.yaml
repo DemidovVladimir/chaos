@@ -1,0 +1,30 @@
+manifest_version: 1
+name: reputation-mcp
+version: 0.2.0
+description: "Layered trust-signal aggregation MCP. Reads NIP-58 badges, kinds 30410+30411+30412 peer attestations, kinds 30430/30431 admin decisions, NIP-02 web of trust; aggregates per `reputation/scoring.md`. Read-only; never custodies. Submit tools require a local signing key — refuses unsigned."
+transport: http+sse
+bind: 127.0.0.1
+port: 7612
+exposed_tools:
+  - name: get_reputation
+    description: "Return ScoringReport for (pubkey, vertical_pack). Aggregates NIP-58 badges, paired attestations (30410+30411), unilateral disputes (30412), admin decisions (30430), NIP-02 WoT distance. Phase-1 onchain stake hook returns null in MVP."
+  - name: submit_peer_attestation
+    description: "Publish a kind 30410 sale-attestation. Requires signing_key_hex."
+  - name: submit_counter_attestation
+    description: "Publish a kind 30411 counter-attestation referencing a prior 30410. Requires signing_key_hex."
+  - name: submit_dispute_attestation
+    description: "Publish a kind 30412 unilateral dispute-attestation when the counterparty refuses to acknowledge. Requires signing_key_hex."
+paid: false
+x402:
+  enabled: false
+threat_model:
+  outbound_http: none      # Nostr WSS to user-configured relays only; optional on-chain RPC in thorough tier
+  retains_inputs: false
+tier_modes:
+  fast:
+    wot_depth: 2
+    onchain_stake: false
+  thorough:
+    wot_depth: 4
+    onchain_stake: true
+    description: "Deeper WoT, broader attestation scan, optional on-chain stake read. Enabled by chaos-pro."

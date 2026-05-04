@@ -1,0 +1,20 @@
+# MCP server descriptor for a chaos shared capability MCP.
+# Copy this file to your new MCP folder and fill in the placeholders.
+manifest_version: 1
+name: template-mcp
+version: 0.1.0
+description: "Copy-and-fill scaffold."
+transport: http+sse           # or stdio
+bind: 127.0.0.1
+port: 7600                    # pick a unique port per shared MCP
+exposed_tools:
+  - name: <tool_name>
+    description: "<one-line description>"
+paid: false                   # true if any tool is x402-priced
+x402:
+  enabled: false
+  price_usdc: 0.0
+  network: base
+threat_model:
+  outbound_http: none         # or list allowed hosts
+  retains_inputs: false

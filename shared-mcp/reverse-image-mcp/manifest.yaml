@@ -1,0 +1,25 @@
+manifest_version: 1
+name: reverse-image-mcp
+version: 0.1.0
+description: "Perceptual-hash photo fraud detection. Universal across verticals."
+transport: http+sse
+bind: 127.0.0.1
+port: 7610
+exposed_tools:
+  - name: check_image
+    description: "Compute pHash/dHash of an image and check against local hash DB. Returns similarity score and tier used. No outbound HTTP."
+paid: true                 # thorough tier is paid; fast tier is free
+x402:
+  enabled: true
+  price_usdc: 0.10         # per `thorough` call; `fast` is free
+  network: base
+threat_model:
+  outbound_http: none      # all hashing local; federated registry pulled via Nostr only
+  retains_inputs: false    # bytes are hashed and discarded; only hashes persist locally
+tier_modes:
+  fast:
+    description: "pHash + dHash + bundled stock library. Free, 100/day per pubkey."
+    paid: false
+  thorough:
+    description: "Adds EXIF cross-checks + federated registry + optional CLIP semantic match. x402 per call. Enabled by chaos-pro."
+    paid: true

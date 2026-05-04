@@ -3,15 +3,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "neuro-spati-buyer"
+name = "chaos-buyer"
 version = "0.1.0"
-description = "Buyer agent for the neuro-spati Nostr-based marketplace"
+description = "Buyer agent for the chaos Nostr-based marketplace (MCP HTTP+SSE client to the seller's MCP server)"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "neuro-spati contributors" }]
+authors = [{ name = "chaos contributors" }]
 license = { text = "MIT" }
 dependencies = [
   "pynostr>=0.6.2,<0.7",
+  "mcp==1.27.0",
   "httpx>=0.28.0,<1",
   "pydantic>=2.0,<3",
   "pyyaml>=6.0,<7",
@@ -27,10 +28,10 @@ dev = [
 ]
 
 [project.entry-points."hermes.plugin"]
-neuro_spati_buyer = "neuro_spati_buyer:register"
+chaos_buyer = "chaos_buyer:register"
 
 [project.scripts]
-neuro-spati-buyer = "neuro_spati_buyer.main:main"
+chaos-buyer = "chaos_buyer.main:main"
 
 [tool.ruff]
 line-length = 100

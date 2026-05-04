@@ -1,0 +1,5 @@
+INSPECTION REPORT (test, seller=bob)
+Item: 2018 Mazda 6 hatchback
+VIN ending: 8K2J
+Mileage at inspection: 65,432 km
+Verdict: pass

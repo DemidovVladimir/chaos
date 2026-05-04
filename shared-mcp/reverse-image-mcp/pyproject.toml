@@ -1,0 +1,19 @@
+[project]
+name = "reverse-image-mcp"
+version = "0.1.0"
+description = "Perceptual-hash photo fraud detection MCP. Universal across verticals. Local-only; no third-party reverse-image services."
+requires-python = ">=3.11"
+dependencies = [
+  "mcp==1.27.0",
+  "fastmcp",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

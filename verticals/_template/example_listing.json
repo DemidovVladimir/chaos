@@ -1,0 +1,41 @@
+{
+  "_comment_purpose": "Skeleton NIP-99 event for a <vertical>-pack listing. Replace every <PLACEHOLDER> and remove the _comment_* keys before publishing. Listings carry NO image tag and NO PII; binaries flow over MCP.",
+  "kind": 30402,
+  "pubkey": "<SELLER_PUBKEY_HEX>",
+  "created_at": 0,
+  "tags": [
+    ["d", "<UUID_V4>"],
+    ["title", "<HUMAN_READABLE_TITLE>"],
+    ["summary", "<ONE_LINE_SUMMARY_LE_280_CHARS>"],
+    ["t", "<vertical>"],
+    ["t", "<PRIMARY_FACET>"],
+    ["price", "<AMOUNT_AS_STRING>", "<ISO_4217_CODE>", ""],
+    ["location", "<CONTINENT>/<COUNTRY>/<CITY>"],
+    ["<REQUIRED_FACET_1>", "<VALUE>"],
+    ["<REQUIRED_FACET_2>", "<VALUE>"],
+    ["<REQUIRED_FACET_3>", "<VALUE>"],
+    ["mcp", "https://<seller-public-mcp-url>/mcp"],
+    ["pack", "<vertical>-pack@1"],
+    ["status", "available"],
+    ["language", "en"],
+    ["schema_version", "1"],
+
+    ["_comment_recommended", "tags below this line are recommended but not required; delete the ones you don't use"],
+    ["<RECOMMENDED_FACET_1>", "<VALUE>"],
+    ["<RECOMMENDED_FACET_2>", "<VALUE>"],
+    ["accepts_offer", "yes"],
+    ["bid_min_cents", "<MIN_ACCEPTABLE_BID_IN_CENTS>"],
+    ["expires_at", "<UNIX_TIMESTAMP>"],
+    ["badge", "<NIP58_BADGE_EVENT_ID_OR_OMIT>"],
+
+    ["_comment_optional", "advanced/optional below; usually omit"],
+    ["region_geohash", "<5_CHAR_GEOHASH>"],
+    ["currency_alt", "<ALT_ISO_4217>"]
+  ],
+  "content": "<PUBLIC_DESCRIPTION_NO_PII_NO_PHOTOS_NO_FULL_ADDRESS>",
+  "id": "<COMPUTED_AT_PUBLISH_TIME>",
+  "sig": "<SCHNORR_SIGNATURE_OVER_ID>",
+  "_comment_pow": "before signing: mine NIP-13 PoW to >= 20 bits by varying the `nonce` tag",
+  "_comment_photos": "no `image` tag in v1 listings — photos arrive in the buyer's agent only via MCP `request_<DOMAIN_PHOTO_OR_DOC>` tool calls returning ImageContent blocks",
+  "_comment_pii": "the `content` field is part of the public listing; never put PII, exact addresses, or document scans in it"
+}

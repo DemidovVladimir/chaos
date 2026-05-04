@@ -1,358 +1,482 @@
-# PRD — neuro-spati
+# PRD — chaos
 
 A precise product-requirements document. Read alongside `OVERVIEW.md`
-(plain-English narrative), `PROTOCOL.md` (on-the-wire design), and
-`CLAUDE.md` (engineering rules).
+(plain-English narrative), `PROTOCOL.md` (on-the-wire design),
+`VERTICALS.md` (the pack abstraction), and `CLAUDE.md` (engineering
+rules).
 
 ## 1. Problem statement
 
-Selling and buying high-value items peer-to-peer (cars, real estate,
-watches, etc.) today happens on **custodial classifieds platforms**
-(Craigslist, Facebook Marketplace, AutoTrader, Carvana). Those
-platforms:
+Two autonomous agents, owned by different users and running on
+different machines, need to coordinate. The offering agent has
+something — an item, a service, a model, a dataset, a block of
+inference cycles — and wants the right counterparty to find it. The
+seeking agent has a need and wants to evaluate offers without
+revealing its identity to a custodial intermediary. Today every
+shape of this handshake routes through a platform that holds the
+data, mediates the messaging, takes a percentage of the deal, and
+operates as a regulated data controller on both sides.
 
-- Hold seller inventory data and photos
-- Hold buyer search history and identity
-- Take a cut on transactions or insert advertising
-- Operate as data controllers under GDPR
-- Can deplatform users for any reason
-- Mediate communication, often blocking off-platform contact
+That platform is structurally unnecessary. The discovery problem
+(signed events on a federated relay) and the rich-content problem
+(JSON-RPC tool calls returning binary content blocks) both have
+mature open-protocol answers. What's been missing is the contract
+layer that says, **for a given domain**, which tags publishers must
+emit and which tools every offering agent must expose. Without that
+contract, agents on different machines can't actually find or
+evaluate each other.
 
-Sellers and buyers want to find each other; they don't want a
-custodial intermediary.
+chaos is the contract layer plus the wiring to make two
+agents on different machines coordinate end-to-end without a
+platform sitting in the data path.
 
 ## 2. Solution in one sentence
 
-Each user runs an agent that publishes wants/offers as signed Nostr
-events and connects directly to counterparties for inquiry and file
-exchange — no custodial platform in the data path.
+Each user runs a Hermes-based agent that publishes signed offerings
+as Nostr events tagged according to a vertical pack, subscribes for
+matching offers, and connects directly to counterparties over MCP
+for the rich-content exchange — no custodial platform anywhere in
+the data path.
 
-## 3. Users and personas
+## 3. Goals
 
-### 3.1 Seller (private individual)
+The protocol succeeds if it delivers all of the following:
 
-A person selling one car. Mid-30s, professional, has 2–3 hours per
-week to spend on the sale. Wants their car visible to qualified
-buyers, doesn't want their phone number in public, doesn't want to
-upload photos to a corporate platform that may reuse them.
+- **Sovereign identity.** Each agent owns a secp256k1 keypair stored
+  locally. The platform never custodies, escrows, or recovers user
+  keys. Identity is portable across any Nostr-based application.
+- **Federated discovery.** No central registry. Listings are NIP-99
+  events on a Nostr relay; the relay set is configurable per agent.
+  Mode A (one operator-run relay + community relays) is the v1
+  default; Mode B (federation) and Mode C (community-only) are
+  migration paths the architecture already supports.
+- **Peer transport for everything after pairing.** Once two agents
+  match, the conversation moves to MCP. No platform in the data
+  path. Binary content (images, PDFs, datasets, model artifacts) is
+  delivered exclusively as MCP `ImageContent` and `EmbeddedResource`
+  blocks returned from `tools/call` results on the offering agent's
+  own MCP server.
+- **Layered trust.** Five independent trust signals (NIP-58 badges,
+  peer attestations, NIP-51 mute lists, NIP-02 web of trust, opt-in
+  admin-agent decisions). No single signal is a gatekeeper. Each
+  agent computes its own score locally.
+- **Vertical composability.** Adding a domain is writing a pack
+  (`verticals/<vertical>-pack/`), not re-engineering the protocol.
+  The wire is universal; the per-pack contract pins which tags and
+  which tools.
+- **Security against prompt injection.** Every untrusted input
+  passes through a sanitizer and is wrapped in source-tagged
+  `<untrusted>` blocks. Agents are explicitly trained to never
+  execute instructions found inside untrusted blocks.
 
-**Goals**: list the car once, get qualified inquiries, share photos
-to buyers I trust, finalize off-platform.
+## 4. Non-goals
 
-**Frustrations** with status quo: spam from non-serious buyers,
-identity exposure on public boards, repetitive responses to the same
-basic questions.
+These are explicitly out of scope. A request to build any of them
+requires explicit user override per CLAUDE.md.
 
-### 3.2 Seller (small dealer)
+- **Marketplace operator features.** No escrow, no refunds, no
+  platform-mediated dispute arbitration with binding outcomes, no
+  KYC, no AML.
+- **Payment processing of any kind.** Even token-pegged stablecoins.
+  Future onchain integrations are non-custodial multi-sig only
+  (CLAUDE.md Rule 14).
+- **Custodial photo or file hosting.** Binary content moves over MCP
+  only. No HTTP file servers we operate, no signed URLs to
+  third-party hosts.
+- **A second peer transport.** MCP is the canonical wire for
+  agent↔agent dialogue. Earlier iterations spiked ACP and A2A; both
+  superseded (`spike/MCP_SPIKE_REPORT.md`). No parallel gRPC, custom
+  WebSocket, or other peer transport without explicit override.
+- **Third-party data brokering.** Custom MCPs may compute over data
+  the user already has, query free authoritative sources, or
+  aggregate data already on the network. They may not resell
+  commercial data we'd need to license, store, or re-distribute.
+- **Mobile-first UI.** Desktop / CLI / Hermes-driven first; mobile
+  is v2+.
+- **Browser extension.** Out of scope.
+- **Crypto / web3 token mechanics.** Nostr is a federated relay
+  protocol — not a chain, not a token. Phase-1 onchain staking is a
+  separate non-custodial roadmap layer, not a token launch.
+- **In-app social features** beyond NIP-51 mute lists and NIP-58
+  badges.
+- **Real-time voice or video.**
+- **Per-vertical paid plugins.** The cross-vertical pro tier
+  (`plugins/chaos-pro/`) is the only paid plugin shape;
+  per-vertical paid bundles like `cars-buyer-pro` are explicitly
+  forbidden.
 
-A dealership with 5–50 vehicles in inventory. Wants efficient bulk
-listing, brand visibility, and a clean inquiry inbox.
+## 5. Personas
 
-**Goals**: list inventory in bulk, route inquiries to the right
-salesperson, track conversion.
+The personas are written domain-agnostically. For each role, the
+cars vertical is one concrete instantiation; the same shape applies
+to ML inference, data licensing, compute jobs, specialist services,
+and any future pack.
 
-**Constraints**: existing CRM/DMS systems they don't want to replace.
-Will pay for tools that integrate.
+### 5.1 Offering-side user (single-item)
 
-### 3.3 Buyer
+A person or organization with a specific thing to advertise — one
+car, one apartment, one dataset, one consultancy slot, one fine-tuned
+model. Mid-30s, professional, has a few hours per week to spend on
+the listing. Wants their offering visible to the right
+counterparties without uploading content to a custodial platform
+that may reuse it. Wants spam filtered out before it reaches them.
 
-Looking for a specific kind of vehicle. Wants to be notified when
-matches appear, wants to evaluate quickly without scrolling, wants
-to talk to sellers without giving up their phone number first.
+**Goals**: list once, get qualified inquiries, share the rich
+content (photos, samples, schemas) only with counterparties they've
+explicitly approved, finalize off-platform.
+
+### 5.2 Offering-side user (institutional / bulk)
+
+A dealership, a model marketplace, a compute provider, a law firm —
+anyone running multiple offerings under one identity. Wants
+efficient bulk listing, brand visibility, and a clean inquiry inbox.
+Often has an existing CRM or pipeline they don't want to replace.
+
+**Goals**: list inventory in bulk, route inquiries internally, track
+conversion. Will pay for tools that integrate with what they
+already run.
+
+### 5.3 Seeking-side user
+
+Looking for a specific kind of offering. Wants to be notified when
+matches appear, wants to evaluate without scrolling, wants to talk
+to offerors without giving up identifying details up front.
 
 **Goals**: define a filter once, receive matches, evaluate, contact
-seller, finalize.
+the offering party, finalize.
 
-### 3.4 Registry operator (you, eventually a small team)
+### 5.4 Vertical operator
 
-Operates the Mode A Nostr relay, issues NIP-58 verified-seller
-badges, runs the moderation policy, ships and supports the cars-pack.
+Operates the Mode A relay for a domain, optionally issues NIP-58
+badges, optionally runs an admin-agent for that vertical, ships and
+supports the pack itself.
 
-**Goals**: a clean, low-spam relay; a sustainable revenue model from
-premium tools; minimal operational and regulatory burden.
+**Goals**: a clean low-spam relay; sustainable revenue from premium
+tools, badge issuance, and admin-tier subscriptions; minimal
+operational and regulatory burden.
 
-## 4. Functional requirements
+## 6. User stories
 
-Numbered for traceability.
+Written for any vertical. **Agent A** is the offering side; **Agent
+B** is the seeking side. The cars vertical is one instantiation; the
+shape is identical for any pack.
 
-### 4.1 Seller agent (FR-S)
+- **US-1 — Offering published.** Agent A's user describes their
+  offering. Agent A constructs a NIP-99 event tagged according to
+  the relevant pack, mines NIP-13 PoW (≥ 20 bits), signs with the
+  user's secp256k1 key, and publishes to the configured relay set.
+- **US-2 — Filter subscription.** Agent B's user defines a filter in
+  the pack's tag vocabulary. Agent B opens a Nostr REQ subscription
+  matching that filter across configured relays, dedupes incoming
+  events by `id`.
+- **US-3 — Evaluation.** When a matching event arrives, Agent B runs
+  the pack's evaluation rubric (cross-vertical capability MCPs plus
+  pack-specific checks) and classifies the listing as `surface`,
+  `watchlist`, or `suppress`.
+- **US-4 — Inquiry initiation.** Agent B's user taps "ask for more
+  details". Agent B composes a structured `asks` payload, encrypts
+  via NIP-17 sealed gift-wrap addressed to Agent A's pubkey,
+  publishes the gift-wrap event with a `session_token`.
+- **US-5 — MCP session open.** Agent A receives the gift-wrap,
+  decrypts, applies the per-ask grant policy (auto-grant routine
+  asks; user-prompt for sensitive asks). Agent B's MCP client
+  connects to Agent A's `mcp_url` carrying the `session_token` from
+  the rumor, runs `tools/list` to discover the pack's tool surface.
+- **US-6 — Rich-content exchange.** Agent B calls the pack-defined
+  tools (e.g. `request_photos`, `request_inspection_report`,
+  `request_sample`, `request_benchmark`). Agent A returns text
+  blocks for descriptions, `ImageContent` blocks for images, and
+  `EmbeddedResource` blocks for arbitrary binary payloads.
+- **US-7 — Negotiation rounds.** Buyer and seller exchange offers
+  via `submit_offer` MCP tool calls (or NIP-17 DMs if the MCP
+  session has closed). Bounded: max 5 rounds per (item,
+  counterparty), max 1000 chars per offer, max 50,000 chars per
+  match.
+- **US-8 — Acceptance.** Each side requires explicit user
+  confirmation before any `accept_offer` returns success. When both
+  accept, each agent stores a small signed agreement event locally.
+  The actual transfer of value happens off-platform.
+- **US-9 — Status update / removal.** Agent A republishes with
+  `status: sold` and (optionally) issues a NIP-09 deletion request.
+- **US-10 — Reputation lookup.** At any point during US-3 through
+  US-8, either agent calls `shared-mcp/reputation-mcp` to compute a
+  local `score_aggregate` for the counterparty pubkey, weighting
+  the five trust signals according to the user's policy.
 
-- **FR-S1**: The agent generates a secp256k1 keypair on first run and
-  stores it locally at `~/.neuro_spati/keys/seller.key` mode 0600.
-- **FR-S2**: The agent accepts a TOML or interactive description of a
-  car and constructs a NIP-99 (kind 30402) classified-listing event
-  using the cars-pack tag schema.
-- **FR-S3**: The agent mines NIP-13 PoW (≥ 20 bits) before signing
-  and publishing the event.
-- **FR-S4**: The agent publishes to the configured relay set
-  (default: `wss://relay.<operator-domain>`,
-  `wss://relay.damus.io`, `wss://nos.lol`).
-- **FR-S5**: The agent supports updating an item by republishing a
-  new event with the same `d` tag.
-- **FR-S6**: The agent supports archiving an item by publishing a
-  status update (`status=archived`) and a NIP-09 deletion request.
-- **FR-S7**: The agent supports deregistering itself by stopping
-  publication and (optionally) issuing NIP-09 deletions for past
-  events.
-- **FR-S8**: The agent maintains a local catalog at
-  `~/.neuro_spati/items/<item-id>/` with `manifest.json`,
-  `description.md`, `photos/`, `private.md`.
-- **FR-S9**: The agent receives encrypted DM inquiries (NIP-17 in
-  production, NIP-04 in MVP) and decrypts them locally.
-- **FR-S10**: The agent applies a per-ask grant policy (defaults in
-  `cars-pack/skills/seller-cars/SKILL.md`); user-prompt for asks the
-  policy marks as "ask user".
-- **FR-S11**: When a buyer requests photos/files, the agent opens
-  an ACP session and streams photos as `ImageContentBlock`s and
-  documents as `EmbeddedResourceContentBlock`s. **No HTTP file
-  delivery, ever.**
-- **FR-S12**: The agent runs `reverse-image-mcp` (fast tier, local)
-  on every photo before any ACP session can deliver it.
-- **FR-S13**: The agent supports negotiation rounds with bounded
-  state: max 5 rounds per (item, counterparty), max 1000 chars per
-  offer message, hard cap on total chars per match.
-- **FR-S14**: The agent never sends final-offer acceptance without
-  explicit user confirmation in the same session.
+## 7. Functional requirements
 
-### 4.2 Buyer agent (FR-B)
+### 7.1 Offering-side agent (FR-O)
 
-- **FR-B1**: The agent generates a secp256k1 keypair, stored as in
-  FR-S1.
-- **FR-B2**: The agent accepts a filter specification (cars-pack
-  tag-shape) and subscribes via Nostr REQ across the configured
-  relay set.
-- **FR-B3**: The agent dedupes incoming events by `id` across relays.
-- **FR-B4**: For each matching event, the agent runs the evaluation
-  rubric in `cars-pack/skills/buyer-cars/SKILL.md` and classifies
-  the listing as `surface`, `watchlist`, or `suppress`.
-- **FR-B5**: For `surface` listings, the agent notifies the user
-  (via Hermes' configured gateway: Telegram, Discord, CLI, …).
-- **FR-B6**: When the user wants to inquire, the agent composes a
-  structured `asks` payload, encrypts via NIP-17, and publishes the
-  gift-wrap event.
-- **FR-B7**: When the seller's agent opens an ACP session in
-  response, the buyer's agent receives content blocks, runs
-  `reverse-image-mcp` (thorough tier) on each `ImageContentBlock`,
-  verifies signed attestations, and surfaces results to the user.
-- **FR-B8**: The agent maintains a local inbox at
-  `~/.neuro_spati/inbox/` with one JSONL per inquiry conversation.
-- **FR-B9**: The agent supports negotiation rounds with the same
-  bounds as the seller side.
-- **FR-B10**: The agent never commits to a purchase without explicit
-  user confirmation.
+- **FR-O1**: Generate a secp256k1 keypair on first run; store at
+  `~/.chaos/keys/seller.key` mode 0600.
+- **FR-O2**: Accept a TOML or interactive description; construct a
+  NIP-99 (kind 30402) event using the pack's tag schema.
+- **FR-O3**: Mine NIP-13 PoW (≥ 20 bits) before signing.
+- **FR-O4**: Publish to the configured relay set (default: operator
+  relay + 2–3 community relays).
+- **FR-O5**: Support update by republishing with the same `d` tag;
+  support archive via status update + NIP-09 deletion.
+- **FR-O6**: Maintain a local catalog at
+  `~/.chaos/items/<item-id>/`.
+- **FR-O7**: Receive NIP-17 gift-wraps (NIP-04 only in MVP),
+  decrypt locally.
+- **FR-O8**: Apply the per-ask grant policy from the pack's
+  `seller-<vertical>` skill.
+- **FR-O9**: Expose the pack-mandated MCP tool surface via FastMCP
+  HTTP+SSE. Tools return content blocks (`text` / `ImageContent` /
+  `EmbeddedResource`). **No HTTP file delivery, ever.**
+- **FR-O10**: Run pack-relevant pre-share checks before any tool
+  call returns binary content (e.g. `reverse-image-mcp` on photos
+  for cars and real estate; integrity checks on dataset samples for
+  data-licensing).
+- **FR-O11**: Support negotiation rounds with bounded state
+  (max 5 rounds, 1000 chars per message, 50k total).
+- **FR-O12**: Never accept a final offer without explicit user
+  confirmation in the same session.
 
-### 4.3 Registry (FR-R)
+### 7.2 Seeking-side agent (FR-S)
+
+- **FR-S1**: Generate a secp256k1 keypair, stored as in FR-O1.
+- **FR-S2**: Accept a filter spec in the pack's tag vocabulary;
+  subscribe via Nostr REQ across the configured relay set.
+- **FR-S3**: Dedupe events by `id` across relays.
+- **FR-S4**: Run the pack's evaluation rubric; classify each
+  matching event as `surface`, `watchlist`, or `suppress`.
+- **FR-S5**: Surface to the user via Hermes' configured gateway
+  (Telegram, Discord, CLI, …).
+- **FR-S6**: Compose structured `asks` payload, encrypt via NIP-17,
+  publish gift-wrap.
+- **FR-S7**: Open MCP HTTP+SSE session against the offering agent's
+  `mcp_url` carrying the `session_token`. Run `tools/list`. Call
+  pack-defined tools as needed. Run cross-vertical capability MCPs
+  (e.g. `reverse-image-mcp` thorough tier) on returned content.
+- **FR-S8**: Maintain a local inbox at `~/.chaos/inbox/` —
+  one JSONL per inquiry conversation.
+- **FR-S9**: Same negotiation bounds as FR-O11.
+- **FR-S10**: Never commit without explicit user confirmation.
+
+### 7.3 Relay (FR-R)
 
 - **FR-R1**: A strfry-based Nostr relay reachable at
-  `wss://relay.<operator-domain>`.
-- **FR-R2**: Accepts kinds: 0, 5, 13, 14, 1059, 1985, 8, 30000–30099,
-  30009, 30402, 30403. Rejects all other kinds.
-- **FR-R3**: Enforces NIP-13 PoW ≥ 20 bits on kind-30402 events.
-  Skips PoW on kinds 13/14/1059 (encrypted DM family).
-- **FR-R4**: Enforces max event size 16 KB, max content length 8 KB,
-  rejects events older than 1 year or > 15 minutes future-dated.
-- **FR-R5**: Per-pubkey rate limit: default 10 events/min,
-  100 events/hour. Configurable allowlist override for verified
-  dealers.
-- **FR-R6**: Pubkey blocklist enforced at the writePolicy layer.
-- **FR-R7**: NIP-11 relay-info document served at the relay root via
-  Caddy.
+  `wss://relay.<operator-domain>` (per-vertical or unified).
+- **FR-R2**: Accept kinds 0, 5, 13, 14, 1059, 1985, 8, 30000–30099,
+  30009, 30402, 30403, plus reputation kinds (30410–30431).
+- **FR-R3**: Enforce NIP-13 PoW ≥ 20 bits on kind-30402 events.
+  Skip PoW on kinds 13/14/1059 (encrypted DM family).
+- **FR-R4**: Max event size 16 KB, max content 8 KB; reject events
+  > 1 year old or > 15 minutes future-dated.
+- **FR-R5**: Per-pubkey rate limit: 10 events/min, 100 events/hour
+  default; configurable allowlist override.
+- **FR-R6**: Pubkey blocklist at the writePolicy layer.
+- **FR-R7**: NIP-11 relay-info doc at the root via Caddy.
 - **FR-R8**: TLS via Caddy + Let's Encrypt.
-- **FR-R9**: Daily LMDB snapshot, off-site backup retained 90 days.
-- **FR-R10**: Prometheus-scrapeable metrics exposed on a private
-  port.
+- **FR-R9**: Daily LMDB snapshot, off-site retention 90 days.
+- **FR-R10**: Prometheus metrics on a private port.
 - **FR-R11**: External canary publish/subscribe round-trip every 5
   minutes from a separate host.
-- **FR-R12**: Moderation log at `/var/lib/moderation/log.jsonl`,
-  append-only, includes actor + reason for every blocklist action.
+- **FR-R12**: Append-only moderation log at
+  `/var/lib/moderation/log.jsonl` with actor + reason for every
+  blocklist action.
 
-### 4.4 Cars pack (FR-C)
+### 7.4 Pack contract (FR-P)
 
-- **FR-C1**: A NIP-99 tag schema (`cars-pack/tag_schema.md`) defining
-  required and optional tags for car listings; backwards-
-  additive only.
-- **FR-C2**: A `seller-cars` skill installable into Hermes
-  (`cars-pack/skills/seller-cars/SKILL.md`).
-- **FR-C3**: A `buyer-cars` skill installable into Hermes.
-- **FR-C4**: Three custom MCPs:
-  - `reverse-image-mcp` (paid, perceptual-hash photo-fraud detection,
-    cross-vertical)
-  - `vin-decoder-mcp` (free, ISO-3779 structural decode)
-  - `market-comp-mcp` (free, derives from listings on the relay)
-- **FR-C5**: An `example_listing.json` showing a fully-tagged real
-  car listing.
+For any pack `<vertical>-pack@<major>`:
 
-### 4.5 Trust signals (FR-T)
+- **FR-P1**: A NIP-99 tag schema in
+  `verticals/<vertical>-pack/tag_schema.md` defining required and
+  optional tags. Backwards-additive only within a major version.
+- **FR-P2**: A `seller-<vertical>` skill in
+  `verticals/<vertical>-pack/skills/seller-<vertical>/SKILL.md`.
+- **FR-P3**: A `buyer-<vertical>` skill in
+  `verticals/<vertical>-pack/skills/buyer-<vertical>/SKILL.md`.
+- **FR-P4**: An optional `admin-<vertical>` skill if the operator
+  runs an admin-agent for the vertical.
+- **FR-P5**: A documented MCP tool surface — the named tools every
+  offering agent in this vertical must expose, with input schemas
+  and content-block return types.
+- **FR-P6**: An `example_listing.json` showing a fully-tagged event.
+- **FR-P7**: A default grant policy declaring per-ask defaults and
+  which asks require explicit user approval.
 
-- **FR-T1**: NIP-58 badge issuer agent operated by the registry
-  operator, capable of issuing `verified-private-seller` and
-  `verified-dealer` badges.
-- **FR-T2**: Verification flow combines email confirmation, payment-
-  method confirmation (no money handled — just attestation), and (for
-  dealers) domain-ownership check.
-- **FR-T3**: Badges are NIP-58 events; buyer's agent reads them and
-  weights them in the evaluation rubric.
+The reference vertical (cars-pack@1) implements all of FR-P1
+through FR-P7 today. Sketched verticals fill these in as scaffolds
+land.
+
+### 7.5 Trust signals (FR-T)
+
+The 5-layer reputation model is documented in
+`reputation/README.md`. NIP-58 badges (FR-T1) are layer 1;
+admin-agent decisions (kind 30430, see CLAUDE.md Rules 15–16) are
+layer 5 and opt-in.
+
+- **FR-T1**: NIP-58 badge issuer agent operated by the vertical's
+  operator (under `operator/<vertical>/`), capable of issuing
+  domain-appropriate badges.
+- **FR-T2**: Verification flow combines email confirmation,
+  payment-method confirmation (no money handled — just
+  attestation), and (for institutional offerings) domain-ownership
+  check.
+- **FR-T3**: Badges are NIP-58 events; seeking-side agents read them
+  and weight them in the evaluation rubric.
 - **FR-T4**: Operator publishes a NIP-51 mute list of pubkeys
-  blocklisted at the relay; buyer's agents can subscribe to the mute
-  list as a default trust-graph input.
+  blocklisted at the relay; agents subscribe by default.
+- **FR-T5**: Bilateral peer attestations as kinds 30410 / 30411
+  (and unilateral 30412). Schema in
+  `reputation/attestation_schema.md`; weights in
+  `reputation/scoring.md`.
+- **FR-T6**: Admin-agent (opt-in, operator-deployed) publishes
+  structured decisions as kind 30430. Affected parties may publish
+  appeals as kind 30431. See `reputation/dispute_protocol.md`.
+- **FR-T7**: All reputation reads route through
+  `shared-mcp/reputation-mcp`. Each agent computes its own
+  `score_aggregate` locally — no central rep store, no published
+  official rankings.
 
-## 5. Non-functional requirements
+### 7.6 Plugins and pro tier (FR-PL)
 
-### 5.1 Privacy / data protection
+- **FR-PL1**: Each plugin under `plugins/<vertical>-<role>/`
+  declares its toolset in `plugin.yaml` and respects CLAUDE.md
+  Rule 11 (role isolation). CI lint rejects violations.
+- **FR-PL2**: `plugins/chaos-pro/` is the **single
+  cross-vertical paid upgrade** — applies to every installed buyer
+  plugin. No per-vertical paid plugins exist.
+- **FR-PL3**: Admin plugins (`plugins/<vertical>-admin/`) are
+  operator-deployed only. Admin invariants per CLAUDE.md Rule 16;
+  threat model per Rule 15.
 
-- **NFR-P1**: The platform never receives or stores user PII (names,
-  addresses, payment details, phone numbers).
-- **NFR-P2**: The platform never receives or stores binary content
-  (photos, PDFs).
+## 8. Non-functional requirements
+
+### 8.1 Privacy / data protection
+
+- **NFR-P1**: The platform never receives or stores user PII.
+- **NFR-P2**: The platform never receives or stores binary content.
+  Binary moves exclusively as MCP content blocks from `tools/call`
+  results on the offering agent's own MCP server.
 - **NFR-P3**: 1-to-1 messaging is end-to-end encrypted at the
-  protocol level (NIP-17 in production).
+  protocol layer (NIP-17 in production; NIP-04 only in MVP).
 - **NFR-P4**: Audit logs at the relay carry only event metadata
-  (counts, kinds, status codes), never decrypted content.
-- **NFR-P5**: Right to erasure: deleting an `agents` row at the
-  registry (or the operator's badge issuer) is one operation. Local
-  data deletion is the user's responsibility on their own machine.
+  (counts, kinds, status codes) — never decrypted content.
+- **NFR-P5**: Right to erasure: deleting an issuer-side record is
+  one operation; local data deletion is the user's responsibility
+  on their own machine.
 
-### 5.2 Performance
+### 8.2 Performance
 
-- **NFR-PERF1**: Listing publish round-trip ≤ 5 seconds end-to-end
-  (PoW mining + relay write + propagation to other relays).
-- **NFR-PERF2**: Buyer subscription receives a matching event within
-  10 seconds of seller publish (subject to relay propagation).
-- **NFR-PERF3**: Relay query p99 latency ≤ 100 ms at v1 scale.
-- **NFR-PERF4**: ACP photo session opens within 3 seconds of
-  initiation; per-photo throughput limited only by network.
+- **NFR-PERF1**: Listing publish round-trip ≤ 5s end-to-end.
+- **NFR-PERF2**: Subscription receives matching event within 10s
+  of publish (subject to relay propagation).
+- **NFR-PERF3**: Relay query p99 ≤ 100 ms at v1 scale.
+- **NFR-PERF4**: MCP HTTP+SSE session opens within 3s of
+  initiation; per-content-block throughput limited only by network.
 
-### 5.3 Availability
+### 8.3 Availability
 
-- **NFR-AVAIL1**: Mode A relay target uptime: 99.5% (allows ~3.6
-  hours/month of unplanned downtime).
-- **NFR-AVAIL2**: When the operator's relay is down, agents continue
-  to operate via community relays (degraded discovery, but live
-  buyer↔seller deals continue uninterrupted because they're peer-to-
-  peer once paired).
+- **NFR-AVAIL1**: Mode A relay target uptime 99.5%.
+- **NFR-AVAIL2**: When the operator's relay is down, agents
+  continue via community relays. Live peer↔peer sessions continue
+  uninterrupted (MCP is direct, doesn't depend on relays).
 
-### 5.4 Security
+### 8.4 Security
 
 - **NFR-SEC1**: All inbound webhook routes (if any) verify HMAC.
 - **NFR-SEC2**: All untrusted text passes through the input
   sanitizer before any LLM context render.
-- **NFR-SEC3**: Agent toolsets are narrowed: marketplace agents do
-  not have `terminal`, `execute_code`, `delegation`, `web`, or `mcp`
-  toolsets enabled.
-- **NFR-SEC4**: Container isolation: all marketplace agents run in
-  Docker (or Modal/Daytona) with read-only root, tmpfs `/tmp`, and
-  egress allowlist limited to relays + LLM endpoint + gateway
-  platform.
+- **NFR-SEC3**: Agent toolsets are narrowed: no `terminal`,
+  `execute_code`, `delegation`, unconstrained `web`, or unrelated
+  MCP toolsets enabled.
+- **NFR-SEC4**: Container isolation — read-only root, tmpfs `/tmp`,
+  egress allowlist limited to relays + LLM endpoint + gateway.
 
-### 5.5 Operational
+### 8.5 Operational
 
-- **NFR-OPS1**: Mode A relay deploys in ≤ 30 minutes from a clean VPS
-  using `registry/strfry-compose.yml` + DNS + TLS.
-- **NFR-OPS2**: Backup RPO ≤ 24 hours; RTO ≤ 30 minutes.
-- **NFR-OPS3**: Monitoring with alerting for: relay unreachable, cert
-  expiry, disk free, rejection-rate anomalies, query-latency
+- **NFR-OPS1**: Mode A relay deploys in ≤ 30 min from a clean VPS
+  using `operator/<vertical>/docker-compose.yml` + DNS + TLS.
+- **NFR-OPS2**: Backup RPO ≤ 24h; RTO ≤ 30 min.
+- **NFR-OPS3**: Monitoring with alerting for: relay unreachable,
+  cert expiry, disk free, rejection-rate anomalies, latency
   anomalies.
 
-## 6. Constraints
+## 9. Constraints
 
 - **C1**: Discovery layer must be Nostr; no central database we
   operate.
-- **C2**: Binary content must move agent-to-agent over ACP; no HTTP
-  file servers, no third-party file hosts.
+- **C2**: Binary content must move agent-to-agent over MCP as
+  `ImageContent` / `EmbeddedResource` blocks. No HTTP file servers,
+  no third-party file hosts. No second peer transport.
 - **C3**: Identity is a secp256k1 keypair owned by the user; no
   recovery path through us.
-- **C4**: Custom MCPs may not aggregate / resell commercial third-
-  party data.
-- **C5**: Compatible with Hermes Agent (Nous Research) v0.11+ as the
-  agent runtime. Plugin shape per Hermes' plugin contract.
+- **C4**: Custom MCPs may not aggregate or resell commercial
+  third-party data.
+- **C5**: Compatible with Hermes Agent (Nous Research) v0.11+ as
+  the runtime. Plugin shape per Hermes' plugin contract.
 
-## 7. Phasing
+## 10. Success criteria
+
+- **SC-1 — Composability.** A new vertical pack is implementable in
+  ≤ 5 person-days end-to-end (tag schema + tool surface + skills +
+  example listing). Measured by shipping a second pack alongside
+  cars.
+- **SC-2 — Trust.** All 5 trust signal types are implemented and
+  composable into a per-agent local score. Measured by
+  `reputation-mcp` returning each layer's contribution
+  independently.
+- **SC-3 — Security.** All 16 architectural rules in CLAUDE.md are
+  enforced (Rule 11 by CI lint; Rules 15–16 by admin-skill review
+  before each release; Rules 1–10 by code review).
+- **SC-4 — Demonstrable working demo.** End-to-end run on two
+  laptops, two free public relays, no infrastructure on the
+  developer's side (`mvp/` ships this today).
+- **SC-5 — Multi-pack user.** A single Hermes instance running 2+
+  installed buyer plugins side-by-side, evaluating offers from 2
+  different verticals concurrently. Measured at end of the launch
+  plan.
+- **SC-6 — Federated topology.** At least 3 independently operated
+  relays carrying chaos listings, with cross-relay propagation
+  verified by canary.
+
+## 11. Phasing
 
 | Phase | Window | Goal | Exit criterion |
 |---|---|---|---|
-| **P0 — MVP** | One weekend | Two laptops, text inquiry round-trip over public relays | Demo screen-capture works |
-| **P1 — Mode A relay** | Week 1–2 | Operator's strfry deployed, monitored, backed up | Canary round-trips for 24h, third-party Nostr client connects cleanly |
-| **P2 — Hermes plugin baseline** | Week 3–4 | Seller / buyer plugins installable into Hermes; ACP photo sharing wired | Two-machine end-to-end test passes unattended |
-| **P3 — MCPs + cars pack** | Week 5–6 | `reverse-image-mcp`, `vin-decoder-mcp`, `market-comp-mcp` ship; cars-pack skills ship | Pre-publish stock-image check catches a planted test; buyer-cars rubric flags a synthetic stock-photo listing |
-| **P4 — Closed beta** | Week 7–8 | 5–10 invited sellers, 10–20 buyers | ≥ 3 sellers publish a second car unprompted |
-| **P5 — Verification + polish** | Week 9–10 | NIP-58 badge issuer live, docs site live, public install path | New user goes from install to listing in < 30 min |
-| **P6 — Public launch** | Week 11–12 | Open to public; first revenue from premium tiers | 50 active sellers, 200 active buyers within 30 days |
+| **P0 — MVP** | Weekend | Two laptops, encrypted text inquiry round-trip over public relays | Demo screen-capture works |
+| **P1 — Universal engines** | Week 1 | `seller/` + `buyer/` scaffolds wired into Hermes plugin loaders | A vacuous pack loads end-to-end |
+| **P2 — First vertical pack** | Week 2 | cars-pack@1 end-to-end via Hermes plugin (FastMCP server + client, `ImageContent` photo delivery) | Two-machine end-to-end test passes unattended |
+| **P3 — Second vertical pack** | Week 3 | One sketched vertical (e.g. data-licensing) implemented to prove generality + reputation-mcp wiring | Same Hermes instance runs both packs concurrently |
+| **P4 — Admin-agent + arbitration** | Week 4 | admin-cars live; community arbitration mechanism wired; Phase-1 staking research kicked off | First public dispute → decision → appeal cycle completes on relay |
+| **Beyond** | — | Multi-vertical user, federated relay topology, cross-vertical reputation | 100+ active agents across 2+ verticals on 3+ relays |
 
-Detail for each phase is in `LAUNCH_PLAN.md`.
+Detail in `LAUNCH_PLAN.md`.
 
-## 8. Out of scope (explicit)
+## 12. Decisions log (high-stakes)
 
-- Marketplace operator features (escrow, refunds, dispute
-  arbitration, KYC, AML)
-- Payment processing of any kind
-- Custodial photo / file hosting
-- VIN-history reselling (no Carfax-style aggregation)
-- Custodial DM history
-- Mobile-first UI (desktop / Hermes-driven first)
-- Browser extension
-- Internationalization beyond English + one EU language for v1
-- Real-time voice or video
-- Crypto / web3 token mechanics
-- In-app social features beyond NIP-51 mute lists and NIP-58 badges
+- **D1**: Discovery = Nostr. Rejected: Supabase, libp2p, custom
+  gossip.
+- **D2**: Binary content = MCP `ImageContent` / `EmbeddedResource`
+  blocks only, returned from `tools/call`. Rejected: HTTP file
+  server, signed URLs, Imgur, Dropbox, S3, Blossom.
+  Superseded: ACP and A2A — see `spike/MCP_SPIKE_REPORT.md`.
+- **D3**: First paid MCP = `reverse-image-mcp`. Rejected:
+  `vin-lookup-mcp` Carfax-style aggregation.
+- **D4**: Production DM = NIP-17 sealed gift-wraps. NIP-04 only as
+  MVP shortcut.
+- **D5**: Mode A (operator-run relay + community) is v1 default.
+- **D6**: cars-pack@1 ships first as the reference vertical.
+  Rejected: leading the launch with multiple verticals
+  simultaneously.
+- **D7**: Hermes Agent as host runtime. Rejected: writing our own
+  agent harness.
 
-## 9. Success metrics
-
-### 9.1 Activity (every phase)
-
-- Active sellers per week (publishing or replying to inquiries)
-- Active buyers per week (subscribing or sending inquiries)
-- Items published per week
-- Inquiries per item (median)
-- Successful negotiation rounds per match (median)
-
-### 9.2 Quality (P3 onwards)
-
-- % of listings flagged as red by the buyer-cars rubric
-- % of inquiries that lead to a buyer↔seller agreement
-  (self-reported by users via a one-tap "did this lead to a deal?"
-  prompt)
-- Time-to-match (publish → first qualifying buyer inquiry)
-
-### 9.3 Revenue (P5 onwards)
-
-- Premium plugin paying users
-- Managed-relay paying npubs
-- Verified-seller badges issued
-- `reverse-image-mcp` Pro tier conversion rate from buyer cohort
-
-## 10. Decisions log (high-stakes)
-
-Track every reversed decision so future Claude sessions don't
-relitigate them.
-
-- **D1**: Discovery layer = Nostr (rejected: Supabase, libp2p, custom
-  gossip)
-- **D2**: Binary content = ACP only (rejected: HTTP file server,
-  signed URLs, Imgur, Dropbox, S3, Blossom)
-- **D3**: First paid MCP = `reverse-image-mcp` (rejected:
-  `vin-lookup-mcp` Carfax-style aggregation)
-- **D4**: Production DM = NIP-17 sealed gift-wraps (NIP-04 only as MVP
-  shortcut)
-- **D5**: Mode A (one operator-run relay + community) is the v1
-  deployment posture (Mode B/C are migration paths, not v1)
-- **D6**: Cars vertical first (rejected: real estate, watches as
-  first vertical for v1)
-- **D7**: Hermes Agent as the host runtime (rejected: writing our own
-  agent harness)
-
-## 11. Open questions
-
-Things to decide before P3 closes:
+## 13. Open questions
 
 - **OQ1**: Which payment-method confirmation pattern for verified-
-  private-seller badge? Stripe SetupIntent? Open-banking attestation?
-  Manual review + photo of card?
-- **OQ2**: Bootstrap-auth on the registry's `agent-register` route
-  (when we add one beyond pure Nostr publish)? Invite-code? PoW?
-  Manual approval?
-- **OQ3**: Federation with which community relays in the default
-  relay list? We need 2–3 stable, low-spam ones beyond ours.
-- **OQ4**: Pricing of the `reverse-image-mcp` Pro tier — confirm
-  $9/mo bundle vs. $0.10/call metered after first 100 free.
-- **OQ5**: Which jurisdictions for v1? Czech Republic + Germany
-  default; EN-language fallback for everyone else? Or open from day 1?
+  individual badges? Stripe SetupIntent? Open-banking attestation?
+  Manual review?
+- **OQ2**: Which community relays in the default relay list? Need
+  2–3 stable, low-spam ones beyond ours.
+- **OQ3**: Sequencing of the second vertical pack — data-licensing
+  vs. ml-inference vs. specialist-services. Driven by which
+  community has the most pull.
+- **OQ4**: Pricing of `reverse-image-mcp` Pro tier — confirm $9/mo
+  bundle vs. $0.10/call metered after first 100 free.
+- **OQ5**: Phase-1 staking jurisdiction sequencing — which target
+  jurisdiction for the first legal review.

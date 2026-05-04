@@ -1,0 +1,46 @@
+# Hermes plugin manifest skeleton.
+# Copy this file to plugins/<vertical>-<role>/plugin.yaml and replace
+# every <PLACEHOLDER_...> marker.
+manifest_version: 1
+
+# Plugin identity.
+name: chaos-<PLACEHOLDER_VERTICAL>-<PLACEHOLDER_ROLE>
+description: "<PLACEHOLDER_ONE_LINE_SUMMARY>"
+version: 0.1.0
+
+# Python entry point: register(ctx) wires engine + skill + MCPs.
+entry_point: chaos_<PLACEHOLDER_VERTICAL>_<PLACEHOLDER_ROLE>:register
+
+# Dependencies. The universal engine is always a dep. Seller plugins
+# depend on `chaos-seller`; buyer on `chaos-buyer`; admin
+# on `chaos-admin-engine`.
+dependencies:
+  - <PLACEHOLDER_UNIVERSAL_ENGINE>>=0.1
+
+# What this plugin pulls in from the rest of the repo.
+includes:
+  # Skill markdown (relative to repo root) that defines the agent
+  # behavior for this (role × vertical).
+  skill: <PLACEHOLDER_SKILL_PATH>
+
+  # Pack contract id — pins the NIP-99 tag schema + MCP tool surface
+  # the agent will speak.
+  pack_contract: <PLACEHOLDER_PACK>@<PLACEHOLDER_PACK_VERSION>
+
+  # Pack tag schema, used for listing publish/parse.
+  pack_schema: <PLACEHOLDER_PACK_SCHEMA_PATH>
+
+  # Capability MCPs to install with this plugin. Each entry is a
+  # `<mcp-name>@<version>` string resolved against shared-mcp/ first,
+  # then verticals/<vertical>-pack/mcp/.
+  capability_mcps: []
+
+# Required env vars. The plugin refuses to register without these.
+required_env: []
+
+# Hermes toolsets the agent is NOT allowed to use. Defaults to a
+# tight closure for role-vertical plugins; loosen only with cause.
+forbidden_toolsets: [terminal, delegation, file, web]
+
+# Per-plugin config the user can override at install time.
+config: {}

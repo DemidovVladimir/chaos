@@ -1,15 +1,16 @@
 # seller — production seller-agent component
 
 The production seller agent: a Hermes plugin that publishes NIP-99
-listings, listens for NIP-17 inquiries, applies the per-ask grant
-policy from `cars-pack/skills/seller-cars/SKILL.md`, and streams
-photos to buyers via ACP.
+listings, listens for NIP-17 inquiries, exposes a cars-pack@1 MCP
+server that buyers connect to for photos and inspection reports, and
+applies the per-tool grant policy from
+`verticals/cars-pack/skills/seller-cars/SKILL.md`.
 
 > **Status**: scaffold. The runnable starter is in `../mvp/seller.py`
-> (text-only, no ACP, NIP-04 instead of NIP-17, no PoW). Wiring the
-> production version is week 1–4 of `LAUNCH_PLAN.md`. This folder
-> exists so the contract is clear and so future Claude sessions know
-> where to put the production code.
+> (text-only, no MCP server, NIP-04 instead of NIP-17, no PoW).
+> Wiring the production version is week 1–4 of `LAUNCH_PLAN.md`. This
+> folder exists so the contract is clear and so future Claude sessions
+> know where to put the production code.
 
 ## What lives here when complete
 
@@ -19,83 +20,98 @@ seller/
 ├── pyproject.toml           Python package definition
 ├── plugin.yaml              Hermes plugin manifest
 └── src/
-    └── neuro_spati_seller/
+    └── chaos_seller/
         ├── __init__.py          register(ctx)
-        ├── config.py            SellerConfig — relays, identity path, ACP url
+        ├── config.py            SellerConfig — relays, identity path, MCP url
         ├── identity.py          Keypair load/save (mode 0600), Schnorr signing
         ├── input_safety.py      copy of shared sanitizer; layer-1 defense
-        ├── catalog.py           local item store at ~/.neuro_spati/items/
+        ├── catalog.py           local item store at ~/.chaos/items/
         ├── publish.py           NIP-99 build + PoW mine + sign + publish
-        ├── inquiry_listener.py  NIP-17 gift-wrap listener, decrypt, route
-        ├── grant_policy.py      per-ask policy (from seller-cars skill)
-        ├── acp_session.py       ACP server endpoint; streams ImageContentBlocks
+        ├── inquiry_listener.py  NIP-17 gift-wrap listener, decrypt, session_token routing
+        ├── grant_policy.py      per-tool policy (from seller-cars skill)
+        ├── mcp_server.py        FastMCP server; exposes cars-pack@1 tool surface
+        │                        (view_listing, request_photos,
+        │                         request_inspection_report, request_vin,
+        │                         submit_offer, cancel_inquiry)
         ├── negotiation.py       round tracking, bid floor, user-confirm
         ├── attestation.py       sign / verify Nostr attestation events
         ├── tools_publish.py     skill tool: publish_item, archive_item, update_item
         ├── tools_inquire.py     skill tool: handle_inquiry, grant_asks, deny_ask
         ├── tools_negotiate.py   skill tool: counter_offer, accept_offer, reject_offer
-        └── main.py              CLI: hermes neuro-spati-seller {publish, listen, status}
+        └── main.py              CLI: hermes chaos-seller {publish, listen, status}
 ```
 
 ## Component contract
 
 The seller plugin **must**:
 
-1. Hold the user's Nostr keypair only at `~/.neuro_spati/keys/seller.key`,
+1. Hold the user's Nostr keypair only at `~/.chaos/keys/seller.key`,
    mode 0600.
 2. Publish NIP-99 events with cars-pack tag schema; never include an
-   `image` tag; always include `acp` and `photos_via=acp` tags.
+   `image` tag; always include `["mcp", "<url>"]` and
+   `["pack", "cars-pack@1"]` tags.
 3. Mine NIP-13 PoW ≥ 20 bits before signing.
 4. Run `reverse_image_check` (fast tier, local) on every photo in the
-   item folder before any ACP session can deliver it.
-5. Listen for NIP-17 gift-wrapped inquiries on configured relays.
-6. Apply the per-ask grant policy from
-   `../cars-pack/skills/seller-cars/SKILL.md` § "Inquiry-handling
-   policy".
-7. Stream photos and PDFs to the buyer via ACP `ImageContentBlock` /
-   `EmbeddedResourceContentBlock`. **Never via HTTP.**
+   item folder before any `request_photos` MCP tool call can return
+   the bytes.
+5. Listen for NIP-17 gift-wrapped `mcp_inquiry_open` rumors on
+   configured relays; bind the `session_token` to the calling buyer
+   pubkey.
+6. Run a FastMCP server exposing the cars-pack@1 tool surface
+   (`view_listing`, `request_photos`, `request_inspection_report`,
+   `request_vin`, `submit_offer`, `cancel_inquiry`). Apply the
+   per-tool grant policy from
+   `../verticals/cars-pack/skills/seller-cars/SKILL.md` § "MCP tool surface".
+7. Return photos and PDFs to the buyer's agent only as MCP
+   `ImageContent` and `EmbeddedResource` blocks from tool calls.
+   **Never via HTTP file servers, never as URLs.**
 8. Maintain the negotiation state machine (≤ 5 rounds, ≤ 1000 chars
    per offer, ≤ 50,000 chars total).
 9. Require explicit user confirmation for any acceptance, sensitive
-   ask grant, or PII-adjacent action.
+   tool grant (`request_vin`, `request_photos` for license-plate
+   kinds), or PII-adjacent action.
 
 The seller plugin **must not**:
 
 - Hold any third-party file URLs to user photos (no Imgur, Dropbox,
   etc.)
+- Return URLs from MCP tool calls instead of inline content blocks
 - Store buyer PII received during inquiries beyond the
   conversation log
 - Accept commands inside `<untrusted>` blocks
-- Have `terminal`, `execute_code`, `delegation`, `web`, `mcp`
-  toolsets enabled (per `CLAUDE.md` § Architecture rules)
+- Have `terminal`, `execute_code`, `delegation`, `web`, or general
+  outbound `mcp` toolsets enabled (the seller's own MCP server is
+  inbound-only — it serves tools to buyers; the seller agent does
+  not call arbitrary outside MCPs) (per `CLAUDE.md` § Architecture
+  rules)
 
 ## Hermes plugin shape
 
 ```yaml
 # plugin.yaml
 manifest_version: 1
-name: neuro-spati-seller
+name: chaos-seller
 description: |
-  Seller agent for the neuro-spati Nostr-based marketplace. Publishes
-  NIP-99 listings, handles NIP-17 inquiries, streams photos via ACP.
+  Seller agent for the chaos Nostr-based marketplace. Publishes
+  NIP-99 listings, handles NIP-17 inquiries, exposes a cars-pack@1
+  MCP server for photo and inspection-report delivery.
 version: 0.1.0
-author: neuro-spati
+author: chaos
 license: MIT
-entry_point: neuro_spati_seller:register
+entry_point: chaos_seller:register
 required_env:
-  - NEURO_SPATI_RELAYS              # comma-separated wss:// urls
-  - NEURO_SPATI_ACP_URL             # https url where this seller's ACP server runs
+  - CHAOS_RELAYS              # comma-separated wss:// urls
+  - CHAOS_MCP_URL             # https url where this seller's MCP server is reachable
 forbidden_toolsets:
   - terminal
   - delegation
   - file
   - web
-  - mcp
 ```
 
 ## Configuration
 
-`~/.neuro_spati/seller.yaml`:
+`~/.chaos/seller.yaml`:
 
 ```yaml
 relays:
@@ -103,9 +119,11 @@ relays:
   - "wss://relay.damus.io"
   - "wss://nos.lol"
 
-acp:
+mcp:
   bind: "0.0.0.0:8645"
-  public_url: "https://a.io/acp"        # ngrok or other tunnel; the public face
+  public_url: "https://a.io/mcp"        # ngrok or other tunnel; the public face
+  transport: "http+sse"                 # FastMCP HTTP+SSE; stdio for local dev only
+  pack: "cars-pack@1"                   # vertical-pack contract this server speaks
 
 publish:
   pow_min_bits: 20
@@ -113,7 +131,7 @@ publish:
   default_region: "EU/CZ/Prague"
 
 grant_policy:
-  defaults_from: "cars-pack/skills/seller-cars/SKILL.md"
+  defaults_from: "verticals/cars-pack/skills/seller-cars/SKILL.md"
   always_user_confirm:
     - vin_full
     - pickup_address
@@ -137,10 +155,14 @@ Phase 1 (week 1 of `LAUNCH_PLAN.md`):
 
 Phase 2 (week 2):
 
-- Implement `acp_session.py` using Hermes' `acp_adapter/`. Stream
-  test photo on demand.
-- Wire `grant_policy.py` from the seller-cars skill.
-- Verify two-machine end-to-end test passes unattended.
+- Implement `mcp_server.py` using FastMCP from Hermes'
+  `tools/mcp_serve.py`. Expose the cars-pack@1 tool surface.
+  Return a test photo as `ImageContent` from `request_photos`.
+- Wire `grant_policy.py` from the seller-cars skill into per-tool
+  hooks.
+- Verify two-machine end-to-end test passes unattended (buyer's
+  `mcp_connect` reaches the seller's public MCP url, `tools/list`
+  works, `request_photos` returns inline bytes).
 
 Phase 3 (week 3):
 
@@ -157,7 +179,7 @@ Phase 4 (week 4+):
 ## See also
 
 - `../mvp/seller.py` — the runnable MVP starter
-- `../cars-pack/skills/seller-cars/SKILL.md` — the canonical seller
+- `../verticals/cars-pack/skills/seller-cars/SKILL.md` — the canonical seller
   skill
 - `../PROTOCOL.md` — the on-the-wire design
 - `../SECURITY.md` — pre-launch security checklist

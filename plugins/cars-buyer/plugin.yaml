@@ -1,0 +1,30 @@
+name: cars-buyer
+version: 1.0.0
+description: "Buy cars on the chaos Nostr-based marketplace. Free tier: bundles cars-pack@1 contract with the universal buyer engine. Watches NIP-99 listings, sends NIP-17 inquiries, and pulls photos / inspection PDFs from sellers' MCP servers."
+author: chaos
+kind: standalone
+
+requires_env:
+  - CHAOS_RELAYS
+
+provides_tools: []
+provides_hooks: []
+
+# --- documentation-only fields (Hermes ignores these) -----------------
+chaos:
+  pack_contract: cars-pack@1
+  pack_schema: ../../verticals/cars-pack/tag_schema.md
+  skill_path: verticals/cars-pack/skills/buyer-cars/SKILL.md
+  capability_mcps:
+    - reverse-image-mcp@1
+    - market-comp-mcp@1
+    - vin-decoder-mcp@1
+    - reputation-mcp@1
+  forbidden_toolsets: [terminal, delegation, file, web]
+  role: buyer
+  # Free-tier defaults; chaos-pro flips pro_mode to true.
+  config:
+    pro_mode: false
+    reverse_image_tier: fast
+    market_comp_window_days: 60
+    reputation_tier: fast

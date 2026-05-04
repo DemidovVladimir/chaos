@@ -1,0 +1,16 @@
+manifest_version: 1
+name: vin-decoder-mcp
+version: 0.1.0
+description: "ISO-3779 structural VIN decoder. Cars-specific (cars-pack)."
+transport: http+sse
+bind: 127.0.0.1
+port: 7620
+exposed_tools:
+  - name: decode_vin
+    description: "Decode a 17-character VIN's structural facts (WMI, VDS, year, plant, check digit) using only public reference data. No vehicle-history lookup."
+paid: false
+x402:
+  enabled: false
+threat_model:
+  outbound_http: none      # all reference data is bundled (public WMI registry)
+  retains_inputs: false

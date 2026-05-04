@@ -1,0 +1,48 @@
+manifest_version: 1
+name: chaos-pro
+description: "Cross-vertical paid upgrade. Flips capability MCPs into thorough/pro-tier mode for ALL installed buyer plugins. ONE subscription, applies to every vertical."
+version: 0.1.0
+entry_point: chaos_pro:register
+
+# Pro extends any installed buyer plugin. Not per-vertical.
+# Resolution: at install time the pro plugin enumerates plugins
+# matching `extends` and overrides their capability-MCP tiers.
+extends: any-buyer-plugin
+
+# Pro depends on the shared MCPs it upgrades. It does NOT pull in a
+# vertical engine — it's a pure configuration-flip plugin.
+dependencies:
+  - reverse-image-mcp>=0.1
+  - market-comp-mcp>=0.1
+  - reputation-mcp>=0.1
+
+includes:
+  capability_mcps:
+    - reverse-image-mcp@1
+    - market-comp-mcp@1
+    - reputation-mcp@1
+
+# Per-MCP overrides applied to every extended buyer plugin.
+mcp_overrides:
+  reverse-image-mcp:
+    tier: thorough               # EXIF + federated registry + optional CLIP
+  market-comp-mcp:
+    tier: thorough
+    window_days: 180             # vs free-tier 60
+  reputation-mcp:
+    tier: thorough
+    wot_depth: 4                 # vs free-tier 2
+    onchain_stake: true          # Phase 1 hook enabled
+
+required_env: []
+
+forbidden_toolsets: [terminal, delegation, file, web]
+
+# Pricing: x402 per-call OR subscription. Subscription validation
+# happens at the engine layer; per-call x402 happens inside each
+# upgraded MCP.
+pricing:
+  model: subscription_or_x402
+  subscription_usdc_per_month: 9.0
+  x402_per_call_usdc: 0.10
+  network: base

@@ -1,0 +1,36 @@
+version: "3.9"
+
+# Local-only overlay for `strfry-compose.yml`. Apply with:
+#
+#   docker compose -f strfry-compose.yml -f strfry-compose.local.yml up -d
+#
+# Differences from the production compose file:
+#   1. strfry's port 7777 is published on 127.0.0.1 — no public exposure.
+#   2. strfry uses `strfry-config.local.toml` (PoW=0, placeholder pubkey).
+#   3. Caddy and node-exporter are tagged with the `production-only`
+#      profile, so they're skipped by default. The base compose file does
+#      not declare a profile on them, so production deployments
+#      (`docker compose -f strfry-compose.yml up -d`) still bring them up.
+#
+# Tear down with:
+#
+#   docker compose -f strfry-compose.yml -f strfry-compose.local.yml down
+
+services:
+  strfry:
+    ports:
+      - "127.0.0.1:7777:7777"
+    volumes:
+      - ./strfry-config.local.toml:/etc/strfry.conf:ro
+      - ./writePolicy.js:/app/strfry-db/writePolicy.js:ro
+      - strfry-data:/app/strfry-db
+
+  # Park production-only services behind a profile so they don't start in
+  # local dev. Compose only starts services whose profile matches an
+  # active one (or services with no profile). This overlay leaves no
+  # active profile, so caddy + prom-exporter stay down.
+  caddy:
+    profiles: ["production-only"]
+
+  prom-exporter:
+    profiles: ["production-only"]

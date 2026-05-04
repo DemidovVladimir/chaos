@@ -1,0 +1,7 @@
+{
+  "admin_pubkey": "<TO_BE_GENERATED_AT_DEPLOY>",
+  "operator_signature": "<TO_BE_SIGNED_BY_OPERATOR>",
+  "vertical": "cars-pack@1",
+  "issued_at": null,
+  "valid_until": null
+}

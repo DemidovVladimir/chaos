@@ -1,0 +1,28 @@
+INSPECTION REPORT (MVP fixture — not a real inspection)
+
+Item:                 2018 Mazda 6 hatchback
+VIN ending:           8K2J
+Mileage at inspection: 65,432 km
+
+Body:                 Original panels, no visible filler. No rust.
+Paint:                Original throughout, no respray detected.
+Frame:                No bends, no welds, no impact marks.
+Engine:               Compression within spec on all cylinders.
+                      No leaks. Service stickers on file.
+Transmission:         Manual gearbox shifts cleanly through all gears.
+                      Clutch within first third of pedal travel.
+Brakes:               Pads ~60 % remaining. Discs within tolerance.
+Tires:                Continental PremiumContact, ~5 mm tread.
+Electronics:          All warning lamps off after self-test.
+                      Infotainment + climate + windows operational.
+
+Verdict:              PASS — no significant defects.
+
+Notes for buyer:
+  • This is a demonstration inspection report shipped with the
+    chaos MVP. In production, sellers obtain a real
+    pre-purchase inspection from a shop of the buyer's choosing
+    and the seller's MCP server returns the resulting PDF as
+    an `EmbeddedResource` block from `request_inspection_report`.
+  • Inspection PDFs never traverse a third-party file host. They
+    move agent-to-agent over the seller's MCP HTTP+SSE session.

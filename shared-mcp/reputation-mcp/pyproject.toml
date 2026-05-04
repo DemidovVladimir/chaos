@@ -1,0 +1,28 @@
+[project]
+name = "reputation-mcp"
+version = "0.2.0"
+description = "Layered trust-signal aggregation MCP. Universal across verticals. Reads only; never custodies."
+requires-python = ">=3.11"
+dependencies = [
+  "mcp==1.27.0",
+  "fastmcp",
+  "pynostr==0.6.2",
+  "certifi",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

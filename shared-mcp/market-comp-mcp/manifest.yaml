@@ -1,0 +1,22 @@
+manifest_version: 1
+name: market-comp-mcp
+version: 0.1.0
+description: "Pricing comparables from on-network NIP-99 listings."
+transport: http+sse
+bind: 127.0.0.1
+port: 7611
+exposed_tools:
+  - name: query_comps
+    description: "Compute pricing comparables for a (pack, filter_tags) query against configured Nostr relays."
+paid: false                # free; thorough mode (longer window, more relays) flipped on by pro plugin
+x402:
+  enabled: false
+threat_model:
+  outbound_http: none      # only Nostr WSS to user-configured relays
+  retains_inputs: false
+tier_modes:
+  fast:
+    window_days: 60
+  thorough:
+    window_days: 180
+    description: "Wider window + more comp relays. Enabled by chaos-pro."

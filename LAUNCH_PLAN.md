@@ -1,213 +1,235 @@
-# 90-day launch plan — cars vertical, Mode A relay
+# LAUNCH PLAN — phased rollout
 
-Bias: ship over polish. Each milestone has explicit deliverables and
-exit criteria. If a milestone slips a week, it slips — don't compress
-later milestones to catch up.
+This is the shipping plan for chaos as a coordination protocol
+for autonomous agents. The phases are bias-toward-shipping; each
+phase has explicit deliverables and exit criteria. If a phase slips
+a week, it slips — don't compress later phases to catch up.
+
+## Approach
+
+The phasing is deliberately not "ship cars first then add other
+verticals". The phasing is:
+
+1. **Universal engines first.** Prove that `seller/` and `buyer/`
+   can load any pack and round-trip the protocol end-to-end.
+2. **First vertical pack as the proof-of-shape.** Implement
+   cars-pack@1 fully end-to-end via Hermes plugins. This is the
+   reference vertical; everything else extends the same shape.
+3. **Second vertical pack as the proof-of-generality.** Implement
+   one sketched vertical (likely data-licensing, ml-inference, or
+   specialist-services — driven by which community has pull).
+   Successful exit means the same Hermes runtime serves both
+   verticals concurrently.
+4. **Admin-agent + community arbitration.** Activate dispute kinds
+   30430 / 30431, the admin-agent's hardened skill, and the
+   community-arbitrator multi-sig hooks for Phase-1 staking
+   readiness.
+5. **Beyond.** Multi-vertical user, federated relay topology,
+   cross-vertical reputation. Scale.
 
 ## Pre-conditions (week 0)
 
 Before week 1 starts:
 
-- [ ] Domain registered (e.g. `neuro-spati.app` and a subdomain plan)
+- [ ] Domain registered (e.g. `chaos.app` and a per-vertical
+      subdomain plan)
 - [ ] VPS account funded (Hetzner / DigitalOcean / Modal)
 - [ ] Off-site backup target chosen (Backblaze B2, S3, or Storj)
 - [ ] Email infrastructure for `abuse@…` and operator addresses
-- [ ] LLM provider chosen (Claude or OpenRouter — confirm budget for
-      pilot users; ~$0.50–$2 per active hour at typical use)
-- [ ] Stock-image hash starter database obtained (~500k pHashes from
-      public stock-photo thumbnails, ~5 MB compressed). One engineer-
-      week to assemble.
+- [ ] LLM provider chosen (Claude or OpenRouter — confirm budget)
+- [ ] Stock-image hash starter database obtained (for
+      `reverse-image-mcp` — relevant to any pack that handles
+      photos: cars, real-estate, watches, livestock). Roughly 500k
+      pHashes from public stock-photo thumbnails, ~5 MB compressed.
 
 If any of these slip past week 0, slip the whole plan. Don't start
 without infrastructure.
 
-## Weeks 1–2 — Mode A relay live
+## Phase 1 (week 1) — Universal engines
 
-**Goal**: a working `wss://relay.<your-domain>` with the moderation
-runbook in place.
-
-Deliverables:
-
-- [ ] VPS provisioned, DNS resolves, firewall configured
-- [ ] `docker compose up -d` runs `registry/strfry-compose.yml`
-- [ ] Caddy issues a valid Let's Encrypt cert
-- [ ] strfry NIP-11 doc returns 200 with your operator pubkey + name
-- [ ] PoW enforcement verified (publish without PoW → rejected)
-- [ ] Rate limit verified (12 events in a minute → 11th rejected)
-- [ ] Backup cron running, first off-site snapshot completed
-- [ ] External canary publish/subscribe round-trip succeeds every
-      5 minutes for 24h straight
-- [ ] Moderation policy live at `https://moderation.<domain>`
-- [ ] `abuse@<domain>` mailbox monitored daily
-
-**Exit criteria**: a third-party Nostr client (Damus, nostr-cli) can
-publish and subscribe round-trip successfully against your relay over
-TLS. Alerts go to the channel you actually monitor.
-
-If you slip: extend by one week, do not compress later phases.
-
-## Weeks 3–4 — Hermes plugin baseline
-
-**Goal**: a working Hermes plugin that publishes a NIP-99 listing and
-subscribes for matching listings, against your relay (Mode A) plus
-2–3 community relays. Photos move agent-to-agent over ACP.
+**Goal**: `seller/` and `buyer/` scaffolds wired into Hermes plugin
+loaders. A vacuous pack — minimal tag schema, single
+`echo` MCP tool — loads end-to-end.
 
 Deliverables:
 
-- [ ] `neuro-spati-seller` and `neuro-spati-buyer` packages on PyPI
-      (private feed or GitHub release for now; public PyPI later)
+- [ ] `seller/` engine loads a pack from
+      `verticals/<pack>/pack.yaml` and exposes the pack's tool
+      surface via FastMCP HTTP+SSE
+- [ ] `buyer/` engine loads a pack and runs the pack's evaluation
+      rubric
+- [ ] Plugin loader contract verified: `plugin.yaml` declares
+      toolset; CI lint enforces role isolation per CLAUDE.md Rule 11
+- [ ] Hermes plugin install path documented and tested with
+      `plugins/_template/`
 - [ ] Keypair generation + secure local storage (mode 0600)
-- [ ] NIP-99 publishing flow with PoW (≥ 20 bits)
-- [ ] REQ subscription with cars-tag filters
-- [ ] NIP-17 gift-wrap encrypt + decrypt for inquiry messages
-- [ ] ACP transport between agents (Hermes already ships
-      `acp_adapter/`); seller agent can stream `ImageContentBlock`s
-      to a buyer agent over a session
-- [ ] Webhook adapter route `/webhooks/item-inquiry` configured (for
-      structured inquiry pre-ACP-session)
-- [ ] Seller-cars and buyer-cars skills installable
-- [ ] Configuration: relay list, npub, recovery key
-- [ ] One end-to-end test: seller publishes, buyer subscribes, buyer
-      sends inquiry over NIP-17, buyer's agent opens an ACP session
-      against the seller's `acp_url`, seller's agent streams photos
-      as `ImageContentBlock`s. **No third-party file host.** All
-      discovery on real relays.
+- [ ] Configuration: relay list, npub, MCP server URL + TLS,
+      MCP-allowlist (buyer side)
+
+**Exit criteria**: `plugins/_template/` installs cleanly into
+Hermes, the universal engines run a vacuous pack end-to-end, and
+the role-isolation lint catches a deliberately broken
+configuration.
+
+If you slip: extend by one week. Do not compress phase 2.
+
+## Phase 2 (week 2) — First vertical pack (cars), seamless from MVP
+
+**Goal**: cars-pack@1 ships end-to-end as a Hermes plugin pair
+(`plugins/cars-seller/` + `plugins/cars-buyer/`), against your
+operator relay (Mode A) plus 2–3 community relays. Photos flow
+agent-to-agent over MCP.
+
+Deliverables:
+
+- [ ] `plugins/cars-seller/` and `plugins/cars-buyer/` install into
+      Hermes
+- [ ] NIP-99 publish flow with PoW (≥ 20 bits), tags include
+      `["mcp", "<https-url>"]` and `["pack", "cars-pack@1"]`
+- [ ] REQ subscription with cars-pack tag filters
+- [ ] NIP-17 gift-wrap encrypt + decrypt for the inquiry channel
+      (rumor type `mcp_inquiry_open` carries the `session_token`)
+- [ ] FastMCP HTTP+SSE server on the offering agent exposing the
+      cars-pack@1 tool surface: `view_listing`, `request_photos`,
+      `request_inspection_report`, `request_vin`, `submit_offer`,
+      `cancel_inquiry`
+- [ ] FastMCP HTTP+SSE client on the seeking agent that runs
+      `tools/list` then `mcp_call_tool` for each ask
+- [ ] `seller-cars` and `buyer-cars` skills installable from
+      `verticals/cars-pack/skills/`
+- [ ] One end-to-end test on two separate machines: seller
+      publishes; buyer subscribes; buyer sends `mcp_inquiry_open`
+      rumor over NIP-17; buyer connects to seller's `mcp_url`
+      carrying `session_token`; runs `tools/list`; calls
+      `request_photos`; receives photos as `ImageContent` blocks;
+      receives the inspection report as an `EmbeddedResource`.
+      **No third-party file host anywhere in the loop.**
+- [ ] Mode A relay deployed via `operator/cars/docker-compose.yml`,
+      backups + canary running
+- [ ] Three local-only capability MCPs ship: `reverse-image-mcp`,
+      `vin-decoder-mcp`, `market-comp-mcp`. First metered revenue
+      from the `reverse-image-mcp` Pro tier is wired but not yet
+      depended on for the demo
 
 **Exit criteria**: the test scenario runs unattended on two separate
-machines with no manual intervention. Zero centralized state outside
-the relay (which is your Mode A) and the user's own machines.
+machines with no manual intervention, no platform piece in the data
+path. Zero centralized state outside the relay (Mode A) and the
+user's own machines.
 
 If you slip: extend by 1 week. Cut the photo-grant policy down to
-"grant all" temporarily if needed; tighten in Phase 2.
+"grant all" temporarily if needed; tighten in phase 3.
 
-## Weeks 5–6 — Three local-only MCPs ship
+## Phase 3 (week 3) — Second vertical pack, proof-of-generality
 
-**Goal**: paid `reverse-image-mcp` + free `vin-decoder-mcp` + free
-`market-comp-mcp` all installable. First revenue stream live.
+**Goal**: one sketched vertical implemented end-to-end, demonstrating
+that the protocol contract works for a non-cars domain. Same Hermes
+runtime serves both packs concurrently. `reputation-mcp` wired up.
 
-Deliverables:
-
-- [ ] `reverse-image-mcp` v1.0:
-  - [ ] pHash + dHash hashing primitives (NumPy, ~50 lines each)
-  - [ ] Bundled stock-image hash database (~500k entries, ~5 MB)
-  - [ ] `tier=fast` free-tier endpoint (loss-leader: 100/day per pubkey)
-  - [ ] `tier=thorough` paid-tier endpoint with EXIF + optional CLIP
-  - [ ] Per-pubkey API key + metering with signed receipts
-  - [ ] Stripe / BTCpay billing integration for the Pro tier
-        ($9/mo, 200 thorough calls)
-  - [ ] Hosted endpoint at `https://photos.<domain>/mcp`
-  - [ ] Container image for self-host customers
-- [ ] `vin-decoder-mcp` v1.0 (free, local):
-  - [ ] WMI registry data file (~10k entries, ~500 KB)
-  - [ ] Year-code mapping (30-year cycle)
-  - [ ] Mod-11 check digit validator
-  - [ ] Cross-check vs. listing tags
-  - [ ] Bundled with the cars-pack as a default-on free MCP
-- [ ] `market-comp-mcp` v1.0 (free, derives from on-network listings):
-  - [ ] Relay-query helper
-  - [ ] Percentile + recency-weighted aggregation
-  - [ ] ECB FX-rate snapshot for cross-currency normalization
-  - [ ] 5-minute in-memory result cache
-- [ ] Cars-pack skills wired up
-- [ ] Pricing page live; terms of service published
-
-**Exit criteria**:
-- The pre-share stock-image check on seller-cars catches a planted
-  test stock photo and refuses to deliver it via ACP.
-- The buyer-cars rubric flags a synthetic listing built from stock
-  photos as a hard red flag and auto-suppresses it.
-- A real $0.10 `thorough` reverse-image call is charged and delivered.
-
-If you slip: ship `vin-decoder-mcp` and `market-comp-mcp` first (both
-free, both core to the buyer rubric). Defer `reverse-image-mcp` paid
-tier by 1 week — the free `fast` tier is enough for beta.
-
-## Weeks 7–8 — Closed beta with 5–10 sellers
-
-**Goal**: real listings on the relay from real sellers, with the
-buyer-cars skill receiving real notifications.
+Likely candidate: **`data-licensing-pack`** (clean tag schema,
+clean tool surface, pre-existing demand from the data-broker
+displacement story) or **`ml-inference-pack`** (closest to the
+Hermes audience). Decided at start of phase 3 based on community
+pull.
 
 Deliverables:
 
-- [ ] 5–10 invited beta sellers
-- [ ] Each provides at least 1 real car listing
-- [ ] 10–20 invited buyer accounts subscribed
-- [ ] Daily check-ins
-- [ ] Bug-tracking issue list with severity tags
-- [ ] At least 1 real successful negotiation round-trip
-- [ ] Per-user feedback survey
+- [ ] Pack source of truth at `verticals/<vertical>-pack/`:
+      `tag_schema.md`, `example_listing.json`, MCP tool-surface
+      spec, seller skill, buyer skill, default grant policy
+- [ ] Plugin pair: `plugins/<vertical>-seller/` and
+      `plugins/<vertical>-buyer/` installable into Hermes
+- [ ] If the pack needs a vertical-specific capability MCP (most
+      packs reuse the cross-vertical ones, but some — e.g. ML
+      inference — need one), it lives in
+      `verticals/<vertical>-pack/mcp/<mcp-name>/`
+- [ ] One end-to-end demo on two machines, same shape as the cars
+      demo
+- [ ] `shared-mcp/reputation-mcp` wired into both buyer plugins;
+      score_aggregate computed locally per agent across all 5
+      reputation layers (NIP-58, peer attestations, NIP-51, NIP-02
+      WoT, opt-in admin decisions)
+- [ ] Multi-vertical user demo: one Hermes instance with both
+      `cars-buyer` and `<new>-buyer` plugins installed,
+      simultaneously evaluating offers from both verticals
 
-**Exit criteria**: ≥ 3 of the beta sellers publish a second car
-unprompted. That's the meaningful signal.
+**Exit criteria**: the second vertical's end-to-end demo runs on
+the same Hermes instance as the cars demo, against the same relay
+infrastructure, with no protocol-level changes. The wire is
+unchanged; only the per-pack contract differs.
 
-If fewer come back: do not launch publicly. Talk to those 3, find out
-why they didn't, and adjust.
+If you slip: keep the second vertical scaffolded but skip the
+end-to-end demo until phase 4.
 
-## Weeks 9–10 — Verification badges + first vertical pack polish
+## Phase 4 (week 4) — Admin-agent + community arbitration
 
-**Goal**: NIP-58 verified-seller badge live; the cars-pack feels
-"done enough" for public launch.
-
-Deliverables:
-
-- [ ] Badge-issuer agent running (Hermes instance with badge-issuer
-      skill, your operator pubkey)
-- [ ] Verification flow: seller submits email + payment-method
-      confirmation → admin agent issues NIP-58 badge → badge appears
-      in NIP-99 listings as `["badge", "..."]`
-- [ ] Pricing for badges live ($20 one-time private, $50/yr dealer)
-- [ ] Buyer-cars skill prefers badge-holders in evaluation rubric
-- [ ] Cars-pack documentation site live with: tag schema, skill
-      docs, "how to be a verified seller", "how to install the
-      plugin", FAQ
-- [ ] Pricing page covers: free plugin, paid premium, paid relay,
-      verified-seller badge, reverse-image-mcp tiers
-- [ ] Telemetry minimal — track active sellers/week, active
-      buyers/week, successful inquiries/week, badges issued, MCP
-      calls. No PII.
-
-**Exit criteria**: from a clean machine, a new user installs the
-plugin, registers, publishes a real car, gets a badge, receives an
-inquiry, responds — all in under 30 minutes following the docs. Test
-this with someone who hasn't seen the code.
-
-## Weeks 11–12 — Public launch
-
-**Goal**: marketplace is live. Word-of-mouth growth begins.
+**Goal**: the admin-agent runs live for cars (extensible to any
+vertical), the community-arbitration multi-sig hooks are wired,
+and the Phase-1 staking research is kicked off.
 
 Deliverables:
 
-- [ ] Public website launch announcement
-- [ ] `neuro-spati-seller` and `neuro-spati-buyer` on public PyPI
-- [ ] Relay listed on common Nostr relay directories (`nostr.watch`,
-      `relay.exchange`)
-- [ ] Forum / Discord / Telegram for users — pick one
-- [ ] Initial content marketing: 1 blog post explaining the model,
-      1 tutorial ("sell your first car in 30 minutes")
-- [ ] Outreach to 50 small-dealer contacts
-- [ ] Pricing finalized
+- [ ] `admin-cars` skill from
+      `verticals/cars-pack/skills/admin-cars/SKILL.md` deployed via
+      `plugins/cars-admin/` on the operator's infrastructure
+- [ ] Admin-agent invariants from CLAUDE.md Rule 16 enforced:
+      decisions limited to `clear` / `warning` / `flag` /
+      `escalated`; no destructive unilateral action
+- [ ] Anti-injection hardening per CLAUDE.md Rule 15 verified:
+      input sanitizer + source-tagged `<untrusted>` blocks, refusal
+      to act on instructions found inside untrusted blocks
+- [ ] Dispute kinds 30430 (decisions) + 30431 (appeals) live on
+      relay
+- [ ] Multi-sig hook for community-arbitrator decisions: at least
+      one full cycle of submit-dispute → admin-agent decision →
+      affected-party appeal completes on relay
+- [ ] First public dispute → decision → appeal cycle audited on
+      relay
+- [ ] Phase-1 staking research initiated: legal review for target
+      jurisdiction begun, smart-contract auditor identified, kinds
+      30420–30422 schema reviewed
 
-**Exit criteria**: 50 active sellers, 200 active buyers within 30
-days of public launch. If you don't hit it, treat it as data: which
-acquisition channel worked, which didn't, what does the next 30 days
-need to look like.
+**Exit criteria**: at least one dispute / decision / appeal
+sequence runs to completion on relay, fully publicly auditable.
+The admin-agent does not custody money or PII (CLAUDE.md Rule 16);
+hashes-only retention after decision verified.
 
-## What's deliberately NOT in 90 days
+## Beyond — multi-vertical scale, federation, cross-vertical reputation
 
-- Real estate vertical pack — wait until cars proves out
-- Skills marketplace meta-layer — needs ≥ 1k users first
-- Mode B / Mode C migration — not until users ask for federation
-- Mobile clients — desktop-first; mobile in v2
-- Payment integration — explicitly off-platform
-- Escrow — explicitly off-platform
-- Internationalization beyond English + one EU language
+Quarterly cadence after phase 4:
 
-## Post-launch quarterly cadence
+- **Q2** — Third vertical pack (whichever has user pull); first
+  cross-vertical reputation signal sharing (opt-in)
+- **Q3** — Mode B (federate with paid relays) operationalized; new
+  `scam-pattern-mcp` shipped as the next paid capability MCP
+- **Q4** — Fourth vertical pack; Phase-1 staking goes live for the
+  first jurisdiction (only after legal review and external smart-
+  contract audit, per CLAUDE.md Rule 14)
+- **Year 2** — Skills marketplace meta-layer once active community
+  exists across multiple verticals (~1k active users threshold)
 
-- **Q2**: Real estate or watches vertical pack (whichever has user pull)
-- **Q3**: First custom MCP beyond the cars-pack three —
-  likely `scam-pattern-mcp`
-- **Q4**: Mode B (federate with paid relays)
+## Success metrics
+
+By the end of phase 4 (week 4):
+
+- **Multi-pack** — at least one user is running 2+ buyer plugins
+  side-by-side with their score_aggregate computed across both
+  verticals
+- **Federated** — at least 3 independently operated relays carry
+  chaos listings, with cross-relay propagation verified by
+  canary
+- **Active agents** — 100+ active agents across 2+ verticals on 3+
+  relays
+- **Demonstrable** — the admin-agent has handled at least one full
+  dispute cycle publicly auditable on relay
+
+By month 12 (post-launch):
+
+- 200+ active offering-side users across 3+ verticals
+- 1,000+ active seeking-side users
+- 50+ NIP-58 verified-issuer badges issued across the network
+- `reverse-image-mcp` Pro tier at $0.5–2k MRR (across all packs
+  that use images)
+- `chaos-pro` cross-vertical subscription at ~50 conversions
 
 ## Risk register
 
@@ -216,21 +238,25 @@ need to look like.
 | Relay performance under load | low at this scale | Capacity plan + canary alerts |
 | Spam attack on launch day | medium | PoW + paid relays + invite-only first 2 weeks |
 | Stock-image database becomes stale | medium | Federated NIP-31000 scam-hash registry from v1.1; quarterly bundled-DB refresh |
-| False positives on reverse-image check | medium | Auto-suppress only on ≥ 0.92 similarity; soft-flag in 0.85–0.92 band |
-| Sellers don't see value vs. existing classifieds | high | Buyer-cars filtering quality is the killer feature; lean on it in marketing |
-| Regulatory grey area in some EU country | low-medium | Mode A with curated allowlist; geo-block sanctioned regions; lawyer review pre-launch |
+| False positives on cross-vertical capability MCPs | medium | Auto-suppress only on high-confidence thresholds; soft-flag below |
+| First vertical doesn't find product-market fit | medium | Cars chosen because it has clean tag vocabulary + photo-fraud problem the protocol uniquely solves; second vertical (phase 3) provides backup |
 | Hermes upstream breaking change | medium | Pin Hermes version; quarterly upgrade cadence |
 | Single-host relay outage during launch week | medium | RTO 30 min; canary + alerts; tested redeploy script |
+| Plugin role-isolation rule (Rule 11) violated by contributor | low | CI lint rejects; review checklist enforces |
+| Admin-agent prompt injection succeeds | low (Rule 15 hardened) | Mandatory skill review before each release; soft-negative reputation for issuing pubkey |
+| Phase-1 staking jurisdictional risk | medium | Phase-1 ships only after legal review + external audit (CLAUDE.md Rule 14) |
 
-## What good looks like at day 90
+## What good looks like at end of phase 4
 
 - Mode A relay: < 1 hour of unplanned downtime in 30 days
-- ~200 active sellers, ~1,000 active buyers
-- 50+ verified-seller badges issued
-- `reverse-image-mcp` Pro tier doing $0.5–2k MRR
-- Premium plugin at $25/mo with ~50 conversions
-- 5+ unsolicited "love this" reviews / posts in the user community
-- Two pieces of negative feedback that are actually instructive
+- Two vertical packs running end-to-end on the same Hermes runtime
+- ~100 active agents across both verticals
+- At least 5 NIP-58 verified-issuer badges issued
+- At least one full dispute cycle (submit / decision / appeal)
+  on relay, publicly auditable
+- `reverse-image-mcp` Pro tier wired as a payable service
+- `chaos-pro` cross-vertical subscription wired with first
+  conversions
 
-If you have all of those, scale. If you have most, iterate. If you
-have few, regroup.
+If you have all of those, scale into Q2. If you have most, iterate.
+If you have few, regroup before adding a third vertical.

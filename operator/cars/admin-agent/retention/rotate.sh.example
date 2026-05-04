@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# rotate.sh.example — placeholder outline for the 90-day retention rotation.
+#
+# DO NOT run this file as-is. Copy it to rotate.sh, adapt the paths to
+# your deployment, and schedule via systemd timer or cron.
+#
+# This script implements the policy described in
+# operator/cars/admin-agent/retention/README.md:
+#   - purge any plaintext files (should be zero — agent never writes them)
+#   - purge resolved decision files older than 90 days
+#   - emit a structured log line per file purged
+#
+# Outline only. Fill in the bodies before deploying.
+
+set -euo pipefail
+
+# QUEUE_DIR=/path/to/operator/cars/admin-agent/escalation_queue
+# LOG_FILE=/var/log/chaos/admin-rotation.jsonl
+# RETENTION_DAYS=90
+
+# 1. Sanity check: pending/ should never hold plaintext .txt or .jsonl
+#    files. If we find any, that's a bug — alert the operator.
+#    pending_plaintext_check() { ... }
+
+# 2. Purge resolved/ entries older than RETENTION_DAYS.
+#    purge_resolved() { ... }
+
+# 3. Vacuum any temp / swap directories the admin-agent process uses.
+#    vacuum_temp() { ... }
+
+# 4. Emit a single summary log line: {"at": "...", "purged": N, "kept": M}
+#    write_summary_log() { ... }
+
+# main() { ... }
+# main "$@"

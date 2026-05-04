@@ -15,7 +15,7 @@ env/
 # User-local Nostr keys — NEVER commit
 *.key
 .mvp/
-.neuro_spati/
+.chaos/
 
 # IDE / editor
 .vscode/

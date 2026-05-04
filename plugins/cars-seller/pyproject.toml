@@ -1,0 +1,41 @@
+[project]
+name = "chaos-cars-seller"
+version = "1.0.0"
+description = "Sell cars on the chaos Nostr-based marketplace (Hermes plugin)."
+requires-python = ">=3.11"
+authors = [{ name = "chaos contributors" }]
+license = { text = "MIT" }
+
+# Runtime deps. The plugin shells out to mvp/seller.py for now (see
+# src/chaos_cars_seller/__init__.py), so we don't import these
+# from the plugin directly — they belong to the engine. Listed for
+# documentation and future when the universal seller engine takes over.
+dependencies = [
+  "pynostr>=0.6.2,<0.7",
+  "mcp==1.27.0",
+  "pyyaml>=6.0,<7",
+  # Once seller/ is implemented, switch to:
+  #   "chaos-seller>=0.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0,<9", "ruff>=0.4,<1"]
+
+# Hermes also accepts pip-installed plugins via the
+# `hermes_agent.plugins` entry-point group
+# (hermes-agent/hermes_cli/plugins.py:113). Declared here so that
+# `pip install -e .` exposes the plugin via that path too — but the
+# canonical install method is symlinking into ~/.hermes/plugins/.
+[project.entry-points."hermes_agent.plugins"]
+cars-seller = "chaos_cars_seller:register"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -3,15 +3,16 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "neuro-spati-seller"
+name = "chaos-seller"
 version = "0.1.0"
-description = "Seller agent for the neuro-spati Nostr-based marketplace"
+description = "Seller agent for the chaos Nostr + MCP marketplace"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "neuro-spati contributors" }]
+authors = [{ name = "chaos contributors" }]
 license = { text = "MIT" }
 dependencies = [
   "pynostr>=0.6.2,<0.7",
+  "mcp==1.27.0",                    # Anthropic MCP Python SDK (FastMCP)
   "httpx>=0.28.0,<1",
   "pydantic>=2.0,<3",
   "pyyaml>=6.0,<7",
@@ -27,10 +28,10 @@ dev = [
 ]
 
 [project.entry-points."hermes.plugin"]
-neuro_spati_seller = "neuro_spati_seller:register"
+chaos_seller = "chaos_seller:register"
 
 [project.scripts]
-neuro-spati-seller = "neuro_spati_seller.main:main"
+chaos-seller = "chaos_seller.main:main"
 
 [tool.ruff]
 line-length = 100

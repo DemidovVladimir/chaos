@@ -15,14 +15,22 @@ fuel_type     = "gasoline"
 transmission  = "manual"
 mileage_band  = "50k-75k"
 
-# Free-text body (markdown). Text only for the MVP — no photo URLs.
-# Photos are shared agent-to-agent via ACP in the post-weekend sprint;
-# the buyer's agent opens an ACP session against the seller's
-# acp_url and the seller streams ImageContentBlocks directly.
+# MCP wiring — the seller agent's FastMCP server endpoint where photos
+# and inspection PDFs flow as ImageContent / EmbeddedResource blocks.
+# The MVP defaults to localhost:8765 on the seller's machine and
+# `seller.py serve` runs the server in a background thread alongside
+# the Nostr listener. For two-machine demos point this at an https
+# tunnel (ngrok, cloudflared) on the seller side.
+mcp_url = "http://127.0.0.1:8765/sse"
+pack    = "cars-pack@1"
+
+# Free-text body (markdown). Text only — photos move via MCP.
 content = """
 Bought new from Mazda CZ in March 2018. Single owner, garaged, non-smoker.
 Full dealer service history. No accidents. Recently passed STK (Czech MOT)
 with no issues. New tires (Continental PremiumContact) at 60k km.
 
-Photos and inspection report available on request via ACP session.
+Photos and inspection report available via MCP — connect to the
+endpoint advertised in the `mcp` tag and call `request_photos` /
+`request_inspection_report` on the cars-pack@1 tool surface.
 """
