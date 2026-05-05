@@ -1,23 +1,24 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_seller"]
 [project]
 name = "chaos-seller"
 version = "0.1.0"
-description = "Seller agent for the chaos Nostr + MCP marketplace"
+description = "Seller agent for the chaos Nostr + MCP protocol"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 authors = [{ name = "chaos contributors" }]
 license = { text = "MIT" }
 dependencies = [
   "pynostr>=0.6.2,<0.7",
-  "mcp==1.27.0",                    # Anthropic MCP Python SDK (FastMCP)
+  "mcp>=1.27,<2",                    # Anthropic MCP Python SDK (FastMCP)
   "httpx>=0.28.0,<1",
-  "pydantic>=2.0,<3",
   "pyyaml>=6.0,<7",
-  "coincurve>=20.0,<21",            # Schnorr / BIP-340 sigs
-  "cryptography>=41.0,<43",         # NIP-44 (XChaCha20-Poly1305 + ECDH)
+  "coincurve>=21.0,<22",            # Schnorr / BIP-340 sigs (cp313 wheels start at 21.0)
+  "cryptography>=43.0,<46",         # NIP-44 (XChaCha20-Poly1305 + ECDH)
 ]
 
 [project.optional-dependencies]
@@ -32,10 +33,6 @@ chaos_seller = "chaos_seller:register"
 
 [project.scripts]
 chaos-seller = "chaos_seller.main:main"
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

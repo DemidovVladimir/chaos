@@ -1,0 +1,140 @@
+# Top-level workspace config for the chaos repo.
+#
+# This file is NOT a buildable package itself. It declares the
+# workspace and unifies tooling (ruff, pytest) across the eleven
+# member packages.
+#
+# Recommended workflow with uv (https://docs.astral.sh/uv/):
+#
+#   uv sync             # resolve and install every workspace member
+#   uv run pytest -q    # run the whole test suite
+#   uv run ruff check . # lint the whole repo
+#   uv run ruff format . # format the whole repo
+
+[project]
+name = "chaos-workspace"
+version = "0.0.0"
+description = "Workspace root for the chaos decentralised remote agentic collaboration protocol."
+requires-python = ">=3.12"
+license = { text = "MIT" }
+# Depend on every workspace member so a plain `uv sync` installs them all
+# editably (alternative: `uv sync --all-packages`, but easy to forget).
+# uv resolves these against `[tool.uv.sources]` below, not PyPI.
+dependencies = [
+  "chaos-seller",
+  "chaos-buyer",
+  "chaos-cars-seller",
+  "chaos-cars-buyer",
+  "chaos-cars-admin",
+  "chaos-pro",
+  "reputation-mcp",
+  "reverse-image-mcp",
+  "market-comp-mcp",
+  "vin-decoder-mcp",
+  # _template packages are intentionally excluded — they're scaffolds.
+]
+
+# PEP 735 dependency groups — installed by `uv sync` by default for the
+# `dev` group, so `uv run ruff check .` and `uv run pytest` Just Work.
+[dependency-groups]
+dev = [
+  "ruff>=0.6,<1",
+  "pytest>=8,<9",
+  "pytest-asyncio>=0.23,<1",
+]
+
+[tool.uv.workspace]
+members = [
+  "seller",
+  "buyer",
+  "shared-mcp/reverse-image-mcp",
+  "shared-mcp/market-comp-mcp",
+  "shared-mcp/reputation-mcp",
+  "shared-mcp/_template",
+  "plugins/cars-seller",
+  "plugins/cars-buyer",
+  "plugins/cars-admin",
+  "plugins/chaos-pro",
+  "plugins/_template",
+  "verticals/cars-pack/mcp/vin-decoder-mcp",
+]
+
+# Workspace-wide source dependency graph: members can depend on each other
+# by name and uv will resolve them locally instead of going to PyPI.
+[tool.uv.sources]
+chaos-seller        = { workspace = true }
+chaos-buyer         = { workspace = true }
+chaos-cars-seller   = { workspace = true }
+chaos-cars-buyer    = { workspace = true }
+chaos-cars-admin    = { workspace = true }
+chaos-pro           = { workspace = true }
+reputation-mcp      = { workspace = true }
+reverse-image-mcp   = { workspace = true }
+market-comp-mcp     = { workspace = true }
+vin-decoder-mcp     = { workspace = true }
+
+# Repo-wide ruff config. Each member pyproject.toml has its own
+# [tool.ruff] block that may override this; the base lint rule set
+# stays consistent.
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+  "**/__pycache__",
+  "**/.pytest_cache",
+  "**/build",
+  "**/dist",
+  "spike",   # historical transport spikes — frozen
+  "mvp",     # MVP scripts — different style guide
+]
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "F",    # pyflakes
+  "I",    # isort
+  "B",    # flake8-bugbear
+  "UP",   # pyupgrade — flags Python <3.12 idioms
+  "SIM",  # flake8-simplify
+  "RUF",  # ruff-specific rules
+]
+ignore = [
+  "E501", # line length is enforced by formatter, not lint
+]
+# `×` (U+00D7 multiplication sign) is used intentionally in docstrings
+# and comments where the math semantics matter ("1.5× median",
+# "WoT-weight × time decay", "Admin × cars skill"). Tell ruff to stop
+# confusing it with the Latin `x`.
+allowed-confusables = ["×"]
+
+[tool.ruff.lint.per-file-ignores]
+# Match any tests/ directory at any depth (seller/tests/, buyer/tests/,
+# shared-mcp/<x>/tests/, etc.).
+"**/tests/**" = ["B011", "ANN", "S101"]
+"**/_template/**" = ["F401"]  # templates are intentionally minimal
+
+# Repo-wide pytest config — every member uses asyncio mode "auto".
+#
+# `--import-mode=importlib` is the modern monorepo-friendly mode:
+#   - Tolerates multiple test_<X>.py files with the same basename in
+#     different packages (e.g. several test_server.py under shared-mcp/).
+#   - Doesn't require `tests/__init__.py` files (we still have them, but
+#     they no longer have to round-trip through sys.path).
+#   - Each test file gets a unique fully-qualified name derived from its
+#     absolute path, so `tests.test_evaluator` collisions across
+#     buyer/tests and seller/tests can't happen.
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--import-mode=importlib"
+testpaths = [
+  "seller/tests",
+  "buyer/tests",
+  "shared-mcp/reverse-image-mcp/tests",
+  "shared-mcp/market-comp-mcp/tests",
+  "shared-mcp/reputation-mcp/tests",
+  "plugins/cars-seller/tests",
+  "plugins/cars-buyer/tests",
+  "plugins/cars-admin/tests",
+  "plugins/chaos-pro/tests",
+  "verticals/cars-pack/mcp/vin-decoder-mcp/tests",
+]
