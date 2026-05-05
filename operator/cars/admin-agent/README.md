@@ -22,7 +22,7 @@ Hermes admin-signal process.
 
 The admin-agent can publish kind 30430/30431 events. It cannot change
 relay policy, delete relay data, issue badges, revoke badges, or call
-buyer/seller MCP servers.
+seeking agent/offering agent MCP servers.
 
 See also:
 
@@ -43,7 +43,7 @@ See also:
    `~/.chaos/.env` mode 0600.
 4. Outbound websocket connectivity to the operator's relay
    (`wss://relay.<domain>`) and 2–3 community relays.
-5. An MCP HTTP+SSE bind that buyers/sellers can reach (default
+5. An MCP HTTP+SSE bind that seeking agents/offering agents can reach (default
    port 7630, behind Caddy with TLS for production).
 6. Matrix or email integration for the escalation queue (see
    `escalation_queue/README.md`).

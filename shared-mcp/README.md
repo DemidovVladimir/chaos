@@ -6,7 +6,7 @@ MCPs live in `verticals/<vertical>-pack/mcp/`.
 
 Each subfolder here is a **standalone Python package** with a
 FastMCP server inside. Any vertical role-plugin (e.g.
-`plugins/cars-buyer`) can list one or more of these as a
+`plugins/cars`) can list one or more of these as a
 `capability_mcps` dependency in its `plugin.yaml`.
 
 ## What lives here

@@ -1,10 +1,10 @@
 # Vertical-specific local capability MCPs
 
 Drop vertical-specific local capability MCP specs here, one per
-file (`<mcp-name>.md`). These are MCPs the seller or buyer agent
+file (`<mcp-name>.md`). These are MCPs the offering agent or seeking agent
 calls **under the hood** while preparing a listing or evaluating
-one — not the seller's peer MCP server (which exposes the
-vertical's tool surface to buyers).
+one — not the offering agent's peer MCP server (which exposes the
+vertical's tool surface to seeking agents).
 
 Examples from `cars-pack`: `reverse-image-mcp` (paid, perceptual-
 hash photo-fraud detection), `vin-decoder-mcp` (free, ISO-3779

@@ -30,7 +30,7 @@ a few minutes.
    for everyone.
 3. **No API costs** — just relay queries.
 4. **Cross-vertical** — same MCP works for real estate, watches, etc.
-5. **Strengthens buyer-cars rubric** — needs market comps to detect
+5. **Strengthens seeking-cars rubric** — needs market comps to detect
    price-bait scams (price too low) and overpriced listings.
 
 ## MCP tool surface
@@ -80,7 +80,7 @@ Returns:
 
 ## Edge cases
 
-- **Sample size < 5**: return `low_sample_warning: true`. Buyer-cars
+- **Sample size < 5**: return `low_sample_warning: true`. Seeking agent-cars
   skill warns the user.
 - **No comps**: return `sample_size: 0`; skill falls back to a
   different rubric.
@@ -110,11 +110,11 @@ market-comp-mcp/
 
 ## Strategic role
 
-The market-comp MCP is the lever for the buyer-cars rubric. It feeds
+The market-comp MCP is the lever for the seeking-cars rubric. It feeds
 the price-too-high / price-too-low detection. Without it, the skill
 has to guess. With it, the skill flags listings that are 15%+ off
 median in either direction.
 
-Combined with `reverse-image-mcp` and `vin-decoder-mcp`, the buyer-
+Combined with `reverse-image-mcp` and `vin-decoder-mcp`, the seeking agent-
 cars skill has three independent fraud-detection signals, all local,
 none requiring third-party data.

@@ -160,7 +160,7 @@ score_aggregate = clamp((raw + 1.0) / 2.0, 0.0, 1.0)
 
 ## Thresholds (advisory, not enforced)
 
-- `score_aggregate < 0.2` → **hard red flag**. Buyer/seller skill
+- `score_aggregate < 0.2` → **hard red flag**. Seeking agent/offering agent skill
   surfaces a "consider not engaging" warning.
 - `0.2 ≤ score < 0.5` → **caution**. Skill suggests asking for
   extra evidence or a small first step.
@@ -193,5 +193,5 @@ delivers; the user decides.
 }
 ```
 
-The `components` block is what the buyer's skill renders as a
+The `components` block is what the seeking agent's skill renders as a
 "why" panel — never just the aggregate number.

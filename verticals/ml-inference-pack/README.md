@@ -42,7 +42,7 @@ caveats, and any benchmark images stay off-relay and flow over MCP.
 | Tool | Args | Returns | Grant policy |
 |---|---|---|---|
 | `view_capabilities` | `{}` | TextContent (model card, quant details, hardware, supported tools/JSON-mode) | always-allow (public) |
-| `request_demo_inference` | `{prompt, max_tokens, modality}` | TextContent or ImageContent (for image models); capped sample | always-allow within demo budget; rate-limited per buyer pubkey |
+| `request_demo_inference` | `{prompt, max_tokens, modality}` | TextContent or ImageContent (for image models); capped sample | always-allow within demo budget; rate-limited per caller pubkey |
 | `request_pricing_quote` | `{monthly_mtok_in, monthly_mtok_out, commitment_months}` | TextContent (volume-tiered quote, valid_until) | always-allow |
 | `request_sla_terms` | `{}` | EmbeddedResource (signed SLA document) | always-allow |
 | `submit_inference_job` | `{messages, params, license_token?}` | TextContent (completion) or job_id for streaming | user-confirm for first-time consumer; license-restricted models require valid `license_token` |

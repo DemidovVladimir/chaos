@@ -2,7 +2,7 @@
 shared.py — minimal helpers for the weekend MVP.
 
 Centralizes keypair I/O, NIP-99 event construction, and relay client
-configuration so seller.py and buyer.py stay short.
+configuration so agent_offering.py and agent_seeking.py stay short.
 """
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class Identity:
 
     @classmethod
     def load_or_create(cls, name: str) -> "Identity":
-        """Load identity for `name` (e.g. 'seller', 'buyer') or generate one."""
+        """Load identity for `name` (e.g. 'offering', 'seeking') or generate one."""
         from pynostr.key import PrivateKey                         # noqa: WPS433
 
         path = KEYS_DIR / f"{name}.key"
@@ -75,9 +75,9 @@ def build_nip99_listing(listing: dict, *, pubkey_hex: str) -> dict:
     """Build a kind-30402 NIP-99 event from a TOML listing dict.
 
     If the TOML carries `mcp_url`, an `["mcp", url]` tag is added so
-    buyers know where to open an MCP HTTP+SSE session for photos and
+    seeking agents know where to open an MCP HTTP+SSE session for photos and
     inspection reports. If `pack` is present, a `["pack", name]` tag
-    is added so buyers know which vertical-pack contract to expect.
+    is added so seeking agents know which vertical-pack contract to expect.
     """
     item_id = listing.get("item_id") or str(uuid.uuid4())
     tags = [
@@ -123,7 +123,7 @@ def render_listing(event) -> None:
     print(f"\nMatch: {title}")
     print(f"  price:    {price_s}")
     print(f"  location: {location}")
-    print(f"  seller:   {event.pubkey[:16]}…")
+    print(f"  offering:   {event.pubkey[:16]}…")
     print(f"  summary:  {summary}")
     if pack:
         print(f"  pack:     {pack}")

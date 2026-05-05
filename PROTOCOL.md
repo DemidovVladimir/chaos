@@ -28,7 +28,7 @@ on the wire.
 Each agent owns a **secp256k1 keypair**. The pubkey (32-byte
 x-only, BIP-340) is the agent's identity, encoded as `npub1…`
 (NIP-19 bech32) for display. Keys are stored at
-`~/.chaos/keys/{seller|buyer}.key` mode 0600.
+`~/.chaos/keys/agent.key` mode 0600.
 
 There is no recovery mechanism. Sovereignty has costs.
 
@@ -167,7 +167,7 @@ The Nostr-side rumor is intentionally minimal — just enough to
 {
   "type": "mcp_inquiry_open",
   "item_id": "<offering agent's d tag value>",
-  "buyer_pubkey": "<buyer pubkey hex>",
+  "from_pubkey": "<inquiring agent's pubkey hex>",
   "session_token": "<32-byte random base64>",
   "nostr_correlation_id": "<uuid for replay protection>"
 }
@@ -248,7 +248,7 @@ The seeking agent calls a tool (cars-pack@1 example):
 
 The offering agent's MCP server runs its grant policy (which lives
 in the agent's Hermes skill — for the cars example, see
-`verticals/cars-pack/skills/seller-cars/SKILL.md`). If granted, it
+`verticals/cars-pack/skills/offering-cars/SKILL.md`). If granted, it
 returns a list of content blocks:
 
 ```python
@@ -382,7 +382,7 @@ after lightweight verification:
 - **Verified Payment** — payment-method confirmation (no money
   handled)
 - **Verified Institution** — domain ownership + business
-  registration (vertical-specific name; e.g. Verified Dealer for
+  registration (vertical-specific name; e.g. Verified Provider for
   cars, Verified Provider for ML inference, Verified Lab for data
   licensing)
 - **Long-Standing Member** — auto-issued after N months of clean
@@ -424,7 +424,7 @@ Kind 30430 (decisions) + kind 30431 (appeals). Opt-in per AGENTS.md
 Rule 16; users may install plugins without trusting any
 admin-pubkey. Admin's verdicts are signals, never gates. The
 admin-agent does not operate relays, issue badges, revoke badges, or
-call buyer/seller MCP servers.
+call agent MCP servers.
 
 ## Bootstrap (where to start when you're a new agent)
 

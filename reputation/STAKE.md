@@ -12,22 +12,22 @@ chain choice.
 The four reputation layers we ship in MVP (badges, attestations,
 mute lists, WoT) plus the fifth admin-decisions layer cover most
 of the trust gap. Where they fall short is the cold-start case:
-a brand-new seller with a freshly-generated keypair, no badge,
+a brand-new offering agent with a freshly-generated keypair, no badge,
 no attestations, no WoT proximity. There is currently nothing
 they can do to credibly signal "I have skin in the game."
 
-Opt-in staking fills exactly that gap. A seller voluntarily locks
+Opt-in staking fills exactly that gap. A offering agent voluntarily locks
 some amount of value to a public stake account. Their listings
-carry a tag pointing at the stake commitment. Buyers' reputation-
+carry a tag pointing at the stake commitment. Seeking agents' reputation-
 mcp picks up the stake as a positive signal weighted by amount and
-lock period. If a 2-of-3 multi-sig (operator + buyer + community
-arbitrator) decides the seller defrauded a counterparty, the
+lock period. If a 2-of-3 multi-sig (operator + seeking agent + community
+arbitrator) decides the offering agent defrauded a counterparty, the
 stake can be slashed — but the operator alone never can.
 
 ## Why Solana (not Ethereum)
 
 - **Cost.** Stake/unstake transactions need to be cheap so a
-  small private seller can use the system. Solana transaction
+  small private offering agent can use the system. Solana transaction
   fees are ≈ $0.0001; Ethereum L1 swings between $1 and $50.
   Even Ethereum L2s like Base/Arbitrum sit at $0.05–$0.50, an
   order of magnitude over Solana.
@@ -53,18 +53,18 @@ the rollup overhead would be wasted.
 A simple Anchor program with two instructions:
 
 1. `stake_lock(amount, lock_until)` — locks `amount` SPL or SOL
-   to a PDA derived from the seller's Solana pubkey. Emits an
-   on-chain log with the seller's Nostr pubkey (committed via
+   to a PDA derived from the offering agent's Solana pubkey. Emits an
+   on-chain log with the offering agent's Nostr pubkey (committed via
    the kind-30420 binding event).
 2. `stake_release_or_slash(stake_account)` — multi-sig 2-of-3
-   over `(operator-admin, buyer, community-arbitrator)`. On
+   over `(operator-admin, seeking agent, community-arbitrator)`. On
    success either:
-   - releases the stake to the seller (clean exit), OR
+   - releases the stake to the offering agent (clean exit), OR
    - slashes per the 70/20/10 split below.
 
 Slashing split:
 
-- **70%** to the wronged buyer (pastel — direct restitution).
+- **70%** to the wronged seeking agent (pastel — direct restitution).
 - **20%** to a vertical-pack dispute pool (funds future
   arbitration costs).
 - **10%** burn (signals the network does not capture the slash;
@@ -72,7 +72,7 @@ Slashing split:
 
 ## Identity binding (kind 30420)
 
-The seller publishes a kind 30420 event whose content includes:
+The offering agent publishes a kind 30420 event whose content includes:
 
 - Their Solana pubkey (ed25519).
 - A signature over `H("nostr-bind:" || nostr_pubkey ||
@@ -98,12 +98,12 @@ any party can verify against a Solana RPC.
 
 ## Opt-in semantics
 
-- A seller without a stake commitment is **not** disadvantaged
+- A offering agent without a stake commitment is **not** disadvantaged
   beyond not getting the stake-layer boost. All Phase-0
   reputation layers continue to work normally.
-- A buyer who doesn't trust onchain stake at all sets
+- A seeking agent who doesn't trust onchain stake at all sets
   `cfg.layer_weights.onchain_stake = 0.0` and the stake layer
-  contributes nothing to their score for any seller.
+  contributes nothing to their score for any offering agent.
 - This is consistent with our top-level rule: the platform never
   gates access; it surfaces signals.
 

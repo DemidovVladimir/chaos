@@ -24,7 +24,7 @@ A pack defines, for one domain:
   return types. Seeking-side skills are written against this
   contract.
 - **Skills** — Hermes skills for each role. At minimum
-  `seller-<vertical>` (offering side) and `buyer-<vertical>`
+  `offering-<pack>` (offering side) and `seeking-<pack>`
   (seeking side); optionally `admin-<vertical>` if the operator
   runs an admin-agent for the vertical.
 - **Default grant policy** — the offering agent's defaults for how
@@ -49,7 +49,7 @@ Those are protocol-level concerns owned by `PROTOCOL.md`.
 ## cars-pack@1 — reference, working
 
 The first pack we shipped. Working end-to-end today: tag schema,
-tool surface, seller / buyer / admin skills, pack-local capability
+tool surface, offering agent / seeking agent / admin skills, pack-local capability
 MCP, example listing.
 
 What it ships:
@@ -58,16 +58,16 @@ What it ships:
   tags: `make`, `model`, `year`, `body_type`, `fuel_type`,
   `transmission`, `mileage_band`, `price`, `location`. Plus the
   protocol-level required tags (`d`, `mcp`, `pack`, `t`).
-- **MCP tool surface** — every cars seller must expose
+- **MCP tool surface** — every cars offering agent must expose
   `view_listing`, `request_photos`, `request_inspection_report`,
   `request_vin`, `submit_offer`, `cancel_inquiry`. Returns text
   blocks, `ImageContent` blocks (photos), and `EmbeddedResource`
   blocks (inspection PDFs).
-- **Seller skill** —
-  `verticals/cars-pack/skills/seller-cars/SKILL.md`. Implements the
+- **Offering-side skill** —
+  `verticals/cars-pack/skills/offering-cars/SKILL.md`. Implements the
   tools and applies the grant policy.
-- **Buyer skill** —
-  `verticals/cars-pack/skills/buyer-cars/SKILL.md`. Knows the tool
+- **Seeking-side skill** —
+  `verticals/cars-pack/skills/seeking-cars/SKILL.md`. Knows the tool
   surface, runs the evaluation rubric (cross-domain capability
   MCPs plus VIN decode), classifies listings as `surface` /
   `watchlist` / `suppress`.
@@ -80,9 +80,9 @@ What it ships:
   WMI-registry-based ISO-3779 VIN structural decode. Cars-only.
 - **Example listing** —
   `verticals/cars-pack/example_listing.json`.
-- **Plugin install bundles** — `plugins/cars-seller/`,
-  `plugins/cars-buyer/`, `plugins/cars-admin/`. Operator deploys
-  the admin plugin; end users install seller and / or buyer.
+- **Plugin install bundles** — `plugins/cars/`,
+  `plugins/cars/`, `plugins/cars-admin/`. Operator deploys
+  the admin plugin; end users install offering agent and / or seeking agent.
 - **Operator infra-as-code** — `operator/cars/` (Mode A strfry
   relay deployment, badge workflow, monitoring, backup, and optional
   admin-agent deployment runbook).
@@ -212,12 +212,12 @@ to copy from is `verticals/cars-pack/`; the skeleton is at
    tools every offering agent in this vertical must expose. For
    each tool: input schema, description, return content-block
    types, grant-policy notes.
-4. **Write the seller skill.** Write
-   `verticals/<vertical>-pack/skills/seller-<vertical>/SKILL.md`.
+4. **Write the offering agent skill.** Write
+   `verticals/<vertical>-pack/skills/offering-<pack>/SKILL.md`.
    Implements the tool surface, applies the grant policy, handles
    negotiation rounds.
-5. **Write the buyer skill.** Write
-   `verticals/<vertical>-pack/skills/buyer-<vertical>/SKILL.md`.
+5. **Write the seeking agent skill.** Write
+   `verticals/<vertical>-pack/skills/seeking-<pack>/SKILL.md`.
    Knows which tools to call in which order, runs the evaluation
    rubric, classifies listings.
 6. **Identify pack-local capability MCPs.** Most capability MCPs
@@ -227,16 +227,16 @@ to copy from is `verticals/cars-pack/`; the skeleton is at
    ship today).
 7. **Write the default grant policy.** Document per-ask defaults
    and which asks require explicit user approval. Include this in
-   the seller skill.
+   the offering agent skill.
 8. **Build the plugin pair.** Create
-   `plugins/<vertical>-seller/` and `plugins/<vertical>-buyer/`
+   `plugins/<pack>/` and `plugins/<pack>/`
    with `plugin.yaml` declaring the toolset. CI lint enforces
-   role isolation per AGENTS.md Rule 11 (no buyer-side capability
-   MCPs in seller plugins; no `mcp_serve` in buyer plugins; no
-   `mcp_connect` in seller plugins).
+   role isolation per AGENTS.md Rule 11 (no seeking-side capability
+   MCPs in offering-side plugins; no `mcp_serve` in seeking-side plugins; no
+   `mcp_connect` in offering-side plugins).
 9. **Optional: build the admin plugin.** If the vertical needs an
    operator-deployed admin-agent, create
-   `plugins/<vertical>-admin/`. The admin skill must follow
+   `plugins/<pack>-admin/`. The admin skill must follow
    AGENTS.md Rules 15–16 — anti-injection hardening, no
    destructive unilateral action, public auditability.
 10. **Optional: operator infra-as-code.** If you're operating a
@@ -271,8 +271,8 @@ multiple pack versions.
 ## Federation
 
 A user may install **multiple packs side-by-side**. One Hermes
-instance with `cars-buyer` + `data-licensing-buyer` +
-`ml-inference-buyer` plugins runs all three simultaneously, each
+instance with `cars` + `data-licensing` +
+`ml-inference` plugins runs all three simultaneously, each
 evaluating its own subscription stream and surfacing matches via
 the same gateway (Telegram, Discord, CLI, …). The plugin role
 isolation rule (Rule 11) makes this safe: each plugin's toolset is

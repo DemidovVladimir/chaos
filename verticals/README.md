@@ -12,20 +12,20 @@ A pack is, in concrete terms, five things:
    and which categories of data must NEVER appear on the public
    listing (PII, exact addresses, anything that should travel only
    over an authenticated MCP session).
-2. An **MCP tool surface contract** — the named tools every seller
+2. An **MCP tool surface contract** — the named tools every offering agent
    in this vertical must expose on their FastMCP HTTP+SSE server,
-   with their argument schemas and response semantics. Buyers'
-   agents discover these via `tools/list` against the seller's
+   with their argument schemas and response semantics. Seeking agents'
+   agents discover these via `tools/list` against the offering agent's
    `["mcp", "<url>"]` tag and call them via `tools/call`. Photos and
    documents come back as `ImageContent` and `EmbeddedResource`
    blocks.
-3. A **seller/offering skill** — a Hermes skill (`skills/<vertical>-seller/SKILL.md`)
+3. A **offering agent/offering skill** — a Hermes skill (`skills/<vertical>-offering/SKILL.md`)
    that knows how to publish a well-formed listing, run the MCP
    server, and apply the per-tool grant policy.
-4. A **buyer/seeking skill** — a Hermes skill
-   (`skills/<vertical>-buyer/SKILL.md`) that knows how to translate
+4. A **seeking agent/seeking skill** — a Hermes skill
+   (`skills/<vertical>-seeking/SKILL.md`) that knows how to translate
    user wants into REQ filters, evaluate listings against a rubric
-   of red and green flags, and call the seller's tools in the right
+   of red and green flags, and call the offering agent's tools in the right
    order.
 5. **Optional vertical-specific local capability MCPs** — small
    utility MCPs an offering or seeking agent calls under the hood
@@ -66,10 +66,10 @@ Five files, regardless of vertical:
 - `tag_schema.md` — required / recommended / optional NIP-99 tags;
   what is NEVER on the public listing; the MCP tool surface; rules
   of thumb.
-- `example_listing.json` — a complete NIP-99 event a seller could
+- `example_listing.json` — a complete NIP-99 event a offering agent could
   publish today, with every required tag filled in.
-- `skills/<vertical>-seller/SKILL.md` and
-  `skills/<vertical>-buyer/SKILL.md` — the two Hermes skills.
+- `skills/<vertical>-offering/SKILL.md` and
+  `skills/<vertical>-seeking/SKILL.md` — the two Hermes skills.
 - `mcp/` (optional) — vertical-specific local capability MCPs.
 
 ## The wire stays universal
@@ -77,7 +77,7 @@ Five files, regardless of vertical:
 The protocol (`PROTOCOL.md`) does not change between verticals.
 Discovery is NIP-99 (`kind: 30402`) plus NIP-13 PoW; identity is
 secp256k1; trust signals are NIP-58 badges, NIP-51 mute lists, and
-seller pubkey reputation; DMs are NIP-17. The peer transport is MCP
+offering agent pubkey reputation; DMs are NIP-17. The peer transport is MCP
 HTTP+SSE. Hermes is the runtime. Only the *contents* of the pack
 change between verticals.
 

@@ -21,23 +21,23 @@ their own machine**. Everything else is defended.
 
 ## Threat actors and what they can do
 
-### TA1 — Malicious seller
+### TA1 — Malicious offering agent
 
 Posts a listing with embedded prompt injection in the description.
-Goal: hijack the buyer agent's reasoning to leak data, send malicious
-DMs to the buyer, or mislead the user.
+Goal: hijack the seeking agent's reasoning to leak data, send malicious
+DMs to the seeking agent, or mislead the user.
 
 **Defense**: input sanitizer strips invisible Unicode and reserved
 tags; wraps in `<untrusted>`; system prompts forbid instruction-
-following inside the wrap. Buyer agent's toolset is narrow (no
+following inside the wrap. Seeking agent agent's toolset is narrow (no
 terminal, no execute_code, no arbitrary web). Worst case the agent
 can post a misleading reply DM, but it can't exfiltrate or take
 unprompted actions.
 
-### TA2 — Malicious buyer
+### TA2 — Malicious seeking agent
 
 Sends a NIP-17 DM with prompt injection. Same defense pattern.
-Additionally, the seller agent's per-ask grant policy requires
+Additionally, the offering agent's per-ask grant policy requires
 explicit user approval for sensitive asks; an injection cannot
 auto-bypass that gate.
 
@@ -116,8 +116,8 @@ relays in the federation are independent.
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ UNTRUSTED INPUT                                              │
-│  • Listing description from any seller                       │
-│  • DM message from any buyer                                 │
+│  • Listing description from any offering agent                       │
+│  • DM message from any seeking agent                                 │
 │  • Attestation content from any party                        │
 │  • Any text crossing an agent boundary                       │
 └──────────────────────────┬──────────────────────────────────┘
@@ -160,8 +160,8 @@ relays in the federation are independent.
             └──────────────┬──────────────┘
                            │
             ┌──────────────▼──────────────┐
-            │ Layer 5 — Per-ask grant      │  seller's per-ask policy
-            │   policy                     │  in seller-cars/SKILL.md
+            │ Layer 5 — Per-ask grant      │  offering agent's per-ask policy
+            │   policy                     │  in offering-cars/SKILL.md
             └──────────────┬──────────────┘
                            │
             ┌──────────────▼──────────────┐
@@ -193,8 +193,7 @@ every applicable one.
 
 The admin-agent (operator-deployed, `plugins/cars-admin/`) is the
 **highest-value prompt-injection target in the system** because it
-ingests untrusted text from all dispute parties (buyer complaints,
-seller complaints, attestation content) and has authority to publish
+ingests untrusted text from all dispute parties (complaints from any party, attestation content) and has authority to publish
 flagging decisions on the relay. A successful injection that
 flipped a decision would burn the trust signal for everyone who
 opted into that admin-pubkey.
@@ -234,21 +233,21 @@ Per Rule 11 in `AGENTS.md`, every plugin under
 `plugins/<vertical>-<role>/plugin.yaml` declares exactly the
 toolset its role needs:
 
-- **Seller plugins** never include buyer-side capability MCPs
+- **Offering-side plugins** never include seeking-side capability MCPs
   (`vin-decoder-mcp`, `market-comp-mcp`, `reverse-image-mcp`,
   `reputation-mcp`'s WoT-traversal in submit-mode) and never
   include `mcp_connect`.
-- **Buyer plugins** never include `mcp_serve`.
+- **Seeking-side plugins** never include `mcp_serve`.
 - **Admin plugins** never include either; only their own publish
   surface.
 - **Multi-role users** install multiple plugins. One plugin = one
   role. CI lint rejects violations.
 
-The cross-domain pro tier (`plugins/chaos-pro/`) is buyer-
-side only; it cannot be installed alongside a seller-only role.
-This isolates blast radius: a compromised buyer plugin cannot
-publish on behalf of the user as a seller; a compromised seller
-plugin cannot reach out to other sellers as a buyer.
+The cross-domain pro tier (`plugins/chaos-pro/`) is seeking-
+side only; it cannot be installed alongside a offering-side role.
+This isolates blast radius: a compromised seeking-side plugin cannot
+publish on behalf of the user as an offering agent; a compromised offering agent
+plugin cannot reach out to other publishers as a seeking agent.
 
 ## Non-negotiable configuration for production
 
@@ -378,15 +377,15 @@ Tick every box before any user-facing system is exposed.
 - [ ] Reverse proxy: TLS termination, per-IP rate limit, request-
       size cap
 
-### MCP server (seller-side)
+### MCP server (offering-side)
 
-- [ ] Seller's FastMCP HTTP+SSE server only accepts sessions whose
+- [ ] Offering agent's FastMCP HTTP+SSE server only accepts sessions whose
       `session_token` matches a NIP-17 `mcp_inquiry_open` rumor
       seen in the last N minutes (default N=15) from the same
-      buyer pubkey — no anonymous / unsolicited MCP sessions
-- [ ] Session token is bound to the buyer pubkey at issue time;
+      seeker pubkey — no anonymous / unsolicited MCP sessions
+- [ ] Session token is bound to the seeking agent pubkey at issue time;
       mismatched-pubkey reuse is rejected
-- [ ] Per-session and per-buyer-pubkey rate limits on
+- [ ] Per-session and per-seeker-pubkey rate limits on
       `mcp_call_tool` (default: 30 calls per 5-minute session,
       configurable)
 - [ ] Tool surface is exactly the cars-pack@1 contract
@@ -395,9 +394,9 @@ Tick every box before any user-facing system is exposed.
       `cancel_inquiry`); any extra tool exposed needs a written
       rationale and a pack version bump
 - [ ] No second peer transport (no parallel gRPC, custom WebSocket
-      layer, or other peer wire) accepting buyer↔seller traffic
+      layer, or other peer wire) accepting agent↔agent traffic
       alongside MCP
-- [ ] TLS terminated at the seller's reverse proxy; MCP server
+- [ ] TLS terminated at the offering agent's reverse proxy; MCP server
       bound to localhost behind it
 - [ ] No `Resource(uri="...")` returned by any cars-pack@1 tool
       whose URI resolves anywhere except the same MCP server's
@@ -407,15 +406,15 @@ Tick every box before any user-facing system is exposed.
 
 - [ ] CI lint pass on every `plugins/<vertical>-<role>/plugin.yaml`
       — toolset matches role
-- [ ] No seller plugin imports `mcp_connect` or buyer-side
+- [ ] No offering-side plugin imports `mcp_connect` or seeking-side
       capability MCPs (`vin-decoder-mcp`, `market-comp-mcp`,
       `reverse-image-mcp`, `reputation-mcp` submit-mode WoT
       traversal)
-- [ ] No buyer plugin imports `mcp_serve`
+- [ ] No seeking-side plugin imports `mcp_serve`
 - [ ] No admin plugin imports either; admin's tool surface is
       exactly its own publish set
 - [ ] Cross-vertical pro tier (`plugins/chaos-pro/`) ships
-      only buyer-side capabilities
+      only seeking-side capabilities
 
 ### Admin-agent (Rule 15 / Rule 16)
 
@@ -432,7 +431,7 @@ Tick every box before any user-facing system is exposed.
 - [ ] Kind 30431 appeal endpoint live and routed to the
       operator's review queue
 - [ ] Admin-pubkey trust is opt-in per user (default empty trusted-
-      admin set in buyer / seller plugins)
+      admin set in seeking agent / offering-side plugins)
 
 ### Subagent boundaries
 

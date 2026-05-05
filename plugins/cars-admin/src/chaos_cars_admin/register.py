@@ -15,7 +15,7 @@ def register(ctx: Any) -> None:
 
     Constraints (AGENTS.md rule 1, 5, and the admin-scope policy):
       * publishes only to the configured relay set
-      * does NOT call seller/buyer MCP servers
+      * does NOT call offering agent/seeking agent MCP servers
       * does NOT operate strfry or issue/revoke NIP-58 badges
       * does NOT decrypt or store DM content
     """

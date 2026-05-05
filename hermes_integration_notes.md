@@ -14,8 +14,8 @@ for `plugin.yaml` + `__init__.py` with a `register(ctx)` function in:
 3. `./.hermes/plugins/<name>/` (project, gated by `HERMES_ENABLE_PROJECT_PLUGINS`)
 4. Pip packages exposing entry-point group `hermes_agent.plugins`
 
-The chaos plugin scaffolds (`plugins/cars-seller`,
-`plugins/cars-buyer`) currently call APIs that **do not exist** on
+The chaos plugin scaffolds (`plugins/cars`,
+`plugins/cars`) currently call APIs that **do not exist** on
 Hermes' `PluginContext`:
 
 - `ctx.resolve_dependency(...)` — does not exist
@@ -45,7 +45,7 @@ on register.
    documentation-only.
 
 3. **Opt-in by default**: a plugin only loads if its `key` (path-derived,
-   e.g. `cars-seller`) is in `plugins.enabled` in `~/.hermes/config.yaml`,
+   e.g. `cars`) is in `plugins.enabled` in `~/.hermes/config.yaml`,
    unless it's bundled with `kind: backend` or `kind: platform`
    (`plugins.py:717`). Our cars plugins must be `kind: standalone`
    and the user has to enable them explicitly.
@@ -88,14 +88,14 @@ on register.
      tools over **stdio**. It is not a per-plugin facility.
      A plugin that wants to host its own FastMCP server has to do it
      itself (start a thread / process at `register()` time, or
-     register a `register_cli_command` like `hermes chaos-seller
+     register a `register_cli_command` like `hermes chaos-agent
      serve`).
    - **Hermes-as-MCP-client**: `tools/mcp_tool.py:2795`
      `register_mcp_servers(servers: Dict[str, dict])` registers
      remote MCP servers from a dict (key = server name, value =
      `{command, args, env, enabled}`). Each remote tool becomes a
-     namespaced Hermes tool. This is the path for the buyer
-     plugin to dial sellers — but typical use is
+     namespaced Hermes tool. This is the path for any seeking-side agent
+     plugin to dial publishers — but typical use is
      project-local (`./.hermes/mcp.json`-style), not per-call.
 
 7. **Toolset isolation enforcement (Rule 11)**: aspirational for now.
@@ -106,7 +106,7 @@ on register.
 8. **Identity / keys**: Hermes does not custody any keys. Hermes' own
    secrets land in `~/.hermes/.env` and `~/.hermes/auth.json`
    (`hermes_constants.get_hermes_home()`). chaos keeps its
-   keys at `~/.chaos/keys/seller.key` (mode 0600 per AGENTS.md
+   keys at `~/.chaos/keys/agent.key` (mode 0600 per AGENTS.md
    Rule 3) — Hermes does not need to know about them.
 
 9. **Logging**: `logging.getLogger(__name__)` is fine; Hermes
@@ -123,9 +123,9 @@ on register.
 Why not "ambitious" (MVP logic moved into the plugin):
 - Hermes provides no `register_mcp_server`. Spinning up FastMCP
   inside `register()` would block plugin discovery.
-- The seller engine (`seller/src/chaos_seller/`) is currently
+- The offering agent engine (`agent/src/chaos_agent/`) is currently
   also stub-and-`NotImplementedError`. The working logic lives in
-  `mvp/seller.py`, which is a script not a library. Rewriting it
+  `mvp/agent_offering.py`, which is a script not a library. Rewriting it
   cleanly into a plugin is a multi-day job — out of scope here.
 
 Why not "tightest" (NoOp register):
@@ -138,15 +138,15 @@ Why not "tightest" (NoOp register):
 **Chosen — "modest"**: Make `register(ctx)` actually run to
 completion. It:
 
-1. Registers a CLI subcommand (`hermes cars-seller …`) that delegates
-   to the existing `mvp/seller.py` script via `subprocess` for now.
+1. Registers a CLI subcommand (`hermes cars …`) that delegates
+   to the existing `mvp/agent_offering.py` script via `subprocess` for now.
    This lets users actually use the plugin to run the working MVP
-   without touching seller engine internals.
-2. Registers the seller-cars / buyer-cars `SKILL.md` from
+   without touching offering agent engine internals.
+2. Registers the offering-cars / seeking-cars `SKILL.md` from
    `verticals/cars-pack/skills/<role>-cars/SKILL.md` so the agent
-   has access to the role description as a skill (`cars-seller:main`).
-3. Registers a slash command (`/cars-seller status`,
-   `/cars-buyer watch`) so plugin presence is visible in-session.
+   has access to the role description as a skill (`cars:main`).
+3. Registers a slash command (`/cars status`,
+   `/cars watch`) so plugin presence is visible in-session.
 4. Logs which steps it took.
 
 This produces a verifiably-loadable plugin against Hermes (Hermes
@@ -156,25 +156,25 @@ without rewriting the engine.
 
 ## Phase 3 — files we'll edit
 
-- `plugins/cars-seller/plugin.yaml` — drop nonexistent keys, add
+- `plugins/cars/plugin.yaml` — drop nonexistent keys, add
   `kind: standalone`, keep `requires_env` / `description` / `version`.
-- `plugins/cars-seller/pyproject.toml` — fix `package-data` glob,
+- `plugins/cars/pyproject.toml` — fix `package-data` glob,
   drop entry-point group (Hermes finds us via dir scan, not pip).
-- `plugins/cars-seller/src/chaos_cars_seller/__init__.py` —
+- `plugins/cars/src/chaos_cars_seller/__init__.py` —
   real `register(ctx)` calling Hermes APIs.
-- `plugins/cars-seller/src/chaos_cars_seller/register.py` —
+- `plugins/cars/src/chaos_cars_seller/register.py` —
   delete or replace; the registration lives in `__init__.py`.
-- Same for `plugins/cars-buyer/`.
+- Same for `plugins/cars/`.
 
-We do NOT touch `seller/`, `buyer/`, `mvp/`, or `verticals/` per
+We do NOT touch `agent/`, `agent/`, `mvp/`, or `verticals/` per
 constraints.
 
 ## Future work (not in scope here)
 
-- Implement the seller / buyer engines so the plugin can drive them
-  in-process instead of `subprocess`-shelling out to `mvp/seller.py`.
+- Implement the offering agent / seeking agent engines so the plugin can drive them
+  in-process instead of `subprocess`-shelling out to `mvp/agent_offering.py`.
 - Build a `lint_plugin.py` in `plugins/_template/` that enforces
   AGENTS.md Rule 11 against the manifest's `forbidden_toolsets`.
 - Add a `register_mcp_server` method to a chaos `PluginContext`
-  wrapper, so the seller plugin can spawn its FastMCP at register time.
-- Once seller/buyer engines exist, drop the `subprocess` shim.
+  wrapper, so the offering-side plugin can spawn its FastMCP at register time.
+- Once agent engines exist, drop the `subprocess` shim.

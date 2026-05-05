@@ -1,12 +1,12 @@
 # `chaos-pro`
 
 **Cross-vertical paid upgrade.** One subscription, applies to all
-installed buyer plugins across all verticals.
+installed seeking agent plugins across all verticals.
 
 ## What it does
 
 Flips three capability MCPs from **fast** tier into **thorough** /
-**pro** tier mode, for every buyer plugin you have installed:
+**pro** tier mode, for every seeking agent plugin you have installed:
 
 - `reverse-image-mcp` — adds EXIF cross-checks, federated scam-
   hash registry queries, and optional CLIP semantic match.
@@ -16,10 +16,10 @@ Flips three capability MCPs from **fast** tier into **thorough** /
   broader attestation scan, optional on-chain stake reads (Phase 1
   hook).
 
-If you install `cars-buyer` today and `watches-buyer` next month,
+If you install `cars` today and `watches-seeking agent` next month,
 **both** automatically use the upgraded MCPs the moment
 `chaos-pro` is installed. There is no per-vertical pro
-variant (no `cars-buyer-pro`).
+variant (no `cars-pro`).
 
 ## Why one cross-vertical pro instead of per-vertical pros
 
@@ -44,6 +44,6 @@ engine level via subscription tokens (AGENTS.md rule 8).
 hermes plugin install chaos-pro
 ```
 
-The pro plugin will enumerate every installed `chaos-*-buyer`
+The pro plugin will enumerate every installed `chaos-*-seeking agent`
 plugin and flip its `pro_mode` config to `true`. Uninstall returns
 all of them to the free fast tier.

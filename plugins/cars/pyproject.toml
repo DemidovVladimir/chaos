@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_cars"]
+
+[project]
+name = "chaos-cars"
+version = "1.0.0"
+description = "Cars-pack@1 plugin for chaos. Single role-flexible install — the agent publishes its own listings AND watches / inquires about others'."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "chaos contributors" }]
+license = { text = "MIT" }
+dependencies = [
+  "chaos-agent>=0.1",                # universal role-flexible engine
+  "pyyaml>=6.0,<7",
+  # Capability MCPs (reverse-image, market-comp, reputation, vin-decoder)
+  # are not pip deps — they're MCP servers the user installs separately
+  # (or that ship via chaos-pro for the upgraded tiers).
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0,<9", "ruff>=0.4,<1"]
+
+[project.entry-points."hermes.plugin"]
+chaos_cars = "chaos_cars:register"

@@ -91,7 +91,7 @@ def test_scoring_revoked_badge_red_flag() -> None:
     """A revoked badge from a trusted issuer is a hard red flag."""
     revoked_badge = BadgeRecord(
         issuer_pubkey=ISSUER1,
-        badge_id="verified-private-seller",
+        badge_id="verified-private-offering agent",
         award_event_id="0" * 64,
         revoked=True,
         revoked_at=NOW_TS - 30 * 86400,
@@ -382,13 +382,13 @@ def test_submit_counter_attestation_rejects_self_sign(fake_relay_publish) -> Non
     from reputation_mcp.server import submit_counter_attestation
 
     fn = _unwrap(submit_counter_attestation)
-    # PrivateKey fake returns ALICE; if we pass ALICE as seller_pubkey the
+    # PrivateKey fake returns ALICE; if we pass ALICE as to_pubkey the
     # server should refuse (counter-att must be from the OTHER party).
     with pytest.raises(ValueError, match="OTHER party"):
         fn(
             sale_id=VALID_UUID,
-            seller_attestation_event_id=VALID_EVENT_ID,
-            seller_pubkey=ALICE,
+            parent_attestation_event_id=VALID_EVENT_ID,
+            to_pubkey=ALICE,
             status="confirmed",
             signing_key_hex=TEST_SK,
         )

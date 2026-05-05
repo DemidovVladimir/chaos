@@ -3,8 +3,8 @@
 Copy this folder to `plugins/<vertical>-<role>/` and fill in the
 placeholders. Every role-vertical plugin must:
 
-1. Declare the **universal engine** (`chaos-seller`,
-   `chaos-buyer`, or `chaos-admin-engine`) as a
+1. Declare the **universal engine** (`chaos-agent`,
+   `chaos-agent`, or `chaos-admin-engine`) as a
    dependency.
 2. Include the **skill** for (role × vertical) from the pack at
    `verticals/<vertical>-pack/skills/<role>-<vertical>/SKILL.md`.

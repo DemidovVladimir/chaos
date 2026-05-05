@@ -1,9 +1,9 @@
-# Multi-listing seller catalog
+# Multi-listing offering agent catalog
 
 Drop one `.toml` per car in this directory and run:
 
 ```bash
-python seller.py serve-multi listings/
+python agent_offering.py serve-multi listings/
 ```
 
 Each `.toml` is published as its own NIP-99 event. The same MCP
@@ -19,7 +19,7 @@ Use `mvp/sample_car.toml` as a template. Required fields:
 - `title`, `summary`, `price_amount`, `price_currency`, `location`
 - `make`, `model`, `year`, `body_type`, `fuel_type`,
   `transmission`, `mileage_band` (cars-pack@1 facets)
-- `mcp_url` — should match wherever the seller's MCP server binds
+- `mcp_url` — should match wherever the offering agent's MCP server binds
   (e.g. `http://127.0.0.1:8765/sse`). All listings in a single
   `serve-multi` invocation share one URL.
 - `pack` — pack name + version, e.g. `cars-pack@1`
@@ -42,6 +42,6 @@ half-populated catalog still demos cleanly.
 
 ## Single-listing path
 
-`python seller.py serve sample_car.toml` is unchanged. It bypasses
+`python agent_offering.py serve sample_car.toml` is unchanged. It bypasses
 the catalog entirely; every call returns the global fallback
 fixtures. Use it for the simplest one-car demo.

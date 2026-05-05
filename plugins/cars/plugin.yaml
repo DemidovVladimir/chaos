@@ -1,0 +1,47 @@
+name: cars
+version: 1.0.0
+description: "Cars-pack@1 plugin for the chaos protocol. Single role-flexible install: the agent both publishes its own car listings (offering side) AND watches for / inquires about others' listings (seeking side). NIP-99 + NIP-13 PoW + NIP-17 sealed gift-wraps + FastMCP HTTP+SSE server and client. Bundles cars-pack@1 with the chaos-agent engine."
+author: chaos
+kind: standalone
+
+# Hermes reads these; the user supplies them via ~/.chaos/.env (mode 0600).
+requires_env:
+  - CHAOS_RELAYS
+  - CHAOS_MCP_URL  # only required if this agent is publishing offerings
+
+# Slash commands and CLI subcommands this plugin registers. Hermes
+# itself doesn't enforce this list — it's documentation. The actual
+# wiring lives in __init__.py::register.
+provides_tools: []
+provides_hooks: []
+
+# --- documentation-only fields (Hermes ignores these) -----------------
+# Kept here so chaos lint / docs can still see the contract.
+chaos:
+  pack_contract: cars-pack@1
+  pack_schema: ../../verticals/cars-pack/tag_schema.md
+  # Skills bundled by this plugin. Loaded lazily based on what the agent
+  # is currently doing — the offering-side skill drives the publish +
+  # serve loop, the seeking-side skill drives the subscribe + inquiry
+  # loop. Same agent, both available.
+  skill_paths:
+    - verticals/cars-pack/skills/offering-cars/SKILL.md
+    - verticals/cars-pack/skills/seeking-cars/SKILL.md
+  # Cross-domain capability MCPs the agent uses when EVALUATING others'
+  # offerings (fact-checking photos, computing market comps, looking up
+  # trust signals). These are read-only and don't leak self-state.
+  capability_mcps:
+    - reverse-image-mcp@1
+    - market-comp-mcp@1
+    - vin-decoder-mcp@1
+    - reputation-mcp@1
+  forbidden_toolsets: [terminal, delegation, file, web]
+  # No "role" field — single plugin, role is situational (the agent
+  # decides per-event whether it's publishing, subscribing, or both).
+  config:
+    # Free-tier defaults; chaos-pro flips pro_mode to true and the
+    # capability MCPs swap to the deeper backends.
+    pro_mode: false
+    reverse_image_tier: fast
+    market_comp_window_days: 60
+    reputation_tier: fast

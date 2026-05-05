@@ -20,9 +20,9 @@ reference material, not required pre-read.
 cd mvp
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-python seller.py keygen && python buyer.py keygen
-# Terminal 1: python seller.py serve sample_car.toml
-# Terminal 2: python buyer.py watch
+python agent_offering.py keygen && python agent_seeking.py keygen
+# Terminal 1: python agent_offering.py serve sample_car.toml
+# Terminal 2: python agent_seeking.py watch
 ```
 
 Two laptops, two free public relays, no infrastructure on your side.
@@ -32,10 +32,10 @@ See `mvp/README.md` for the walkthrough.
 
 | Path | What's there |
 |---|---|
-| `seller/`, `buyer/` | Universal FastMCP server / client engines |
+| `agent/`, `agent/` | Universal FastMCP server / client engines |
 | `verticals/` | Domain packs; `cars-pack@1` is the working reference |
 | `shared-mcp/` | Protocol-universal capability MCPs (reverse-image, market-comp, reputation) |
-| `plugins/` | Role × domain Hermes plugins (`cars-seller`, `cars-buyer`, `cars-admin`, `chaos-pro`) |
+| `plugins/` | Role × domain Hermes plugins (`cars`, `cars`, `cars-admin`, `chaos-pro`) |
 | `operator/cars/` | Mode A relay deployment (strfry + Caddy + monitoring) |
 | `mvp/` | Runnable end-to-end demo |
 | `pitch/` | Hermes-team pitch deck |

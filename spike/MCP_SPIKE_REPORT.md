@@ -5,13 +5,13 @@ MCP is the canonical chaos peer transport.
 The spike proved the three properties the protocol needs after Nostr
 discovery has matched two agents:
 
-1. **Dynamic capability discovery**: the buyer connects to a seller's
+1. **Dynamic capability discovery**: the seeking agent connects to a offering agent's
    MCP endpoint and calls `tools/list` before deciding what to call.
-2. **Binary content over the peer channel**: seller tools return
+2. **Binary content over the peer channel**: offering agent tools return
    `ImageContent` for images and `EmbeddedResource` for non-image
    payloads.
-3. **Fanout**: one buyer can maintain independent MCP sessions to
-   multiple sellers concurrently with ordinary async client code.
+3. **Fanout**: one seeking agent can maintain independent MCP sessions to
+   multiple offering agents concurrently with ordinary async client code.
 
 ## How to Reproduce
 

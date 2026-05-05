@@ -12,14 +12,14 @@ admin-signal inputs and publishes kind-30430 admin decisions.
   MCP tool (NIP-44 encrypted package: conversation log + complaint
   + counter-attestations + manifest). Decrypts in memory only.
 - Subscribes to **kind 30412** unilateral observations and
-  **kind 30411** counter-attestations referencing sellers / buyers
+  **kind 30411** counter-attestations referencing offering agents / seeking agents
   in `cars-pack@1`.
 - Reviews them against the cars-pack admin rubric (see
   `verticals/cars-pack/skills/admin-cars/SKILL.md`) and the
   reputation report (`reputation-mcp`'s `get_reputation` tool).
 - Publishes **kind 30430** admin decisions — admin-key-signed
   verdicts (`clear`/`warning`/`flag`/`escalated`) that downstream
-  buyers can choose to weight via opt-in admin-trust.
+  seeking agents can choose to weight via opt-in admin-trust.
 - Affected parties may publish **kind 30431** appeals; admin
   re-reviews on new evidence.
 - Does not issue or revoke **NIP-58** badges. Badge workflow is an
@@ -27,13 +27,13 @@ admin-signal inputs and publishes kind-30430 admin decisions.
 
 ## Hard constraints
 
-- **Does NOT call seller/buyer MCP servers.** Admin lives only on
+- **Does NOT call offering agent/seeking agent MCP servers.** Admin lives only on
   the relay layer; it never reaches into a peer's MCP surface. If
   an admin process needs more context than the on-relay events
   provide, it asks the parties to publish more events — it does
   not pull from their agents.
 - **Does NOT decrypt third-party DMs.** NIP-17 gift wraps between
-  buyer and seller are opaque to the admin. Admin only decrypts
+  seeking agent and offering agent are opaque to the admin. Admin only decrypts
   admin-signal packages explicitly submitted to `submit_dispute` (NIP-44
   encrypted to admin's pubkey by the submitter), and only in
   memory — plaintext never lands on disk per the 90-day forgetting
@@ -44,7 +44,7 @@ admin-signal inputs and publishes kind-30430 admin decisions.
 - **Does NOT custody anything.** No keys, no funds, no inventory.
   Operator's own key signs admin decisions; nothing else is held.
 
-## Why this is a separate plugin (not a buyer/seller variant)
+## Why this is a separate plugin (not a seeking agent/offering agent variant)
 
 The admin agent runs continuously in a trust root's environment. It
 parses listing references and attestations, but its toolset and policy

@@ -46,16 +46,16 @@ explicitly; don't quietly violate the rule.
    servers we operate as a service. No signed URLs to third-party
    hosts. No Imgur, Dropbox, S3, Blossom, ngrok-as-file-tunnel, or
    any third-party file host. Ever.** If a payload exceeds practical
-   inline size (~10 MB), the seller's MCP server may return a
+   inline size (~10 MB), the offering agent's MCP server may return a
    `Resource(uri="local://...")` whose URI MUST resolve through the
    **same MCP server's `resources/read` endpoint** — never an
    external host.
 3. **Identity is sovereign.** Each agent owns a secp256k1 keypair
    stored locally at mode 0600. The platform never holds, escrows, or
    recovers user keys.
-4. **Trust signals layered, not centralized.** Verified-seller
+4. **Trust signals layered, not centralized.** Verified-organisation
    badges (NIP-58) issued by the operator are *one* trust signal; PoW
-   (NIP-13), paid relays, NIP-51 mute lists, and seller pubkey
+   (NIP-13), paid relays, NIP-51 mute lists, and publisher pubkey
    reputation history are the others. No single trust signal is a
    gatekeeper.
 5. **No data custody.** The relay stores only NIP-99 metadata
@@ -81,15 +81,35 @@ explicitly; don't quietly violate the rule.
 10. **NIP-13 PoW required on listing publishes.** Default ≥ 20 bits.
     DMs (NIP-17 gift wraps) skip PoW because they're encrypted and
     rate-limited per-sender.
-11. **Plugin role isolation.** Each vertical plugin's `plugin.yaml`
-    declares exactly the toolset its role needs. Seller-side plugins
-    never include buyer-side capability MCPs (`vin-decoder-mcp`,
-    `market-comp-mcp`, `reverse-image-mcp`, `reputation-mcp`'s
-    WoT-traversal in submit-mode) and never include `mcp_connect` in
-    their toolset. Buyer-side plugins never include `mcp_serve`.
-    Admin-side plugins never include either, only have their own
-    publish surface. CI lint rejects violations. Multi-role users
-    install multiple plugins; one plugin = one role.
+11. **Plugin tier isolation.** Plugins decompose by *tier*, not by
+    agent role. The agent itself (`chaos-agent`) is symmetric
+    — it can publish, subscribe, serve MCP, and dial MCP all at
+    once. Plugins layer on top, each declaring its own
+    `forbidden_toolsets` and capability MCP set:
+
+    - **End-user pack plugins** (`plugins/cars/`, future
+      `plugins/<pack>/`) — bundle a pack's tag schema + MCP tool
+      surface + skills + grant policy with the `chaos-agent`
+      engine. Single install lets the agent both publish AND
+      subscribe in that pack. Capability MCPs (`reverse-image-mcp`,
+      `market-comp-mcp`, `vin-decoder-mcp`, `reputation-mcp`) are
+      bundled here at the free-tier backends.
+    - **Cross-pack pro plugin** (`plugins/chaos-pro/`) — the only
+      paid plugin shape. Upgrades capability-MCP backends across
+      every installed pack plugin. No per-pack paid plugins exist.
+    - **Admin plugins** (`plugins/cars-admin/`, future
+      `plugins/<pack>-admin/`) — operator-deployed only. NEVER
+      installed by end-user agents. Has its own publish surface for
+      kind-30430 decisions, no `mcp_connect` toolset, no end-user
+      capability MCPs. CI lint rejects an end-user agent that
+      somehow imported an admin plugin.
+
+    The previous role-split — separate offering-side and seeking-side
+    plugins per pack, with non-overlapping toolsets — was commerce-
+    coded and is retired. The same security property (least-privilege
+    per install) is preserved by the tier split: admin tier is
+    operator-only, end-user tier is symmetric, pro is additive on
+    top.
 12. **Reputation is layered and local.** No central rep store.
     Reputation = (a) NIP-58 operator-issued badges, (b) bilateral
     peer attestations as kinds 30410/30411 (and unilateral 30412),
@@ -148,7 +168,7 @@ explicit user override.
 - **Payment processing** of any kind — even token-pegged stablecoins
 - **Custodial photo/file hosting** — see rule 2 above
 - **A second peer transport** — MCP is the canonical wire for
-  buyer↔seller dialogue and binary content. Do not introduce gRPC,
+  agent↔agent dialogue and binary content. Do not introduce gRPC,
   custom WebSocket protocols, or anything else as a parallel peer
   transport without explicit user override.
 - **VIN-history aggregation** — was rejected; see commit history if
@@ -168,9 +188,9 @@ explicit user override.
 - **In-app social features** beyond NIP-51 mute lists and NIP-58
   badges
 - **Per-vertical paid tier — pro is cross-domain via
-  `chaos-pro`.** Don't create `cars-buyer-pro`,
-  `realestate-buyer-pro`, etc. as separate paid plugins. One
-  subscription, applies to every installed buyer plugin.
+  `chaos-pro`.** Don't create `chaos-pro`,
+  `chaos-pro`, etc. as separate paid plugins. One
+  subscription, applies to every installed seeking-side plugin.
 
 ## Code conventions
 
@@ -184,7 +204,7 @@ explicit user override.
 - Secrets from `~/.chaos/.env` (mode 0600), never in
   `config.yaml`
 - Lint: ruff. Type-check: ty (or mypy). Tests: pytest.
-- One module = one responsibility. Don't grow `seller/main.py` past
+- One module = one responsibility. Don't grow `agent/src/chaos_agent/main.py` past
   ~300 lines; split.
 
 ## Repository layout
@@ -195,12 +215,12 @@ Hard rules:
   `PROTOCOL.md`, `SECURITY.md`, `BUSINESS_MODEL.md`, `LICENSE`) live
   at the root
 - Diagrams (`*.svg`, `*.html`) live at the root
-- Top-level component folders: `seller/`, `buyer/` (universal
+- Top-level component folders: `agent/`, `agent/` (universal
   engines); `verticals/` (per-vertical packs — source of truth);
   `shared-mcp/` (cross-domain capability MCPs:
   `reverse-image-mcp`, `market-comp-mcp`, `reputation-mcp`);
   `plugins/` (role × vertical Hermes plugins — install targets:
-  `cars-seller`, `cars-buyer`, `cars-admin`, `chaos-pro`);
+  `cars`, `cars`, `cars-admin`, `chaos-pro`);
   `reputation/` (reputation/admin-signal architecture docs and kind
   registry); `operator/<vertical>/` (per-vertical operator infra-as-
   code); `mvp/`;
@@ -225,8 +245,8 @@ Soft rules (preferred but flexible):
 
 ## Input safety — the only way
 
-Every piece of untrusted text (listing description from a seller,
-inquiry message from a buyer, attestation content) MUST pass through
+Every piece of untrusted text (listing description from a offering agent,
+inquiry message from a seeking agent, attestation content) MUST pass through
 the input sanitizer (`shared/input_safety.py` — copy across
 components rather than centralize, to keep components installable
 independently).
@@ -269,9 +289,9 @@ Before any merge to `main`:
       only in `mvp/` and only with a comment marking the temporary
       shortcut
 - [ ] No new plugin under `plugins/<vertical>-<role>/` violates
-      Rule 11 — toolset matches role (no buyer-side capability MCPs
-      in seller plugins; no `mcp_connect` in seller; no `mcp_serve`
-      in buyer)
+      Rule 11 — toolset matches role (no seeking-side capability MCPs
+      in offering-side plugins; no `mcp_connect` in offering-side install; no `mcp_serve`
+      in seeking agent)
 - [ ] No new attestation kind in `reputation/kinds.md` introduced
       without versioning policy
 - [ ] If touching `verticals/cars-pack/skills/admin-cars/SKILL.md`
@@ -285,7 +305,7 @@ when:
 - A request would relax any architecture rule above
 - A request would expand any agent's toolset beyond the documented
   allowlist
-- A request crosses component boundaries (seller asking buyer-only
+- A request crosses component boundaries (an end-user agent asking for admin-only
   tools, etc.)
 - A request would custody data we promised not to custody
 - A request would relax Rule 14 (money/value non-custody)
@@ -301,13 +321,13 @@ A vertical pack (cars-pack, ml-inference-pack, …) is what makes the
 protocol composable. Each pack defines:
 
 - **Nostr tag schema** — required NIP-99 tags for that category
-- **MCP tool surface** — the named tools every seller in this
+- **MCP tool surface** — the named tools every offering agent in this
   vertical must expose, with schemas and semantics
-- **Buyer skill** — Hermes skill that knows what tools to call and
+- **Seeking-side skill** — Hermes skill that knows what tools to call and
   how to evaluate responses
-- **Seller skill** — Hermes skill that implements the tools and
+- **Offering-side skill** — Hermes skill that implements the tools and
   applies the grant policy
-- **Default grant policy** — per-ask defaults the seller's user can
+- **Default grant policy** — per-ask defaults the offering agent's user can
   override
 
 When adding new tools, schemas, or behaviors, ask first: "is this
@@ -321,7 +341,7 @@ The wire (MCP) is universal. The pack is the contract.
 Pack source of truth (skills, MCP specs, tag schema, default grant
 policy) lives in `verticals/<vertical>-pack/`. Install targets are
 role-vertical Hermes plugins under `plugins/<vertical>-<role>/`
-(e.g. `plugins/cars-seller/`, `plugins/cars-buyer/`,
+(e.g. `plugins/cars/`, `plugins/cars/`,
 `plugins/cars-admin/`). The pack is the contract; the plugin is the
 install bundle.
 
@@ -342,7 +362,7 @@ in a worktree is warranted (rare).
 
 ## What good looks like for a PR
 
-- Touches one component (seller, buyer, a vertical pack under
+- Touches one component (the chaos-agent engine, a pack plugin, a vertical pack under
   `verticals/`, a shared MCP under `shared-mcp/`, a plugin under
   `plugins/`, reputation docs, an operator deployment under
   `operator/<vertical>/`, or mvp)

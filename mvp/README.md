@@ -5,13 +5,13 @@ server module. No infrastructure required.
 
 The MVP exercises the full discovery + peer-transport loop:
 
-1. **Discovery** — seller publishes a NIP-99 event on free public
+1. **Discovery** — offering agent publishes a NIP-99 event on free public
    relays carrying `["mcp", "<url>"]` and `["pack", "cars-pack@1"]`
-   tags. Buyer subscribes with cars-pack tag filters.
-2. **Encrypted handshake** — buyer sees match, sends NIP-04 DM
-   inquiry; seller replies in same encrypted channel. (Production
+   tags. Seeking agent subscribes with cars-pack tag filters.
+2. **Encrypted handshake** — seeking agent sees match, sends NIP-04 DM
+   inquiry; offering agent replies in same encrypted channel. (Production
    uses NIP-17 sealed gift-wrap; NIP-04 is the MVP shortcut.)
-3. **Peer transport** — buyer connects to the seller's FastMCP
+3. **Peer transport** — seeking agent connects to the offering agent's FastMCP
    HTTP+SSE server on the URL from the listing, runs `tools/list`,
    calls `view_listing`, `request_photos`, `request_inspection_report`
    on the cars-pack@1 tool surface. Photos arrive as `ImageContent`
@@ -34,8 +34,8 @@ pip install -r requirements.txt
 Generate keypairs (one per role):
 
 ```bash
-python seller.py keygen   # writes ~/.mvp/seller.key
-python buyer.py keygen    # writes ~/.mvp/buyer.key
+python agent_offering.py keygen   # writes ~/.mvp/agent.key
+python agent_seeking.py keygen    # writes ~/.mvp/agent.key
 ```
 
 Each script prints the corresponding `npub` so the other side knows
@@ -43,12 +43,12 @@ who to DM.
 
 ## Single-machine demo (recommended)
 
-Two terminals on the same machine. Seller's FastMCP server binds to
-`127.0.0.1:8765` so the buyer reaches it locally.
+Two terminals on the same machine. Offering agent's FastMCP server binds to
+`127.0.0.1:8765` so the seeking agent reaches it locally.
 
 ```bash
-# Terminal 1 (seller)
-python seller.py serve sample_car.toml
+# Terminal 1 (offering agent)
+python agent_offering.py serve sample_car.toml
 ```
 
 You should see, in order:
@@ -60,8 +60,8 @@ Listening for inquiries; Ctrl-C to stop.
 ```
 
 ```bash
-# Terminal 2 (buyer)
-python buyer.py watch
+# Terminal 2 (seeking agent)
+python agent_seeking.py watch
 ```
 
 Within seconds:
@@ -70,24 +70,24 @@ Within seconds:
 Match: 2018 Mazda 6 hatchback
   price:    15000 EUR
   location: EU/CZ/Prague
-  seller:   ...
+  offering:   ...
   pack:     cars-pack@1
   mcp:      http://127.0.0.1:8765/sse
 
-Send the seller a DM? Type a message (blank to skip):
+Send the offering agent a DM? Type a message (blank to skip):
 > tell me more about service history
 [+] Sent. Listening for reply...
 ```
 
-Switch back to Terminal 1 — type a reply at the seller's prompt.
-Switch to Terminal 2 — see the seller's reply, then a follow-up
+Switch back to Terminal 1 — type a reply at the offering agent's prompt.
+Switch to Terminal 2 — see the offering agent's reply, then a follow-up
 prompt:
 
 ```
 Reply from npub17c4f...:
 > Full Mazda dealer service history. Ask MCP for photos.
 
-This seller's listing advertised an MCP endpoint:
+This offering agent's listing advertised an MCP endpoint:
   http://127.0.0.1:8765/sse  (item 8f4a2b1e…)
 Fetch cover photo + inspection report via MCP now? [y/N] y
 ```
@@ -107,17 +107,17 @@ After answering `y`:
               sha256 9876543210ab...
 ```
 
-The cover PNG and inspection report are now on the buyer's disk,
+The cover PNG and inspection report are now on the seeking agent's disk,
 delivered agent-to-agent over MCP, never via HTTP file host.
 
-## Multi-listing seller
+## Multi-listing offering agent
 
 Drop multiple `.toml` listings into `mvp/listings/` (use
 `sample_car.toml` as a template — see `mvp/listings/README.md`),
 then:
 
 ```bash
-python seller.py serve-multi listings/
+python agent_offering.py serve-multi listings/
 ```
 
 Each listing is published as its own NIP-99 event. The same MCP
@@ -152,15 +152,15 @@ cd ../operator/cars
 docker compose -f strfry-compose.yml -f strfry-compose.local.yml up -d
 python3 verify_relay.py    # confirms ws://localhost:7777 is alive
 
-# Terminal 1 — seller, pointing at the local relay
+# Terminal 1 — offering agent, pointing at the local relay
 cd ../../mvp
 export MVP_RELAYS="ws://localhost:7777"
-python3 seller.py serve sample_car.toml
+python3 agent_offering.py serve sample_car.toml
 
-# Terminal 2 — buyer, same relay
+# Terminal 2 — seeking agent, same relay
 cd mvp
 export MVP_RELAYS="ws://localhost:7777"
-python3 buyer.py watch
+python3 agent_seeking.py watch
 ```
 
 `MVP_RELAYS` accepts a comma-separated list, so you can mix your local
@@ -168,8 +168,8 @@ relay with the public defaults while testing federation behaviour.
 
 ## Two-machine demo
 
-Same flow, but the seller's FastMCP server needs to be reachable from
-the buyer's machine. Easiest: put an https tunnel in front (ngrok,
+Same flow, but the offering agent's FastMCP server needs to be reachable from
+the seeking agent's machine. Easiest: put an https tunnel in front (ngrok,
 cloudflared) and update `sample_car.toml`:
 
 ```toml
@@ -177,15 +177,15 @@ mcp_url = "https://abc123.ngrok.app/sse"
 ```
 
 **Important security boundary**: `mcp_client.py` rejects http:// URLs
-with non-localhost hosts to avoid the buyer being tricked into
+with non-localhost hosts to avoid the seeking agent being tricked into
 connecting to a malicious public host via a crafted listing tag
 during the demo. Cross-machine demos must use https.
 
 ## Files
 
-- `seller.py` — publish + listen + reply + boots MCP server in background;
+- `agent_offering.py` — publish + listen + reply + boots MCP server in background;
   `serve` (one listing) and `serve-multi` (a directory of listings)
-- `buyer.py` — subscribe + match + DM + receive reply + optional MCP fetch
+- `agent_seeking.py` — subscribe + match + DM + receive reply + optional MCP fetch
 - `shared.py` — keypair load/save, NIP-99 event builder, mcp/pack tag helpers,
   default relay list (override via `MVP_RELAYS` env var)
 - `mcp_server.py` — FastMCP HTTP+SSE server exposing cars-pack@1 tool surface;
@@ -197,32 +197,32 @@ during the demo. Cross-machine demos must use https.
 - `listings/` — drop multiple `.toml`s here for `serve-multi`
 - `sample_inspection.txt` — fixture inspection report (global fallback)
 - `sample_photos/` — fixture cover image + per-item photo subdirs
-- `received/` — buyer's downloaded photos + reports (created on first MCP fetch)
+- `received/` — seeking agent's downloaded photos + reports (created on first MCP fetch)
 - `requirements.txt` — `pynostr`, `tomli`, `mcp`
 
 ## Common failures and fixes
 
 - **`SSL: CERTIFICATE_VERIFY_FAILED`** — already handled in
-  `seller.py` and `buyer.py` via `certifi`. If you see this on a new
+  `agent_offering.py` and `agent_seeking.py` via `certifi`. If you see this on a new
   machine, run `pip install --upgrade certifi` in the venv.
 - **`websockets.exceptions.ConnectionClosed`** — relay disconnected.
   Re-run; both scripts auto-reconnect once.
-- **No matches in `buyer.py`** — check that the filter in `buyer.py`
-  matches the seller's tags. Default filter is `t=cars, make=mazda`;
+- **No matches in `agent_seeking.py`** — check that the filter in `agent_seeking.py`
+  matches the offering agent's tags. Default filter is `t=cars, make=mazda`;
   if you changed `sample_car.toml`, change the filter too.
 - **DM not arriving** — both scripts need to share at least one
   relay. Default is the 5-relay list in `shared.py` (damus, nos.lol,
   snort.social, wellorder.net, nostr.band). If you set
   `MVP_RELAYS` on one side, make sure the other side has at least
   one relay in common.
-- **`refusing http:// MCP URL with non-local host`** — the buyer
+- **`refusing http:// MCP URL with non-local host`** — the seeking agent
   refused a non-https public URL. Either run single-machine
-  (localhost is allowed) or front the seller's MCP with an https
+  (localhost is allowed) or front the offering agent's MCP with an https
   tunnel.
-- **`Connection refused` on MCP fetch** — seller's MCP server isn't
-  bound. Check the seller terminal printed `FastMCP server up on
+- **`Connection refused` on MCP fetch** — offering agent's MCP server isn't
+  bound. Check the offering agent terminal printed `FastMCP server up on
   http://127.0.0.1:8765/sse` before publishing. If it crashed,
-  rerun `seller.py serve` (or `python mcp_server.py` standalone to
+  rerun `agent_offering.py serve` (or `python mcp_server.py` standalone to
   diagnose).
 - **`OSError: [Errno 48] address already in use`** — port 8765 is
   taken (likely a previous `serve` is still running). Kill it or
@@ -231,25 +231,25 @@ during the demo. Cross-machine demos must use https.
 - **`ImportError: Using SOCKS proxy, but the 'socksio' package is
   not installed`** — your shell has `HTTP_PROXY` / `HTTPS_PROXY` /
   `ALL_PROXY` set to a `socks5://...` URL. Either `unset` those for
-  the buyer terminal (the MVP's localhost-only flow doesn't need a
+  the seeking agent terminal (the MVP's localhost-only flow doesn't need a
   proxy) or `pip install 'httpx[socks]'` into the venv. Doesn't
   affect single-machine demos unless your shell exports a SOCKS
   proxy by default.
 
 ## What this MVP intentionally does NOT do
 
-These all live in `seller/`, `buyer/`, `plugins/cars-seller`,
-`plugins/cars-buyer`, etc. — the production wiring:
+These all live in `offering agent/`, `seeking agent/`, `plugins/cars`,
+`plugins/cars`, etc. — the production wiring:
 
 - **Per-tool grant policy**. The MVP MCP server auto-grants
   view_listing, request_photos, request_inspection_report, and stubs
   request_vin to a hard-coded "denied" string. Production wires
-  `mcp_grant_decision(...)` to prompt the seller's user.
+  `mcp_grant_decision(...)` to prompt the offering agent's user.
 - **NIP-17 sealed DMs**. The MVP uses NIP-04 for inquiry channel.
   Production switches to NIP-17 gift-wrap with NIP-44 encryption.
 - **Session_token binding**. The MVP MCP server trusts whoever
   reaches localhost. Production binds a session_token established
-  via NIP-17 to the calling buyer's pubkey.
+  via NIP-17 to the calling seeking agent's pubkey.
 - **PoW on listing publish**. The MVP skips NIP-13. Production
   mines ≥ 20 bits before publishing.
 - **input_safety on returned tool content**. The MVP logs server
@@ -258,13 +258,13 @@ These all live in `seller/`, `buyer/`, `plugins/cars-seller`,
   EmbeddedResource.uri text field in `<untrusted>` and runs through
   `input_safety` before surfacing to the LLM planner.
 - **reverse_image_check, vin_decode, market_comp, reputation_mcp**.
-  The MVP doesn't load any capability MCPs. Production buyer
-  plugins ship them per `plugins/cars-buyer/plugin.yaml`.
+  The MVP doesn't load any capability MCPs. Production seeking agent
+  plugins ship them per `plugins/cars/plugin.yaml`.
 - **Negotiation state machine**. `submit_offer` returns a stub
   refusal. Production wires the round-counted negotiation flow from
-  `seller/src/chaos_seller/negotiation.py`.
+  `offering agent/src/chaos_agent/negotiation.py`.
 
 ## Next steps once it works
 
-Use the `seller/` and `buyer/` component scaffolds for the production
+Use the `offering agent/` and `seeking agent/` component scaffolds for the production
 wiring path after the demo works.

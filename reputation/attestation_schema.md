@@ -33,7 +33,7 @@ publishers and re-checked by the reputation-mcp on read.
     ["currency_band", "15k-50k"],
     ["sale_closed_at", "1714710000"]
   ],
-  "content": "Sold to a friendly buyer, no surprises.",
+  "content": "Sold to a friendly seeking agent, no surprises.",
   "id": "<sha256 of canonical serialization>",
   "sig": "<schnorr sig hex>"
 }
@@ -103,7 +103,7 @@ Same as 30410 plus:
     ["status", "counterparty-vanished"],
     ["currency_band", "15k-50k"],
     ["sale_closed_at", "1714710000"],
-    ["reason_short", "buyer ghosted after deposit"]
+    ["reason_short", "seeking agent ghosted after deposit"]
   ]
 }
 ```
@@ -190,15 +190,15 @@ for either side.
 
 ## Examples
 
-- **Clean sale:** seller publishes 30410 `completed-clean`; buyer
+- **Clean sale:** offering agent publishes 30410 `completed-clean`; seeking agent
   publishes 30411 `confirmed`. Both within a week. Both PoW ≥ 16.
   Reputation-mcp records `+0.05` to each (capped, decays over
   365d).
-- **Buyer ghosting:** seller publishes 30412
+- **Seeking agent ghosting:** offering agent publishes 30412
   `counterparty-vanished` with `reason_short`. No 30411 ever
-  arrives. Counts as a unilateral negative against buyer, but at
+  arrives. Counts as a unilateral negative against seeking agent, but at
   half the weight a paired attestation would carry.
-- **Disputed sale:** seller publishes 30410 `disputed-by-me`;
-  buyer publishes 30411 `disputed`. Both parties have signaled a
+- **Disputed sale:** offering agent publishes 30410 `disputed-by-me`;
+  seeking agent publishes 30411 `disputed`. Both parties have signaled a
   dispute exists. The dispute is then routed to the admin-agent
   per `dispute_protocol.md`.

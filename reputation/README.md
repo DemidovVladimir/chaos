@@ -21,7 +21,7 @@ risk we built on Nostr to avoid. See `AGENTS.md` Rules 12–16.
 
 ## The five layers (plus a future sixth)
 
-1. **Operator-issued badges (NIP-58).** `verified-private-seller`,
+1. **Operator-issued badges (NIP-58).** `verified-private-offering agent`,
    `verified-dealer`. One trust signal among many — never a
    gatekeeper. See `operator_revocation.md`.
 2. **Bilateral peer attestations.** Custom kinds 30410
@@ -50,7 +50,7 @@ risk we built on Nostr to avoid. See `AGENTS.md` Rules 12–16.
 vertical_pack)` which collapses the layers above into a single
 `score_aggregate` ∈ [0, 1] using the user's configured weights.
 The reference algorithm is in `scoring.md`. The MCP returns the
-component breakdown alongside the aggregate so the buyer's skill
+component breakdown alongside the aggregate so the seeking agent's skill
 can show "why" — never just a number.
 
 ## Files in this folder
@@ -85,4 +85,4 @@ can show "why" — never just a number.
 - No machine-learned model that combines layers behind a black
   box — the algorithm is open and the weights are user-configurable.
 - No gating of protocol access on reputation. Low score reduces
-  buyer/seller appetite to engage; it never blocks the wire.
+  seeking agent/offering agent appetite to engage; it never blocks the wire.

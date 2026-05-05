@@ -42,7 +42,7 @@ stay off-relay.
 | Tool | Args | Returns | Grant policy |
 |---|---|---|---|
 | `view_dataset_card` | `{}` | TextContent (schema, statistics, collection method, citation) | always-allow (public) |
-| `request_sample` | `{n_rows?}` | EmbeddedResource (≤100-row CSV / image bundle ≤25 items / audio ≤30s clip) | always-allow within sample budget; per-buyer-pubkey rate limit |
+| `request_sample` | `{n_rows?}` | EmbeddedResource (≤100-row CSV / image bundle ≤25 items / audio ≤30s clip) | always-allow within sample budget; per-caller-pubkey rate limit |
 | `request_license_terms` | `{intended_use}` | EmbeddedResource (signed license document) | always-allow |
 | `request_provenance_proof` | `{}` | EmbeddedResource (cryptographic chain: source attestations, consent receipts, hash-tree root) | user-confirm (offerer reveals collection chain) |
 | `request_compliance_evidence` | `{framework}` | EmbeddedResource (HIPAA/GDPR/SOC2 audit summary) | always-allow if framework is publicly claimed |

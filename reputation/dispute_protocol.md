@@ -1,7 +1,7 @@
 # Dispute protocol — end-to-end flow
 
 This document describes the full lifecycle of a dispute between a
-buyer and a seller, from packaging evidence through a published
+seeking agent and a offering agent, from packaging evidence through a published
 admin-decision and possible appeal.
 
 The flow is **opt-in**: a user only invokes the admin-agent if
@@ -11,7 +11,7 @@ sale-attestation, mute, and WoT layers continue to operate.
 
 ## Roles
 
-- **Submitter** — the aggrieved party (buyer or seller).
+- **Submitter** — the aggrieved party (seeking agent or offering agent).
 - **Counterparty** — the other side of the disputed sale.
 - **Admin-agent** — Hermes instance running the `admin-cars`
   skill, deployed under `operator/cars/admin-agent/`. Owns a
@@ -40,7 +40,7 @@ The package is then:
 
 ## Step 2 — submitter calls `submit_dispute`
 
-The submitter's buyer/seller skill opens an MCP HTTP+SSE session
+The submitter's seeking agent/offering agent skill opens an MCP HTTP+SSE session
 against the admin-agent's MCP server (announced in the operator's
 relay metadata) and calls:
 
@@ -62,8 +62,8 @@ package is decrypted:
 - Rate limit: 1 dispute submission per submitter pubkey per 7
   days, sliding window.
 - Submitter-rep gate: submitter must hold either at least 1
-  paired `completed-clean` attestation OR a verified-buyer /
-  verified-seller / verified-dealer NIP-58 badge.
+  paired `completed-clean` attestation OR a verified-seeking agent /
+  verified-offering agent / verified-dealer NIP-58 badge.
 - Pattern detection: if N submitters have flagged the same
   counterparty within 24h with overlapping content hashes, the
   whole batch is held for human review (coordinated-fraud
@@ -122,7 +122,7 @@ two-sided) sanitized inputs. The rubric distinguishes:
   with stake.
 - **Soft violations (warning):** late delivery, miscommunication,
   partial misrepresentation.
-- **Non-violations (clear):** buyer remorse, ambiguous quality
+- **Non-violations (clear):** seeking agent remorse, ambiguous quality
   dispute, civil disagreement.
 - **Always escalate:** high-value (>$15k currency_band),
   cross-jurisdiction, novel pattern, contradictory evidence.

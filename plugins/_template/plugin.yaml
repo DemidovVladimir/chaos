@@ -11,8 +11,8 @@ version: 0.1.0
 # Python entry point: register(ctx) wires engine + skill + MCPs.
 entry_point: chaos_<PLACEHOLDER_VERTICAL>_<PLACEHOLDER_ROLE>:register
 
-# Dependencies. The universal engine is always a dep. Seller plugins
-# depend on `chaos-seller`; buyer on `chaos-buyer`; admin
+# Dependencies. The universal engine is always a dep. Offering agent plugins
+# depend on `chaos-agent`; seeking agent on `chaos-agent`; admin
 # on `chaos-admin-engine`.
 dependencies:
   - <PLACEHOLDER_UNIVERSAL_ENGINE>>=0.1

@@ -30,9 +30,9 @@ below).
 2. **No data custody** — perceptual hashes are 64-bit fingerprints,
    not images. We never receive, store, or transmit user photos.
    The hashing happens locally; in the protocol flow the MCP runs
-   on the buyer's own machine on bytes the buyer's agent already
+   on the seeking agent's own machine on bytes the seeking agent's agent already
    received as `ImageContent` blocks from a `request_photos` MCP
-   tool call against the seller's MCP server.
+   tool call against the offering agent's MCP server.
 3. **Cross-vertical** — a single MCP serves cars, real estate,
    watches, and any future vertical.
 4. **GDPR-clean** — no personal data touches the platform.
@@ -48,7 +48,7 @@ below).
     "type": "object",
     "properties": {
       "image_b64": {"type": "string",
-                    "description": "Base64-encoded image bytes (max 10 MB). This is the canonical input — bytes the buyer's agent received as `ImageContent` blocks from a `request_photos` MCP tool call against the seller, fed directly to the MCP without ever crossing a third party."},
+                    "description": "Base64-encoded image bytes (max 10 MB). This is the canonical input — bytes the seeking agent's agent received as `ImageContent` blocks from a `request_photos` MCP tool call against the offering agent, fed directly to the MCP without ever crossing a third party."},
       "image_url": {"type": "string",
                     "description": "OPTIONAL: HTTP(S) URL of the image, only useful for testing against publicly-published images (e.g. checking a stock-image library entry). The protocol flow never uses this; it always passes inline bytes received from `request_photos`."},
       "tier":      {"type": "string", "enum": ["fast", "thorough"],
@@ -118,7 +118,7 @@ Volume tiers:
 | Power | $39 | 1,000 | $0.03/call |
 | Whitelabel | custom | custom | custom |
 
-## When the buyer-cars rubric uses this MCP
+## When the seeking-cars rubric uses this MCP
 
 | Check | Tier | Trigger | Outcome on hit |
 |---|---|---|---|
@@ -128,13 +128,13 @@ Volume tiers:
 | EXIF GPS contradicts stated location | thorough | every `ImageContent` block in a `request_photos` tool result | warn user |
 | EXIF date contradicts stated `year` | thorough | every `ImageContent` block in a `request_photos` tool result | warn user |
 
-## When the seller-cars skill uses this MCP
+## When the offering-cars skill uses this MCP
 
-`seller-cars/SKILL.md` runs `fast` proactively against each photo the
-user intends to share, before the seller's MCP server returns them as
+`offering-cars/SKILL.md` runs `fast` proactively against each photo the
+user intends to share, before the offering agent's MCP server returns them as
 `ImageContent` blocks from a `request_photos` tool call, to flag
 accidental stock-image inclusion. All local; no photos leave the
-seller's machine.
+offering agent's machine.
 
 ## Hash distribution
 
@@ -147,7 +147,7 @@ We don't curate the stock-image database alone. Sources:
    `kind: 31000`, parameterized replaceable) that publishes "this
    image hash is associated with this scam listing". Anyone can
    issue these; clients weigh by issuer reputation.
-3. **Local accumulation**: every photo the buyer's agent has seen is
+3. **Local accumulation**: every photo the seeking agent's agent has seen is
    hashed and stored locally with provenance. Cross-listing reuse
    becomes detectable within the user's own corpus.
 4. **Operator-curated set**: as the relay operator, you can publish

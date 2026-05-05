@@ -37,7 +37,7 @@ have its decisions weighted.
 
 It is not the operator relay and not the badge issuer. It must not
 change strfry policy, delete relay events, issue NIP-58 badges, revoke
-NIP-58 badges, or call buyer/seller MCP servers.
+NIP-58 badges, or call seeking agent/offering agent MCP servers.
 
 This skill is the **highest-value prompt-injection target** in
 the entire chaos architecture. The hard rules below are
@@ -88,7 +88,7 @@ between this skill and the threat model doc is a release blocker.
 3. Anti-abuse gates pre-decryption:
      - 1 submission per submitter pubkey per 7 days (sliding).
      - Submitter must hold >=1 paired completed-clean attestation
-       OR a verified-buyer / verified-seller / verified-dealer
+       OR a verified-seeking agent / verified-offering agent / verified-dealer
        NIP-58 badge.
      - Coordinated-fraud detector: N similar-content submissions
        against same target within 24h → batch held for human.
@@ -134,7 +134,7 @@ non-negotiable categories.
 
 `decision = clear`, `severity = low`:
 
-- **Buyer remorse** after a clean transaction.
+- **Seeking agent remorse** after a clean transaction.
 - **Ambiguous quality dispute** with no clear protocol breach
   (e.g. "the paint isn't quite the shade I expected").
 - **Civil disagreement** that did not escalate into a violation.

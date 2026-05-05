@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_agent"]
+
+[project]
+name = "chaos-agent"
+version = "0.1.0"
+description = "The chaos agent — single role-flexible engine for the decentralised remote agentic collaboration protocol. Publishes, subscribes, serves MCP, dials MCP — any agent does any of these in any combination."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "chaos contributors" }]
+license = { text = "MIT" }
+dependencies = [
+  "pynostr>=0.6.2,<0.7",
+  "mcp>=1.27,<2",                    # Anthropic MCP Python SDK (FastMCP)
+  "httpx>=0.28.0,<1",
+  "pyyaml>=6.0,<7",
+  "coincurve>=21.0,<22",            # Schnorr / BIP-340 sigs (cp313 wheels start at 21.0)
+  "cryptography>=43.0,<46",         # NIP-44 (XChaCha20-Poly1305 + ECDH)
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9",
+  "pytest-asyncio>=0.23,<1",
+  "ruff>=0.4,<1",
+]
+
+[project.entry-points."hermes.plugin"]
+chaos_agent = "chaos_agent:register"
+
+[project.scripts]
+chaos-agent = "chaos_agent.main:main"

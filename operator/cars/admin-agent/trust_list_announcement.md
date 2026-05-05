@@ -2,8 +2,8 @@
 
 The admin-agent's decisions are **opt-in**. Until you explicitly
 add its pubkey to your trust list, your reputation-mcp will not
-weight any of its kind 30430 events when scoring sellers or
-buyers. This is by design (Rule 16) — admin trust is a choice, not
+weight any of its kind 30430 events when scoring offering agents or
+seeking agents. This is by design (Rule 16) — admin trust is a choice, not
 a default.
 
 ## Why opt-in matters
@@ -38,7 +38,7 @@ limits the blast radius:
        "<admin-pubkey-hex>": 0.8     # weight 0..1; default 0.8
    ```
 
-3. Reload your buyer / seller skill or restart Hermes.
+3. Reload your seeking agent / offering agent skill or restart Hermes.
 
 ## How to remove
 

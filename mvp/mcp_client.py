@@ -1,15 +1,15 @@
 """
 mcp_client.py — weekend MVP FastMCP client.
 
-Helper used by `buyer.py` after a NIP-04 reply arrives carrying an
-`mcp` URL: opens an HTTP+SSE session against the seller's MCP server,
+Helper used by `agent_seeking.py` after a NIP-04 reply arrives carrying an
+`mcp` URL: opens an HTTP+SSE session against the offering agent's MCP server,
 runs `tools/list` (bootstrap), then exercises view_listing,
 request_photos, and request_inspection_report. Saves received bytes
 to `mvp/received/` with SHA-256 verification logging.
 
 MVP scope cuts vs production:
   • No session_token binding — we connect to whatever URL the
-    seller's listing tag advertised. Production buyer plugins bind
+    offering agent's listing tag advertised. Production seeking agent plugins bind
     a session_token established via NIP-17 to the MCP session.
   • URL whitelist is permissive (localhost + https only). Production
     plugins SSRF-defend (no private IP unless explicitly opted-in,
@@ -21,7 +21,7 @@ MVP scope cuts vs production:
 
 Security notes (project-wide "always check prompt injection" rule):
   • _safe_url_for_mvp() rejects URLs that aren't localhost or https,
-    preventing the buyer from being tricked into connecting to a
+    preventing the seeking agent from being tricked into connecting to a
     malicious public host via a crafted listing tag during the demo.
   • Image bytes are written to disk and SHA-logged — never decoded
     as text and never fed to the LLM directly.
@@ -58,7 +58,7 @@ RECEIVED_DIR = HERE / "received"
 MAX_TEXT_PRINT = 500            # cap server-controlled text echoed to user
 CONNECT_TIMEOUT_SECONDS = 10.0
 CALL_TIMEOUT_SECONDS = 30.0
-MAX_IMAGE_BYTES = 25_000_000    # mirror production buyer config cap
+MAX_IMAGE_BYTES = 25_000_000    # mirror production seeking agent config cap
 
 
 def _safe_url_for_mvp(url: str) -> str:
@@ -210,7 +210,7 @@ async def _query(url: str, item_id: str) -> dict:
 
 
 def fetch_listing_assets(url: str, item_id: str = "8f4a2b1e") -> dict:
-    """Synchronous entry point — buyer.py calls this from its main loop."""
+    """Synchronous entry point — agent_seeking.py calls this from its main loop."""
     return asyncio.run(_query(url, item_id))
 
 

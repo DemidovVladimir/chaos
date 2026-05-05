@@ -15,12 +15,12 @@ fuel_type     = "gasoline"
 transmission  = "manual"
 mileage_band  = "50k-75k"
 
-# MCP wiring — the seller agent's FastMCP server endpoint where photos
+# MCP wiring — the offering agent's FastMCP server endpoint where photos
 # and inspection PDFs flow as ImageContent / EmbeddedResource blocks.
-# The MVP defaults to localhost:8765 on the seller's machine and
-# `seller.py serve` runs the server in a background thread alongside
+# The MVP defaults to localhost:8765 on the offering agent's machine and
+# `agent_offering.py serve` runs the server in a background thread alongside
 # the Nostr listener. For two-machine demos point this at an https
-# tunnel (ngrok, cloudflared) on the seller side.
+# tunnel (ngrok, cloudflared) on the offering agent side.
 mcp_url = "http://127.0.0.1:8765/sse"
 pack    = "cars-pack@1"
 

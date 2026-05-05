@@ -21,10 +21,8 @@ license = { text = "MIT" }
 # editably (alternative: `uv sync --all-packages`, but easy to forget).
 # uv resolves these against `[tool.uv.sources]` below, not PyPI.
 dependencies = [
-  "chaos-seller",
-  "chaos-buyer",
-  "chaos-cars-seller",
-  "chaos-cars-buyer",
+  "chaos-agent",
+  "chaos-cars",
   "chaos-cars-admin",
   "chaos-pro",
   "reputation-mcp",
@@ -45,14 +43,12 @@ dev = [
 
 [tool.uv.workspace]
 members = [
-  "seller",
-  "buyer",
+  "agent",
   "shared-mcp/reverse-image-mcp",
   "shared-mcp/market-comp-mcp",
   "shared-mcp/reputation-mcp",
   "shared-mcp/_template",
-  "plugins/cars-seller",
-  "plugins/cars-buyer",
+  "plugins/cars",
   "plugins/cars-admin",
   "plugins/chaos-pro",
   "plugins/_template",
@@ -62,10 +58,8 @@ members = [
 # Workspace-wide source dependency graph: members can depend on each other
 # by name and uv will resolve them locally instead of going to PyPI.
 [tool.uv.sources]
-chaos-seller        = { workspace = true }
-chaos-buyer         = { workspace = true }
-chaos-cars-seller   = { workspace = true }
-chaos-cars-buyer    = { workspace = true }
+chaos-agent         = { workspace = true }
+chaos-cars          = { workspace = true }
 chaos-cars-admin    = { workspace = true }
 chaos-pro           = { workspace = true }
 reputation-mcp      = { workspace = true }
@@ -108,7 +102,7 @@ ignore = [
 allowed-confusables = ["×"]
 
 [tool.ruff.lint.per-file-ignores]
-# Match any tests/ directory at any depth (seller/tests/, buyer/tests/,
+# Match any tests/ directory at any depth (agent/tests/,
 # shared-mcp/<x>/tests/, etc.).
 "**/tests/**" = ["B011", "ANN", "S101"]
 "**/_template/**" = ["F401"]  # templates are intentionally minimal
@@ -122,18 +116,16 @@ allowed-confusables = ["×"]
 #     they no longer have to round-trip through sys.path).
 #   - Each test file gets a unique fully-qualified name derived from its
 #     absolute path, so `tests.test_evaluator` collisions across
-#     buyer/tests and seller/tests can't happen.
+#     multiple `tests/` directories can't happen.
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "--import-mode=importlib"
 testpaths = [
-  "seller/tests",
-  "buyer/tests",
+  "agent/tests",
   "shared-mcp/reverse-image-mcp/tests",
   "shared-mcp/market-comp-mcp/tests",
   "shared-mcp/reputation-mcp/tests",
-  "plugins/cars-seller/tests",
-  "plugins/cars-buyer/tests",
+  "plugins/cars/tests",
   "plugins/cars-admin/tests",
   "plugins/chaos-pro/tests",
   "verticals/cars-pack/mcp/vin-decoder-mcp/tests",

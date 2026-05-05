@@ -125,7 +125,7 @@ for naive comps).
 **Critical note**: this vertical surfaces sensitive PII (medical
 history, legal facts, financial detail). The grant policy on every
 tool that accepts or returns personal info is **user-confirm by
-default** — the buyer skill MUST prompt with a PII warning before
+default** — the seeking-side skill MUST prompt with a PII warning before
 calling `submit_question`, `book_consultation`, or
 `request_formal_opinion`. Phase-1 staking (when shipped) plus
 verifiable insurance proof are the strongest trust amplifiers in

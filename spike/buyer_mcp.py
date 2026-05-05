@@ -1,12 +1,12 @@
 # (Historical -- written under the project's previous name "neuro-spati", now called "chaos".)
 """
-buyer_mcp.py — neuro-spati MCP buyer spike.
+buyer_mcp.py — neuro-spati MCP seeking agent spike.
 
 Spawns TWO seller_mcp.py instances on different ports (alice@7501,
-bob@7502), then for each seller in parallel:
+bob@7502), then for each offering agent in parallel:
 
   1. Opens an MCP HTTP+SSE session
-  2. Calls `tools/list` (BOOTSTRAP — buyer learns what seller can do
+  2. Calls `tools/list` (BOOTSTRAP — seeking agent learns what offering agent can do
      without prior knowledge)
   3. Calls `request_photos(...)` and `request_inspection_report(...)`
   4. Decodes the binary content blocks and SHA-256-verifies them
@@ -15,7 +15,7 @@ This proves three things at once:
 
   • bootstrap discovery (tools/list)
   • binary content (ImageContent + EmbeddedResource over SSE)
-  • multi-seller fanout (one buyer, two sellers, asyncio.gather)
+  • multi-offering agent fanout (one seeking agent, two offering agents, asyncio.gather)
 
 Exit 0 = all three succeed. Non-zero = one failed; check stderr.
 """
@@ -39,12 +39,12 @@ from mcp.client.sse import sse_client
 logging.basicConfig(
     stream=sys.stderr,
     level=logging.INFO,
-    format="[buyer]   %(asctime)s %(levelname)s %(message)s",
+    format="[seeking agent]   %(asctime)s %(levelname)s %(message)s",
 )
-log = logging.getLogger("buyer")
+log = logging.getLogger("seeking agent")
 
 
-# Same bytes the sellers carry — used for SHA verification.
+# Same bytes the offering agents carry — used for SHA verification.
 EXPECTED_PNG_RED = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108020000"
     "00907753de0000000c49444154789c63f8cfc0000000020001e22165"
@@ -92,15 +92,15 @@ async def _query_one_seller(name: str, port: int) -> dict:
             log.info("[%s] initialized; server=%s v=%s",
                      name, init.serverInfo.name, init.serverInfo.version)
 
-            # ── BOOTSTRAP — the buyer doesn't know in advance what tools
-            # this seller exposes. tools/list is the discovery primitive.
+            # ── BOOTSTRAP — the seeking agent doesn't know in advance what tools
+            # this offering agent exposes. tools/list is the discovery primitive.
             tools_resp = await session.list_tools()
             tool_names = [t.name for t in tools_resp.tools]
             log.info("[%s] tools/list → %s", name, tool_names)
             out["tools_advertised"] = tool_names
 
             if "request_photos" not in tool_names:
-                out["errors"].append("seller doesn't expose request_photos")
+                out["errors"].append("offering agent doesn't expose request_photos")
                 return out
 
             # ── BINARY — call request_photos, expect ImageContent
@@ -148,7 +148,7 @@ async def _query_one_seller(name: str, port: int) -> dict:
 
 
 async def main() -> int:
-    # 1. Spawn both sellers in parallel
+    # 1. Spawn both offering agents in parallel
     procs: list[subprocess.Popen] = []
     for s in SELLERS:
         env = {**os.environ, "SELLER_NAME": s["name"], "MCP_PORT": str(s["port"])}
@@ -164,9 +164,9 @@ async def main() -> int:
         # Wait for both ports to bind
         for s in SELLERS:
             if not _wait_for_port("127.0.0.1", s["port"], timeout_s=10):
-                log.error("seller %s did not bind to port %d", s["name"], s["port"])
+                log.error("offering agent %s did not bind to port %d", s["name"], s["port"])
                 return 1
-        log.info("both sellers up — running parallel queries")
+        log.info("both offering agents up — running parallel queries")
 
         # 2. Query both in parallel — the fanout demo
         results = await asyncio.wait_for(
@@ -223,8 +223,8 @@ def cli() -> None:
     rc = asyncio.run(main())
     if rc == 0:
         print("\n=== MCP SPIKE PASS ===")
-        print(f"Two sellers, one buyer, parallel fanout, binary verified.")
-        print(f"Bootstrap (tools/list) worked: buyer learned tool surface dynamically.")
+        print(f"Two offering agents, one seeking agent, parallel fanout, binary verified.")
+        print(f"Bootstrap (tools/list) worked: seeking agent learned tool surface dynamically.")
         print(f"Outputs in: {OUT_DIR}")
     else:
         print(f"\n=== MCP SPIKE FAIL (rc={rc}) ===")

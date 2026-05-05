@@ -19,7 +19,7 @@ gate relay access, MCP access, or listing visibility by themselves.
 
 - [ ] Applicant pubkey is controlled by the applicant.
 - [ ] Requested badge type is valid for `cars-pack@1`
-      (`verified-private-seller`, `verified-dealer`,
+      (`verified-private-offering agent`, `verified-dealer`,
       `long-standing-member`, or a documented future badge).
 - [ ] Due-diligence basis is recorded in the operator's private case
       file. Store only the minimum needed to explain issuance.

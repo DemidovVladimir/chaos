@@ -19,7 +19,7 @@ def register(ctx: Any) -> None:
             makes.
     """
     # 1. Pull in the universal engine.
-    #    e.g. from chaos_buyer import register as engine_register
+    #    e.g. from chaos_agent import register as engine_register
     #    engine_register(ctx)
     engine_register = ctx.resolve_dependency("<PLACEHOLDER_UNIVERSAL_ENGINE>")
     engine_register(ctx)

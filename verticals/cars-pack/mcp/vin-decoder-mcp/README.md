@@ -108,18 +108,18 @@ Total code is ~300 lines including tests.
 
 ## Use in the cars pack
 
-The buyer-cars skill calls `vin_decode` whenever the seller has
-provided a VIN (typically only after the buyer asked for it via
-NIP-17 DM and the seller granted). The skill cross-checks the
+The seeking-cars skill calls `vin_decode` whenever the offering agent has
+provided a VIN (typically only after the seeking agent asked for it via
+NIP-17 DM and the offering agent granted). The skill cross-checks the
 decoded facts against the listing tags. Contradictions are reported
 to the user as red flags.
 
 ## What this opens up later
 
 **`vin-attestation-mcp`** (paid, future) — a successor that lets a
-**seller** sign a structured attestation about their VIN ("I attest
+**offering agent** sign a structured attestation about their VIN ("I attest
 this VIN, this odometer reading, no salvage title, attached PDF of
 inspection report"). The attestation is a signed Nostr event the
-seller publishes alongside their listing. The MCP doesn't store
-anything; it just helps the seller construct the signed event and
-helps the buyer verify the signature + linked PDF.
+offering agent publishes alongside their listing. The MCP doesn't store
+anything; it just helps the offering agent construct the signed event and
+helps the seeking agent verify the signature + linked PDF.

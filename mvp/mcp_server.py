@@ -3,8 +3,8 @@ mcp_server.py — weekend MVP FastMCP server.
 
 A minimal HTTP+SSE MCP server exposing the cars-pack@1 tool surface
 for one or many local listings. Designed to be started in a
-background thread from `seller.py serve` (single listing) or
-`seller.py serve-multi` (multi listing — same process, one port,
+background thread from `agent_offering.py serve` (single listing) or
+`agent_offering.py serve-multi` (multi listing — same process, one port,
 catalog keyed by item_id).
 
 Tools exposed (cars-pack@1 minimum):
@@ -20,9 +20,9 @@ Tools exposed (cars-pack@1 minimum):
   • submit_offer(...)                → TextContent — denied stub
 
 Catalog model:
-  • Single-listing path (seller.py serve sample_car.toml) — no
+  • Single-listing path (agent_offering.py serve sample_car.toml) — no
     catalog needed; ITEM_ID_DEFAULT + the global asset paths are used.
-  • Multi-listing path (seller.py serve-multi listings/) — at boot,
+  • Multi-listing path (agent_offering.py serve-multi listings/) — at boot,
     we read every *.toml in `MVP_LISTINGS_DIR` and build CATALOG:
     item_id → {title, summary, photos_dir, inspection_path}. Tool
     calls that pass a known item_id resolve to that listing's
@@ -38,10 +38,10 @@ Catalog model:
 MVP scope cuts vs production:
   • Binds to 127.0.0.1 only (no public URL, no tunnel).
   • No grant policy: every call auto-grants. Production wires the
-    per-tool grant policy from cars-pack/skills/seller-cars/SKILL.md.
-  • No session_token binding to buyer pubkey — we trust whoever
+    per-tool grant policy from cars-pack/skills/offering-cars/SKILL.md.
+  • No session_token binding to seeker pubkey — we trust whoever
     reaches localhost. Production binds session_token established
-    over NIP-17 to the calling buyer's pubkey.
+    over NIP-17 to the calling seeking agent's pubkey.
   • request_vin returns a hard-coded "user-confirm-required" denial.
   • request_photos serves the per-item dir if present, otherwise the
     fixture cover image; ignores `kinds` filter.
@@ -49,8 +49,8 @@ MVP scope cuts vs production:
 Security review notes (project-wide rule "always check prompt
 injection"):
   • Tool args are typed (str / list[str]) — no eval, no shell.
-  • Returned text content is from the seller's own files
-    (sample_inspection.txt, fixture summary). No buyer-controlled
+  • Returned text content is from the offering agent's own files
+    (sample_inspection.txt, fixture summary). No seeker-controlled
     content is ever echoed back inside a tool response.
   • Returned image bytes are read from disk (sample_photos/cover.png)
     and base64-encoded — opaque to the LLM; cannot carry instructions.
@@ -86,7 +86,7 @@ logging.basicConfig(
 log = logging.getLogger("mvp-mcp-server")
 
 # Quiet uvicorn's per-request access log so it doesn't bleed into the
-# seller's interactive `Reply (blank to skip):` prompt in seller.py serve.
+# offering agent's interactive `Reply (blank to skip):` prompt in agent_offering.py serve.
 # Tool-call activity is still logged via our own `log.info` calls below.
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
@@ -125,7 +125,7 @@ def _ensure_fixtures() -> None:
         INSPECTION_PATH.write_text(
             "INSPECTION REPORT (auto-generated MVP fixture)\n"
             "No real inspection on file. Drop your PDF or text report\n"
-            "at this path and the seller's MCP server will return it.\n"
+            "at this path and the offering agent's MCP server will return it.\n"
         )
 
 
@@ -244,14 +244,14 @@ def _resolve(item_id: str) -> dict:
     }
 
 
-mcp = FastMCP("mvp-cars-seller", host=HOST, port=PORT)
+mcp = FastMCP("mvp-cars-offering", host=HOST, port=PORT)
 
 
 @mcp.tool()
 def view_listing(item_id: str = ITEM_ID_DEFAULT) -> str:
     """Return a short textual summary of the item.
 
-    The first call a buyer's agent makes after `tools/list`. Confirms
+    The first call a seeking agent's agent makes after `tools/list`. Confirms
     the item exists and grabs the human-readable description before
     asking for binary content.
     """
@@ -272,7 +272,7 @@ def request_photos(
     return all of them. Otherwise return the global fallback
     sample_photos/cover.png as a single image.
 
-    MVP scope: ignores `kinds`. Production cars-pack@1 sellers apply
+    MVP scope: ignores `kinds`. Production cars-pack@1 offering agents apply
     the per-kind grant policy (auto for cover/exterior/interior/
     engine_bay; user-confirm for license_plate/interior_with_documents).
     """
@@ -318,7 +318,7 @@ def request_inspection_report(item_id: str = ITEM_ID_DEFAULT) -> EmbeddedResourc
     `_detect_mime` — drop a real `.pdf` next to the `.toml` and the
     server will return it as application/pdf.
 
-    Production sellers return the actual PDF from a real
+    Production offering agents return the actual PDF from a real
     pre-purchase inspection, attached with a signed attestation
     referencing the inspection event.
     """
@@ -352,8 +352,8 @@ def request_vin(item_id: str = ITEM_ID_DEFAULT) -> str:
     """Always user-confirm: return a denial in the MVP.
 
     Production wires this to `mcp_grant_decision(...)` which prompts
-    the seller's user before disclosing the full VIN. MVP cuts the
-    interactive step and returns a stable denial so buyer agents
+    the offering agent's user before disclosing the full VIN. MVP cuts the
+    interactive step and returns a stable denial so seeking agents
     can exercise the negative branch.
     """
     via = "catalog" if item_id in CATALOG else "fallback"
@@ -361,7 +361,7 @@ def request_vin(item_id: str = ITEM_ID_DEFAULT) -> str:
     return (
         "DENIED: full VIN requires explicit user confirmation. "
         "MVP server returns deny by default. Production wiring "
-        "will prompt the seller's user via mcp_grant_decision."
+        "will prompt the offering agent's user via mcp_grant_decision."
     )
 
 
@@ -374,7 +374,7 @@ def submit_offer(
     """Stub — returns a polite refusal in the MVP.
 
     Production wires this to the negotiation state machine in
-    `seller/src/chaos_seller/negotiation.py` (≤ 5 rounds,
+    `agent/src/chaos_agent/negotiation.py` (≤ 5 rounds,
     ≤ 1000 chars per offer). MVP doesn't simulate negotiation.
     """
     log.info(
@@ -384,13 +384,13 @@ def submit_offer(
     return (
         "STUB: MVP server does not simulate offers. "
         "Production cars-pack@1 negotiation flow ships in "
-        "seller/ + buyer/ components."
+        "the unified agent/ component."
     )
 
 
 @mcp.tool()
 def cancel_inquiry(conversation_id: str = "") -> str:
-    """Acknowledge an inquiry-cancel from the buyer."""
+    """Acknowledge an inquiry-cancel from the seeking agent."""
     log.info("cancel_inquiry(conversation_id=%s)", conversation_id)
     return "ACK: inquiry cancelled."
 

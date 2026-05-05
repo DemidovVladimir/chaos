@@ -1,7 +1,7 @@
 [project]
 name = "chaos-pro"
 version = "0.1.0"
-description = "Cross-vertical paid upgrade for chaos buyer plugins."
+description = "Cross-vertical paid upgrade for chaos seeking agent plugins."
 requires-python = ">=3.12"
 dependencies = [
   "reverse-image-mcp>=0.1",

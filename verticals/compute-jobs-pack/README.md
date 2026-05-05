@@ -87,7 +87,7 @@ server's `resources/read` endpoint.
   delivered uptime, queue-time accuracy, artifact integrity
 - `tee-attestation-mcp` (new, vertical-specific) — verifies
   SEV-SNP / SGX / TDX quotes against vendor root certificates;
-  required when buyer's data sensitivity demands confidential compute
+  required when the seeking agent's data sensitivity demands confidential compute
 - `benchmark-mcp` (new, vertical-specific) — submits a small
   standard test job (tiny CUDA workload, known-output renderer
   scene) before a large commitment, verifying claimed hardware

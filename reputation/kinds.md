@@ -9,11 +9,11 @@ event. PoW (NIP-13) requirements per kind below.
 
 | Kind  | Name                  | Status      | Signed by         | PoW   | Retention                     | Replaceable                     |
 | ----- | --------------------- | ----------- | ----------------- | ----- | ----------------------------- | ------------------------------- |
-| 30410 | sale-attestation      | live        | seller or buyer   | ≥ 16  | indefinite (until reissued)   | yes, on `(pubkey, kind, d)`     |
+| 30410 | sale-attestation      | live        | offering agent or seeking agent   | ≥ 16  | indefinite (until reissued)   | yes, on `(pubkey, kind, d)`     |
 | 30411 | counter-attestation   | live        | counterparty      | ≥ 16  | indefinite (until reissued)   | yes, on `(pubkey, kind, d)`     |
 | 30412 | dispute-attestation   | live        | unilateral        | ≥ 16  | indefinite                    | yes                             |
-| 30420 | identity-binding      | placeholder | seller (Phase 1)  | ≥ 20  | indefinite                    | yes                             |
-| 30421 | stake-commitment      | placeholder | seller (Phase 1)  | ≥ 20  | indefinite                    | yes                             |
+| 30420 | identity-binding      | placeholder | offering agent (Phase 1)  | ≥ 20  | indefinite                    | yes                             |
+| 30421 | stake-commitment      | placeholder | offering agent (Phase 1)  | ≥ 20  | indefinite                    | yes                             |
 | 30422 | slash-record          | placeholder | multi-sig 2-of-3  | ≥ 20  | indefinite                    | no                              |
 | 30430 | admin-decision        | live        | admin-agent       | ≥ 20  | indefinite (relay-side)       | no                              |
 | 30431 | appeal                | live        | affected party    | ≥ 20  | indefinite                    | yes, on `(pubkey, kind, d)`     |
@@ -24,7 +24,7 @@ Either party publishes after a sale closes (or fails). The pair
 30410+30411 from both parties is what makes the attestation
 "valid"; a lone 30410 is a claim, not a fact.
 
-- **Signed by:** the publishing party (seller OR buyer).
+- **Signed by:** the publishing party (offering agent OR seeking agent).
 - **Tag schema:**
   - `d` — sale-id (UUID v4 chosen by publisher; the same UUID is
     used by the counterparty's 30411).
@@ -40,7 +40,7 @@ Either party publishes after a sale closes (or fails). The pair
 - **Content:** short note (≤ 1 KB) the publisher wants to attach;
   passes through `input_safety`.
 - **PoW:** ≥ 16 bits.
-- **Read by:** reputation-mcp, buyer/seller skills.
+- **Read by:** reputation-mcp, seeking agent/offering agent skills.
 - **Replaceable:** yes — `(pubkey, kind, d)` replaces. A publisher
   may correct a typo by re-issuing with the same `d`.
 
@@ -63,7 +63,7 @@ counts only as a claim by one side.
 ## kind 30412 — dispute-attestation
 
 Unilateral. Used when the counterparty refuses to publish a 30411
-at all (e.g. a vanished seller). Carries less weight than a paired
+at all (e.g. a vanished offering agent). Carries less weight than a paired
 30410+30411 but is not zero.
 
 - **Signed by:** the aggrieved party.
@@ -116,7 +116,7 @@ multi-sig.
   `input_safety`-sanitized, free of names/PII beyond the pubkeys
   in `p` tags.
 - **PoW:** ≥ 20 bits.
-- **Read by:** reputation-mcp, buyer/seller/admin skills, anyone.
+- **Read by:** reputation-mcp, seeking agent/offering agent/admin skills, anyone.
 - **Replaceable:** **no** — corrections happen via a new 30430
   with a different `d` plus an appeal trail.
 - **Co-sign requirement:** if `severity == high`, the admin-agent

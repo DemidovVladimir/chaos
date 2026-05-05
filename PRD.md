@@ -115,7 +115,7 @@ requires explicit user override per AGENTS.md.
 - **Real-time voice or video.**
 - **Per-vertical paid plugins.** The cross-domain pro tier
   (`plugins/chaos-pro/`) is the only paid plugin shape;
-  per-domain paid bundles like `cars-buyer-pro` are explicitly
+  per-domain paid bundles like `chaos-pro` are explicitly
   forbidden.
 
 ## 5. Personas
@@ -172,7 +172,7 @@ Boundary: the relay operator runs strfry/Caddy and relay policy; the
 badge issuer performs manual due diligence and signs NIP-58 badges; the
 admin-agent is a separate Hermes process that publishes opt-in kind
 30430/30431 trust signals. The admin-agent does not operate the relay,
-issue badges, revoke badges, or call buyer/seller MCP servers.
+issue badges, revoke badges, or call agent MCP servers.
 
 ## 6. User stories
 
@@ -206,7 +206,7 @@ shape is identical for any pack.
   `request_sample`, `request_benchmark`). Agent A returns text
   blocks for descriptions, `ImageContent` blocks for images, and
   `EmbeddedResource` blocks for arbitrary binary payloads.
-- **US-7 — Negotiation rounds.** Buyer and seller exchange offers
+- **US-7 — Negotiation rounds.** Seeking and offering agents exchange offers
   via `submit_offer` MCP tool calls (or NIP-17 DMs if the MCP
   session has closed). Bounded: max 5 rounds per (item,
   counterparty), max 1000 chars per offer, max 50,000 chars per
@@ -227,7 +227,7 @@ shape is identical for any pack.
 ### 7.1 Offering-side agent (FR-O)
 
 - **FR-O1**: Generate a secp256k1 keypair on first run; store at
-  `~/.chaos/keys/seller.key` mode 0600.
+  `~/.chaos/keys/agent.key` mode 0600.
 - **FR-O2**: Accept a TOML or interactive description; construct a
   NIP-99 (kind 30402) event using the pack's tag schema.
 - **FR-O3**: Mine NIP-13 PoW (≥ 20 bits) before signing.
@@ -240,7 +240,7 @@ shape is identical for any pack.
 - **FR-O7**: Receive NIP-17 gift-wraps (NIP-04 only in MVP),
   decrypt locally.
 - **FR-O8**: Apply the per-ask grant policy from the pack's
-  `seller-<vertical>` skill.
+  `offering-<pack>` skill.
 - **FR-O9**: Expose the pack-mandated MCP tool surface via FastMCP
   HTTP+SSE. Tools return content blocks (`text` / `ImageContent` /
   `EmbeddedResource`). **No HTTP file delivery, ever.**
@@ -304,10 +304,10 @@ For any pack `<vertical>-pack@<major>`:
 - **FR-P1**: A NIP-99 tag schema in
   `verticals/<vertical>-pack/tag_schema.md` defining required and
   optional tags. Backwards-additive only within a major version.
-- **FR-P2**: A `seller-<vertical>` skill in
-  `verticals/<vertical>-pack/skills/seller-<vertical>/SKILL.md`.
-- **FR-P3**: A `buyer-<vertical>` skill in
-  `verticals/<vertical>-pack/skills/buyer-<vertical>/SKILL.md`.
+- **FR-P2**: A `offering-<pack>` skill in
+  `verticals/<vertical>-pack/skills/offering-<pack>/SKILL.md`.
+- **FR-P3**: A `seeking-<pack>` skill in
+  `verticals/<vertical>-pack/skills/seeking-<pack>/SKILL.md`.
 - **FR-P4**: An optional `admin-<vertical>` skill if the operator
   runs an admin-agent for the vertical.
 - **FR-P5**: A documented MCP tool surface — the named tools every
@@ -359,9 +359,9 @@ layer 5 and opt-in.
   declares its toolset in `plugin.yaml` and respects AGENTS.md
   Rule 11 (role isolation). CI lint rejects violations.
 - **FR-PL2**: `plugins/chaos-pro/` is the **single
-  cross-domain paid upgrade** — applies to every installed buyer
+  cross-domain paid upgrade** — applies to every installed seeking-side
   plugin. No per-domain paid plugins exist.
-- **FR-PL3**: Admin plugins (`plugins/<vertical>-admin/`) are
+- **FR-PL3**: Admin plugins (`plugins/<pack>-admin/`) are
   operator-deployed only. Admin invariants per AGENTS.md Rule 16;
   threat model per Rule 15.
 
@@ -448,7 +448,7 @@ layer 5 and opt-in.
   laptops, two free public relays, no infrastructure on the
   developer's side (`mvp/` ships this today).
 - **SC-5 — Multi-pack user.** A single Hermes instance running 2+
-  installed buyer plugins side-by-side, evaluating offers from 2
+  installed seeking-side plugins side-by-side, evaluating offers from 2
   different verticals concurrently. Measured at end of the launch
   plan.
 - **SC-6 — Federated topology.** At least 3 independently operated
@@ -460,7 +460,7 @@ layer 5 and opt-in.
 | Phase | Window | Goal | Exit criterion |
 |---|---|---|---|
 | **P0 — MVP** | Weekend | Two laptops, encrypted text inquiry round-trip over public relays | Demo screen-capture works |
-| **P1 — Universal engines** | Week 1 | `seller/` + `buyer/` scaffolds wired into Hermes plugin loaders | A vacuous pack loads end-to-end |
+| **P1 — Universal engines** | Week 1 | `agent/` + `agent/` scaffolds wired into Hermes plugin loaders | A vacuous pack loads end-to-end |
 | **P2 — First pack** | Week 2 | cars-pack@1 end-to-end via Hermes plugin (FastMCP server + client, `ImageContent` photo delivery) | Two-machine end-to-end test passes unattended |
 | **P3 — Second pack** | Week 3 | One sketched vertical (e.g. data-licensing) implemented to prove generality + reputation-mcp wiring | Same Hermes instance runs both packs concurrently |
 | **P4 — Admin-agent trust signals** | Week 4 | admin-cars live; opt-in dispute signal flow wired; Phase-1 staking remains research-only | First public dispute signal → decision → appeal cycle completes on relay |

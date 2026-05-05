@@ -40,11 +40,11 @@ protocol does not.
 
 `plugins/chaos-pro/` is the **single cross-domain paid
 upgrade**, applied to every installed seeking-side plugin the user
-runs. There is no `cars-buyer-pro`, no `realestate-buyer-pro`, no
+runs. There is no `chaos-pro`, no `chaos-pro`, no
 per-domain paid bundle (AGENTS.md cut list — the pack is the
 contract; the upgrade is universal).
 
-**What pro adds across every installed buyer plugin**:
+**What pro adds across every installed seeking-side plugin**:
 
 - **Thorough-tier `reverse-image-mcp`** — deeper reference library,
   perceptual-hash + visual-similarity backbone (free tier is
@@ -57,8 +57,8 @@ contract; the upgrade is universal).
 - **Optional Phase-1 onchain stake reading** — surfaces the
   `onchain_stake` field from `reputation-mcp` (default off; opt-in
   per AGENTS.md Rule 14)
-- **AI-assisted negotiation drafting** — cheap-LLM assist for buyer
-  / seller turns
+- **AI-assisted negotiation drafting** — cheap-LLM assist for any
+  side's turns
 - **Multi-modal item search** (text + content similarity via local
   CLIP)
 - **CRM features** — deal pipeline, follow-up reminders, comparison
@@ -71,7 +71,7 @@ Both metered against the same per-pubkey license. Volume pricing for
 businesses.
 
 **Distribution**: shipped as `plugins/chaos-pro/` — installed
-alongside whichever buyer plugins the user already has. License
+alongside whichever seeking-side plugins the user already has. License
 token validated locally.
 
 ### 2. Managed relay subscriptions
@@ -110,13 +110,13 @@ vertical:
 - **Verified Payment** — payment-method confirmation (no money
   handled — just attestation)
 - **Verified Institution** — domain ownership + business
-  registration (vertical-specific name; e.g. Verified Dealer for
+  registration (vertical-specific name; e.g. Verified Provider for
   cars, Verified Provider for ML inference, Verified Lab for data
   licensing)
 - **Long-Standing Member** — auto-issued after N months of clean
   activity
 
-Buyers' filters can require badges. Sellers pay for the trust signal.
+Seekers' filters can require badges. Publishers pay for the trust signal.
 
 **Pricing**: $5–50 one-time per badge. Re-verification at intervals
 the operator sets.
@@ -175,9 +175,9 @@ license, store, or resell.
   consistency checks. Local. $3–5/mo.
 - **`logistics-mcp`** — shipping-rate lookup against public carrier
   APIs. Per-call. Used during off-platform handover planning.
-- **`tax-doc-mcp`** — generates seller-side tax docs from the
-  seller's *own* per-item history (locally stored). No data leaves
-  the seller. $5/mo.
+- **`tax-doc-mcp`** — generates offering-side tax docs from the
+  offering agent's *own* per-item history (locally stored). No data leaves
+  the offering agent. $5/mo.
 
 **Things we deliberately do NOT build**:
 
@@ -199,7 +199,7 @@ for users who want full local-only operation.
 
 Operators that run an admin-agent for their vertical pay the
 chaos platform fee for the admin plugin
-(`plugins/cars-admin/`, future `plugins/<vertical>-admin/`). The
+(`plugins/cars-admin/`, future `plugins/<pack>-admin/`). The
 admin-agent runs only on the operator's infrastructure; the plugin
 install is gated behind the operator-tier subscription.
 
@@ -251,7 +251,7 @@ at most one of N multi-sig signers — never custodian. Reference
 - Stake is held in an open-source Solana program where chaos
   is one of N multi-sig signers. We can never unilaterally seize or
   move user funds.
-- A buyer's reputation lookup weights `onchain_stake.amount_usd` as
+- A seeking agent's reputation lookup weights `onchain_stake.amount_usd` as
   an additional positive signal — bigger stake, more skin in the
   game.
 - On a confirmed `flag` decision from a community arbitrator (NOT
@@ -298,7 +298,7 @@ Things we explicitly do not take a cut of:
 
 ## What stays free, forever
 
-The protocol implementation, the universal seller / buyer engines,
+The protocol implementation, the universal offering agent / seeking agent engines,
 the cross-domain capability MCPs at their free tier, the
 input-safety helpers, the bootstrap relay list, and the reference
 pack (cars-pack@1). **Free forever, openly licensed.**

@@ -524,7 +524,7 @@ def get_reputation(
         att_filter = filter_for_pubkey_tag(
             kinds=[30410, 30411, 30412], pubkey_hex=target, limit=500
         )
-        # 30411 also references the seller's 30410 by `e`, so also
+        # 30411 also references the offering agent's 30410 by `e`, so also
         # query 30410s where target is the *signer* (signer-side).
         att_authored = filter_for_authors(kinds=[30410, 30411, 30412], authors=[target], limit=500)
         admin_filter = filter_for_pubkey_tag(kinds=[30430], pubkey_hex=target, limit=200)
@@ -726,8 +726,8 @@ def submit_peer_attestation(
 @mcp.tool()
 def submit_counter_attestation(
     sale_id: str,
-    seller_attestation_event_id: str,
-    seller_pubkey: str,
+    parent_attestation_event_id: str,
+    to_pubkey: str,
     status: str,
     pack: str = "cars-pack@1",
     relays: list[str] | None = None,
@@ -738,24 +738,24 @@ def submit_counter_attestation(
 
     Args:
         sale_id: same UUID as the parent 30410's `d` tag.
-        seller_attestation_event_id: id of the 30410 being countered.
-        seller_pubkey: pubkey of the original 30410's publisher.
+        parent_attestation_event_id: id of the 30410 being countered.
+        to_pubkey: pubkey of the original 30410's publisher.
         status: `confirmed` or `disputed`.
     """
     sale_id = _require_uuid(sale_id, field="sale_id")
-    parent_id = _require_event_id(seller_attestation_event_id, field="seller_attestation_event_id")
-    seller = _require_pubkey(seller_pubkey, field="seller_pubkey")
+    parent_id = _require_event_id(parent_attestation_event_id, field="parent_attestation_event_id")
+    other_party = _require_pubkey(to_pubkey, field="to_pubkey")
     status = _allowed(status, ALLOWED_30411_STATUS, field="status")
     pack = _require_pack(pack)
     sk_hex, pk_hex = _resolve_signer(signing_key_hex)
-    if pk_hex == seller:
+    if pk_hex == other_party:
         raise ValueError("counter-attestation must be signed by the OTHER party")
     used_relays = relays or DEFAULT_RELAYS
 
     tags = [
         ["d", sale_id],
         ["e", parent_id],
-        ["p", seller],
+        ["p", other_party],
         ["pack", pack],
         ["status", status],
     ]
@@ -769,10 +769,10 @@ def submit_counter_attestation(
     )
     event_id = _publish_or_die(event, used_relays)
     log.info(
-        "submit_counter_attestation OK sale_id=%s signer=%s... seller=%s... status=%s",
+        "submit_counter_attestation OK sale_id=%s signer=%s... other_party=%s... status=%s",
         sale_id,
         pk_hex[:12],
-        seller[:12],
+        other_party[:12],
         status,
     )
     return event_id
@@ -793,7 +793,7 @@ def submit_dispute_attestation(
     """Publish a kind-30412 unilateral dispute-attestation.
 
     Used when the counterparty refuses to publish a 30411 (e.g. a
-    vanished seller). Carries half the weight of a paired
+    vanished offering agent). Carries half the weight of a paired
     attestation per `reputation/scoring.md`.
     """
     sale_id = _require_uuid(sale_id, field="sale_id")

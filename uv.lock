@@ -4,12 +4,10 @@ requires-python = ">=3.12"
 
 [manifest]
 members = [
-    "chaos-buyer",
+    "chaos-agent",
+    "chaos-cars",
     "chaos-cars-admin",
-    "chaos-cars-buyer",
-    "chaos-cars-seller",
     "chaos-pro",
-    "chaos-seller",
     "chaos-vertical-role",
     "chaos-workspace",
     "market-comp-mcp",
@@ -189,9 +187,9 @@ wheels = [
 ]
 
 [[package]]
-name = "chaos-buyer"
+name = "chaos-agent"
 version = "0.1.0"
-source = { editable = "buyer" }
+source = { editable = "agent" }
 dependencies = [
     { name = "coincurve" },
     { name = "cryptography" },
@@ -223,6 +221,30 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
+name = "chaos-cars"
+version = "1.0.0"
+source = { editable = "plugins/cars" }
+dependencies = [
+    { name = "chaos-agent" },
+    { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "chaos-agent", editable = "agent" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<9" },
+    { name = "pyyaml", specifier = ">=6.0,<7" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<1" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "chaos-cars-admin"
 version = "0.1.0"
 source = { editable = "plugins/cars-admin" }
@@ -241,58 +263,6 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "reputation-mcp", editable = "shared-mcp/reputation-mcp" },
     { name = "ruff", marker = "extra == 'dev'" },
-]
-provides-extras = ["dev"]
-
-[[package]]
-name = "chaos-cars-buyer"
-version = "1.0.0"
-source = { editable = "plugins/cars-buyer" }
-dependencies = [
-    { name = "mcp" },
-    { name = "pynostr" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "mcp", specifier = ">=1.27,<2" },
-    { name = "pynostr", specifier = ">=0.6.2,<0.7" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<9" },
-    { name = "pyyaml", specifier = ">=6.0,<7" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<1" },
-]
-provides-extras = ["dev"]
-
-[[package]]
-name = "chaos-cars-seller"
-version = "1.0.0"
-source = { editable = "plugins/cars-seller" }
-dependencies = [
-    { name = "mcp" },
-    { name = "pynostr" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "mcp", specifier = ">=1.27,<2" },
-    { name = "pynostr", specifier = ">=0.6.2,<0.7" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<9" },
-    { name = "pyyaml", specifier = ">=6.0,<7" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<1" },
 ]
 provides-extras = ["dev"]
 
@@ -323,40 +293,6 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
-name = "chaos-seller"
-version = "0.1.0"
-source = { editable = "seller" }
-dependencies = [
-    { name = "coincurve" },
-    { name = "cryptography" },
-    { name = "httpx" },
-    { name = "mcp" },
-    { name = "pynostr" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "coincurve", specifier = ">=21.0,<22" },
-    { name = "cryptography", specifier = ">=43.0,<46" },
-    { name = "httpx", specifier = ">=0.28.0,<1" },
-    { name = "mcp", specifier = ">=1.27,<2" },
-    { name = "pynostr", specifier = ">=0.6.2,<0.7" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<9" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23,<1" },
-    { name = "pyyaml", specifier = ">=6.0,<7" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4,<1" },
-]
-provides-extras = ["dev"]
-
-[[package]]
 name = "chaos-vertical-role"
 version = "0.1.0"
 source = { editable = "plugins/_template" }
@@ -379,12 +315,10 @@ name = "chaos-workspace"
 version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "chaos-buyer" },
+    { name = "chaos-agent" },
+    { name = "chaos-cars" },
     { name = "chaos-cars-admin" },
-    { name = "chaos-cars-buyer" },
-    { name = "chaos-cars-seller" },
     { name = "chaos-pro" },
-    { name = "chaos-seller" },
     { name = "market-comp-mcp" },
     { name = "reputation-mcp" },
     { name = "reverse-image-mcp" },
@@ -400,12 +334,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "chaos-buyer", editable = "buyer" },
+    { name = "chaos-agent", editable = "agent" },
+    { name = "chaos-cars", editable = "plugins/cars" },
     { name = "chaos-cars-admin", editable = "plugins/cars-admin" },
-    { name = "chaos-cars-buyer", editable = "plugins/cars-buyer" },
-    { name = "chaos-cars-seller", editable = "plugins/cars-seller" },
     { name = "chaos-pro", editable = "plugins/chaos-pro" },
-    { name = "chaos-seller", editable = "seller" },
     { name = "market-comp-mcp", editable = "shared-mcp/market-comp-mcp" },
     { name = "reputation-mcp", editable = "shared-mcp/reputation-mcp" },
     { name = "reverse-image-mcp", editable = "shared-mcp/reverse-image-mcp" },

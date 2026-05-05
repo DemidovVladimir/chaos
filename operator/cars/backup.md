@@ -1,7 +1,7 @@
 # Backup — Mode A relay
 
 The relay's event database is the only state worth backing up.
-Photos and inquiries live on seller / buyer machines; the relay is
+Photos and inquiries live on offering agent / seeking agent machines; the relay is
 the discovery index.
 
 ## What to back up

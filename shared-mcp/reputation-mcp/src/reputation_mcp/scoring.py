@@ -16,7 +16,7 @@ single aggregate in [0, 1]:
     raw = sum(layer_weight[i] * layer_score[i])
     aggregate = clamp((raw + 1.0) / 2.0, 0.0, 1.0)
 
-The aggregate is intentionally *advisory* — buyer/seller skills
+The aggregate is intentionally *advisory* — seeking agent/offering agent skills
 render the per-layer breakdown alongside the aggregate so the
 user sees "why" rather than just a number.
 """
@@ -127,7 +127,7 @@ class ScoringReport:
     red_flags: list[str] = field(default_factory=list)
     green_flags: list[str] = field(default_factory=list)
     # raw per-layer signed scores in [-1, 1] before layer-weighting,
-    # surfaced for the buyer skill's "why" panel.
+    # surfaced for the seeking agent skill's "why" panel.
     layer_scores: dict[str, float] = field(default_factory=dict)
     attestation_summary: dict[str, int] = field(default_factory=dict)
 

@@ -8,10 +8,10 @@ contact field and from the project website at
 
 - NIP-99 classified listings (kinds 30402 / 30403) for cars and
   car-related goods
-- NIP-17 sealed DMs (kinds 13 / 14 / 1059) for buyer↔seller inquiries
+- NIP-17 sealed DMs (kinds 13 / 14 / 1059) for seeking agent↔offering agent inquiries
 - Profile metadata (kind 0)
 - NIP-51 personal lists (kinds 30000–30099) for follow / mute / etc.
-- NIP-58 badge events (kinds 8 / 30009) for verified-seller signaling
+- NIP-58 badge events (kinds 8 / 30009) for verified-offering agent signaling
 - NIP-09 deletion requests (kind 5)
 - NIP-32 labels (kind 1985) for tagging
 
@@ -44,7 +44,7 @@ Reports go to `abuse@<your-domain>`. Triage target: 24 hours.
 
 ## Moderation actions, ordered
 
-1. **Notify** — DM the seller's pubkey via NIP-17 with description
+1. **Notify** — DM the offering agent's pubkey via NIP-17 with description
    of the issue and a 24h grace period to remove or update.
 2. **Remove single event** — `strfry delete --filter
    '{"ids":["<event-id>"]}'`. Audited.
@@ -58,7 +58,7 @@ Reports go to `abuse@<your-domain>`. Triage target: 24 hours.
    scrape floods). Caddy has a rate-limit module.
 6. **Public disclosure** — for repeat severe offenders, publish a
    NIP-51 mute list under your operator pubkey naming the bad actors.
-   Buyers can subscribe via the cars-pack default trust graph.
+   Seeking agents can subscribe via the cars-pack default trust graph.
 
 Every action is logged to `/var/lib/moderation/log.jsonl`:
 
@@ -74,10 +74,10 @@ Every action is logged to `/var/lib/moderation/log.jsonl`:
 
 ## What we do NOT moderate
 
-- **Disagreements on price or condition** — between buyer and seller
+- **Disagreements on price or condition** — between seeking agent and offering agent
 - **Subjective taste** — listing photos that aren't pretty enough,
   awkward grammar, etc.
-- **Off-platform interactions** — once buyer and seller exchange DMs,
+- **Off-platform interactions** — once seeking agent and offering agent exchange DMs,
   what happens between them is theirs
 - **NIP-17 DM content** — we cannot read encrypted DMs. We cannot
   moderate them. We act only on metadata (sender pubkey, recipient
@@ -85,7 +85,7 @@ Every action is logged to `/var/lib/moderation/log.jsonl`:
 
 ## Appeal process
 
-Sellers / buyers who believe an action was wrong can appeal:
+Offering agents / seeking agents who believe an action was wrong can appeal:
 
 1. Email `abuse@<your-domain>` with their pubkey, the event id (if
    applicable), and the reason they believe the action was incorrect.

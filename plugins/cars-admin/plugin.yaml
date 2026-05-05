@@ -26,7 +26,7 @@ required_env:
 #
 # Admin scope rules:
 #   - admin-agent only publishes to configured relays + reads admin-signal submissions.
-#   - admin-agent does NOT inquire to seller/buyer MCP servers (no direct peer-MCP calls).
+#   - admin-agent does NOT inquire to offering agent/seeking agent MCP servers (no direct peer-MCP calls).
 #   - admin-agent does NOT operate strfry and does NOT issue/revoke NIP-58 badges.
 #   - admin-agent does NOT custody DM content; reads only structured kinds
 #     30410/30411/30412 (peer attestations) and publishes 30430/30431 (decisions/appeals).

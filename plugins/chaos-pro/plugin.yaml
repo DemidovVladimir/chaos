@@ -1,13 +1,13 @@
 manifest_version: 1
 name: chaos-pro
-description: "Cross-vertical paid upgrade. Flips capability MCPs into thorough/pro-tier mode for ALL installed buyer plugins. ONE subscription, applies to every vertical."
+description: "Cross-vertical paid upgrade. Flips capability MCPs into thorough/pro-tier mode for ALL installed seeking agent plugins. ONE subscription, applies to every vertical."
 version: 0.1.0
 entry_point: chaos_pro:register
 
-# Pro extends any installed buyer plugin. Not per-vertical.
+# Pro extends any installed seeking agent plugin. Not per-vertical.
 # Resolution: at install time the pro plugin enumerates plugins
 # matching `extends` and overrides their capability-MCP tiers.
-extends: any-buyer-plugin
+extends: any-seeking agent-plugin
 
 # Pro depends on the shared MCPs it upgrades. It does NOT pull in a
 # vertical engine — it's a pure configuration-flip plugin.
@@ -22,7 +22,7 @@ includes:
     - market-comp-mcp@1
     - reputation-mcp@1
 
-# Per-MCP overrides applied to every extended buyer plugin.
+# Per-MCP overrides applied to every extended seeking agent plugin.
 mcp_overrides:
   reverse-image-mcp:
     tier: thorough               # EXIF + federated registry + optional CLIP

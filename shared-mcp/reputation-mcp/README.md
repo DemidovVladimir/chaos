@@ -1,14 +1,14 @@
 # `reputation-mcp` — layered trust-signal aggregation
 
 Universal across verticals. Every vertical needs a way to ask "what
-do I know about this seller pubkey?" without depending on a central
+do I know about this offering agent pubkey?" without depending on a central
 reputation oracle.
 
 ## Why this MCP
 
 `AGENTS.md` rule 4 says trust must be **layered, not centralized**.
 This MCP is the layering point. It reads multiple sources, weights
-them, and returns a structured `ReputationReport` the buyer skill
+them, and returns a structured `ReputationReport` the seeking agent skill
 can use as one input among many. It does NOT make the gatekeeping
 decision for the user.
 
@@ -35,7 +35,7 @@ in-memory only.
    along NIP-02 follow graphs.
 7. **On-chain stake** — optional Phase 1 hook. The MVP returns
    `null`; later we can wire a small bonded-stake check (e.g. an
-   on-chain commitment the seller posted, queryable via a free
+   on-chain commitment the offering agent posted, queryable via a free
    public RPC). Per `AGENTS.md` Rules 12–14 the on-chain stake is
    **never** custodied by us; we only read it.
 
@@ -93,8 +93,8 @@ Hermes/MCP clients call:
   listing_event_id, status, currency_band, pack, relays,
   signing_key_hex, note)` — publishes a kind 30410.
 
-- `submit_counter_attestation(sale_id, seller_attestation_event_id,
-  seller_pubkey, status, pack, relays, signing_key_hex, note)` —
+- `submit_counter_attestation(sale_id, parent_attestation_event_id,
+  to_pubkey, status, pack, relays, signing_key_hex, note)` —
   publishes a kind 30411.
 
 - `submit_dispute_attestation(sale_id, counterparty_pubkey,
@@ -105,16 +105,16 @@ Hermes/MCP clients call:
 
 Every submit tool refuses to run without `signing_key_hex`. The MCP
 is local-only: keys come from the calling agent's local keystore at
-`~/.chaos/<role>/seller.key` (mode 0600, per AGENTS.md Rule 3)
+`~/.chaos/<role>/agent.key` (mode 0600, per AGENTS.md Rule 3)
 and are passed in only at call time. The server never logs the
 signing key, never persists it, and never derives identity from
 anywhere else.
 
-The buyer's skill calls `get_reputation` with the user's own pubkey
-in `user_pubkey` so the WoT walk is anchored correctly. The seller's
-skill calls `submit_peer_attestation` after a sale closes; the buyer
+The seeking agent's skill calls `get_reputation` with the user's own pubkey
+in `user_pubkey` so the WoT walk is anchored correctly. The offering agent's
+skill calls `submit_peer_attestation` after a sale closes; the seeking agent
 follows up with `submit_counter_attestation` referencing the
-seller's 30410 event id. If the counterparty disappears, either
+offering agent's 30410 event id. If the counterparty disappears, either
 party may publish `submit_dispute_attestation`.
 
 ## Tests

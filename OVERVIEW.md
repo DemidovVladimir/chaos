@@ -85,7 +85,7 @@ Full operating rules live in `AGENTS.md`.
 |---|---|
 | MVP loop | Runs end-to-end on two laptops |
 | `cars-pack@1` | Working reference pack |
-| `seller/`, `buyer/` | Package skeletons with focused tests |
+| `agent/`, `agent/` | Package skeletons with focused tests |
 | `vin-decoder-mcp` | Pack-local MCP shipped |
 | Shared MCPs | reverse-image, market-comp, reputation skeletons with tests |
 | Mode A relay | `operator/cars/` runbook |

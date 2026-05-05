@@ -1,8 +1,8 @@
-"""chaos-pro — cross-vertical buyer upgrade.
+"""chaos-pro — cross-vertical seeking agent upgrade.
 
 Pure configuration-flip plugin. At install time it enumerates the
-installed buyer plugins (any plugin whose name matches
-`chaos-*-buyer`) and overrides each one's capability-MCP
+installed seeking agent plugins (any plugin whose name matches
+`chaos-*-seeking agent`) and overrides each one's capability-MCP
 tier from `fast` to `thorough`. The same subscription / x402 entry
 covers every vertical the user has installed.
 """
@@ -24,8 +24,8 @@ def register(ctx: Any) -> None:
     #    engine layer; no money flows through this plugin).
     ctx.validate_entitlement(plugin="chaos-pro")
 
-    # 2. Find every installed buyer plugin and flip pro_mode on.
-    for buyer_plugin in ctx.list_installed(matching="chaos-*-buyer"):
+    # 2. Find every installed seeking agent plugin and flip pro_mode on.
+    for buyer_plugin in ctx.list_installed(matching="chaos-*-seeking agent"):
         ctx.update_plugin_config(buyer_plugin, {"pro_mode": True})
 
     # 3. Apply per-MCP overrides globally.

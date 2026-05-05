@@ -20,7 +20,7 @@ the relay process.
 The operator may run the relay without running an admin-agent. The
 operator may issue NIP-58 badges without running an admin-agent. The
 admin-agent does not issue badges, operate strfry, change relay
-policy, or call buyer/seller MCP servers.
+policy, or call seeking agent/offering agent MCP servers.
 
 ## Files
 
@@ -135,7 +135,7 @@ your own Mode-A relay".
 8. Verify: `curl https://relay.<your-domain>/` should return strfry's
    NIP-11 relay information document.
 9. Test publish/subscribe round-trip with a third-party Nostr client
-   (Damus, nostr-cli, or `mvp/buyer.py`).
+   (Damus, nostr-cli, or `mvp/agent_seeking.py`).
 
 ## Cost
 
@@ -202,8 +202,8 @@ naming the bad actors.
 ## Federation note
 
 You don't have to be the only relay. The default cars-pack relay list
-in the seller / buyer config ships with `wss://relay.<your-domain>`
-plus 2–3 community ones. Buyers' agents subscribe to all; sellers
+in the offering agent / seeking agent config ships with `wss://relay.<your-domain>`
+plus 2–3 community ones. Seeking agents' agents subscribe to all; offering agents
 publish to all. Your relay gives you moderation control over your
 slice of the network; it cannot reach into community relays.
 

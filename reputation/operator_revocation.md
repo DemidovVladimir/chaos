@@ -1,6 +1,6 @@
 # Operator badge revocation
 
-The operator issues NIP-58 badges (`verified-private-seller`,
+The operator issues NIP-58 badges (`verified-private-offering agent`,
 `verified-dealer`). Issuance is a manual due-diligence process
 documented in `operator/cars/badge_issuance.md`. **Revocation** is the
 counterpart: when, why, and how the operator pulls a badge.
@@ -86,11 +86,11 @@ symmetric with revocation.
 
 ## What revocation is NOT
 
-- Not a court order. The operator's verified-seller badge is one
+- Not a court order. The operator's verified-offering agent badge is one
   trust signal among many (Rule 14). Other trust signals — peer
   attestations, WoT, the user's own mute list — continue to
   operate independently.
-- Not a wire-level block. Revoked sellers can still publish
+- Not a wire-level block. Revoked offering agents can still publish
   NIP-99 listings; relays still accept them subject to PoW and
   rate limits. What changes is how every viewer's reputation-mcp
   scores them.
