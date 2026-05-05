@@ -16,10 +16,10 @@ Subcommands:
   publish / inquiry counts.
 - ``keygen`` — generate the seller keypair if it doesn't exist.
 """
+
 from __future__ import annotations
 
 import argparse
-from typing import Any
 
 
 def setup_argparse(subparser: argparse.ArgumentParser) -> None:

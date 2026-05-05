@@ -9,8 +9,9 @@ that's where the real implementation now lives.
 This module just re-exports the function so any external code that
 imported it from the old path keeps working.
 """
+
 from __future__ import annotations
 
-from chaos_cars_seller import register  # noqa: F401
+from chaos_cars_seller import register
 
 __all__ = ["register"]

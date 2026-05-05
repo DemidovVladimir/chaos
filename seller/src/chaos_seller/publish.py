@@ -11,10 +11,11 @@ Per ``PROTOCOL.md`` § "Discovery — NIP-99 classified listings":
   ``location``, ``t`` (multiple), make/model/year/body_type/
   fuel_type/transmission/mileage_band, ``mcp``, ``pack``.
 - **No** ``image`` tag, **no** public photo URL anywhere on the
-  event (CLAUDE.md rule 2).
+  event (AGENTS.md rule 2).
 
-PoW: NIP-13. Default difficulty 20 bits per CLAUDE.md rule 10.
+PoW: NIP-13. Default difficulty 20 bits per AGENTS.md rule 10.
 """
+
 from __future__ import annotations
 
 import time
@@ -85,12 +86,12 @@ def mine_pow(raw_event: dict[str, Any], *, bits: int = DEFAULT_POW_BITS) -> dict
 
     Raises:
         ValueError: if ``bits < 1`` or ``bits > 32`` (anything above
-            32 is unreasonable for the cars vertical).
+            32 is unreasonable for cars-pack@1).
     """
     raise NotImplementedError("publish.mine_pow not implemented")
 
 
-def publish(rm: "RelayManager", sk_hex: str, raw_event: dict[str, Any]) -> "Event":
+def publish(rm: RelayManager, sk_hex: str, raw_event: dict[str, Any]) -> Event:
     """Sign and publish ``raw_event`` to every relay in ``rm``.
 
     Args:
@@ -108,8 +109,9 @@ def publish(rm: "RelayManager", sk_hex: str, raw_event: dict[str, Any]) -> "Even
     raise NotImplementedError("publish.publish not implemented")
 
 
-def deletion_request(event_id: str, *, pubkey_hex: str, addressable: str | None = None,
-                     reason: str = "") -> dict[str, Any]:
+def deletion_request(
+    event_id: str, *, pubkey_hex: str, addressable: str | None = None, reason: str = ""
+) -> dict[str, Any]:
     """Build a NIP-09 deletion request.
 
     Per ``PROTOCOL.md`` § "Item updates and removal", we publish a

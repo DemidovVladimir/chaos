@@ -1,8 +1,8 @@
 # verticals — vertical packs live here
 
-A **vertical pack** is what makes the chaos marketplace
-composable. Each pack defines, for one category of thing-being-traded,
-the small set of conventions every seller and buyer in that category
+A **vertical pack** is what makes the chaos protocol composable. Each
+pack defines, for one domain of offerings, the small set of
+conventions every offering-side and seeking-side agent in that domain
 agrees to. The wire is universal; the pack is the contract.
 
 A pack is, in concrete terms, five things:
@@ -19,19 +19,19 @@ A pack is, in concrete terms, five things:
    `["mcp", "<url>"]` tag and call them via `tools/call`. Photos and
    documents come back as `ImageContent` and `EmbeddedResource`
    blocks.
-3. A **seller skill** — a Hermes skill (`skills/<vertical>-seller/SKILL.md`)
+3. A **seller/offering skill** — a Hermes skill (`skills/<vertical>-seller/SKILL.md`)
    that knows how to publish a well-formed listing, run the MCP
    server, and apply the per-tool grant policy.
-4. A **buyer skill** — a Hermes skill
+4. A **buyer/seeking skill** — a Hermes skill
    (`skills/<vertical>-buyer/SKILL.md`) that knows how to translate
    user wants into REQ filters, evaluate listings against a rubric
    of red and green flags, and call the seller's tools in the right
    order.
 5. **Optional vertical-specific local capability MCPs** — small
-   utility MCPs the seller or buyer agent calls under the hood
+   utility MCPs an offering or seeking agent calls under the hood
    (e.g. cars-pack ships `reverse-image-mcp`, `vin-decoder-mcp`,
    `market-comp-mcp`). These run on the user's own machine. They
-   never resell commercial data; see `CLAUDE.md` rule 6.
+   never resell commercial data; see `AGENTS.md` rule 6.
 
 ## Why one folder per pack
 
@@ -41,17 +41,18 @@ docs (`PROTOCOL.md`) clean and lets a deployment ship just the packs
 it needs. The cars-only operator installs `cars-pack`; the multi-
 vertical operator installs several.
 
-Today the only shipped pack is `cars-pack/`. Future packs slot in
-as siblings:
+`cars-pack/` is the working reference pack. Other packs slot in as
+siblings:
 
 ```
 verticals/
 ├── README.md
 ├── _template/                 copy-and-fill skeleton
-├── cars-pack/                 cars-pack@1   (shipped)
-├── realestate-pack/           realestate-pack@1   (future)
-├── lawyers-pack/              lawyers-pack@1   (future)
-└── watches-pack/              watches-pack@1   (future)
+├── cars-pack/                 cars-pack@1   (working reference)
+├── ml-inference-pack/         sketched
+├── data-licensing-pack/       sketched
+├── compute-jobs-pack/         sketched
+└── specialist-services-pack/  sketched
 ```
 
 Same shape, different tags + tool surface.

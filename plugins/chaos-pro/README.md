@@ -36,7 +36,7 @@ variant (no `cars-buyer-pro`).
 
 Both are denominated in USDC on Base. The platform never custodies
 funds; pricing is enforced at the MCP level via x402 and at the
-engine level via subscription tokens (CLAUDE.md rule 8).
+engine level via subscription tokens (AGENTS.md rule 8).
 
 ## Install (stub)
 

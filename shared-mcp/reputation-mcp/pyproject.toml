@@ -2,11 +2,11 @@
 name = "reputation-mcp"
 version = "0.2.0"
 description = "Layered trust-signal aggregation MCP. Universal across verticals. Reads only; never custodies."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
-  "mcp==1.27.0",
+  "mcp>=1.27,<2",
   "fastmcp",
-  "pynostr==0.6.2",
+  "pynostr>=0.6.2,<0.7",
   "certifi",
 ]
 
@@ -17,12 +17,11 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
+[tool.hatch.build.targets.wheel]
+packages = ["src/reputation_mcp"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

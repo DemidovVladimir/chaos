@@ -3,6 +3,7 @@
 Copy this folder, rename, and fill in the tool implementations. Stub
 shape mirrors `spike/seller_mcp.py` so the wire model is identical.
 """
+
 from __future__ import annotations
 
 import logging

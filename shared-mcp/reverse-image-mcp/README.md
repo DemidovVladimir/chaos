@@ -11,7 +11,7 @@ Given image bytes, return:
 
 - A **perceptual hash** (pHash and dHash)
 - **Match results** against a local hash database of known stock
-  photos, scam-listing images, and previously-seen marketplace photos
+  photos, scam-listing images, and previously-seen protocol photos
 - Optional **EXIF analysis** flag set (date inconsistencies, GPS
   that doesn't match the listing's stated location, missing EXIF on
   photos claimed as recent)
@@ -29,7 +29,7 @@ below).
    reusing stock photos or photos lifted from prior listings.
 2. **No data custody** — perceptual hashes are 64-bit fingerprints,
    not images. We never receive, store, or transmit user photos.
-   The hashing happens locally; in the marketplace flow the MCP runs
+   The hashing happens locally; in the protocol flow the MCP runs
    on the buyer's own machine on bytes the buyer's agent already
    received as `ImageContent` blocks from a `request_photos` MCP
    tool call against the seller's MCP server.
@@ -43,16 +43,16 @@ below).
 ```json
 {
   "name": "reverse_image_check",
-  "description": "Compute a perceptual hash of an image and check it against a local database of known stock images, scam-listing images, and previously-seen marketplace photos. Returns nearest matches with similarity score and a fraud-risk flag set. No third-party services are called; the image bytes are not retained.",
+  "description": "Compute a perceptual hash of an image and check it against a local database of known stock images, scam-listing images, and previously-seen protocol photos. Returns nearest matches with similarity score and a fraud-risk flag set. No third-party services are called; the image bytes are not retained.",
   "inputSchema": {
     "type": "object",
     "properties": {
       "image_b64": {"type": "string",
                     "description": "Base64-encoded image bytes (max 10 MB). This is the canonical input — bytes the buyer's agent received as `ImageContent` blocks from a `request_photos` MCP tool call against the seller, fed directly to the MCP without ever crossing a third party."},
       "image_url": {"type": "string",
-                    "description": "OPTIONAL: HTTP(S) URL of the image, only useful for testing against publicly-published images (e.g. checking a stock-image library entry). The marketplace flow never uses this; it always passes inline bytes received from `request_photos`."},
+                    "description": "OPTIONAL: HTTP(S) URL of the image, only useful for testing against publicly-published images (e.g. checking a stock-image library entry). The protocol flow never uses this; it always passes inline bytes received from `request_photos`."},
       "tier":      {"type": "string", "enum": ["fast", "thorough"],
-                    "description": "fast = pHash + dHash only. thorough = also check EXIF, run optional CLIP semantic match, query the federated marketplace-photos hash registry."},
+                    "description": "fast = pHash + dHash only. thorough = also check EXIF, run optional CLIP semantic match, query the federated photo-hash registry."},
       "context":   {"type": "object",
                     "description": "Optional context for EXIF cross-checks.",
                     "properties": {
@@ -80,7 +80,7 @@ Returns:
     },
     {
       "kind": "prior_listing",
-      "source": "marketplace_event:30402:abc...",
+      "source": "protocol_event:30402:abc...",
       "similarity": 0.91,
       "first_seen": "2024-11-04",
       "publisher_pubkey": "9d3e..."

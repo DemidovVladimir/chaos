@@ -3,9 +3,10 @@
 Wraps ``negotiation`` behind the standard Hermes handler shape.
 ``accept_offer`` is the most safety-sensitive tool in the seller
 plugin: it MUST refuse to act without an explicit user confirmation
-in the same Hermes session, per CLAUDE.md and the seller-cars
+in the same Hermes session, per AGENTS.md and the seller-cars
 SKILL.md hard rule "Never auto-accept an offer."
 """
+
 from __future__ import annotations
 
 import json

@@ -12,22 +12,23 @@ chars per offer, ≤ 50,000 chars per match.
 
 The user's explicit confirmation is required for any acceptance.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 DEFAULT_MAX_ROUNDS = 5
 DEFAULT_MAX_CHARS_PER_OFFER = 1_000
 DEFAULT_MAX_CHARS_PER_MATCH = 50_000
 
 
-class Stance(str, Enum):
+class Stance(StrEnum):
     """How aggressive the suggested offer should be."""
 
-    FAIR = "fair"        # median - 5%
-    LOW = "low"          # median - 15% (used when soft red flags exist)
-    HIGH = "high"        # median; used when seller has strong green flags
+    FAIR = "fair"  # median - 5%
+    LOW = "low"  # median - 15% (used when soft red flags exist)
+    HIGH = "high"  # median; used when seller has strong green flags
 
 
 @dataclass(frozen=True, slots=True)

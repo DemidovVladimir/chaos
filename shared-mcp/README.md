@@ -21,7 +21,7 @@ FastMCP server inside. Any vertical role-plugin (e.g.
   on-chain stake (universal — every vertical needs it).
 - `_template/` — copy-and-fill skeleton for adding a new shared MCP.
 
-## Rules (from `CLAUDE.md` rules 2 and 6)
+## Rules (from `AGENTS.md` rules 2 and 6)
 
 1. **Free, or one-shot paid (per-call x402-style).** No
    subscriptions inside the MCP itself; subscriptions live at the

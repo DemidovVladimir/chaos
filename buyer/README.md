@@ -9,7 +9,7 @@ receives photos and inspection PDFs as MCP `ImageContent` /
 
 > **Status**: scaffold. The runnable starter is in `../mvp/buyer.py`
 > (text-only, no MCP client, NIP-04 instead of NIP-17). Wiring the
-> production version is week 1–4 of `LAUNCH_PLAN.md`.
+> production version follows `IMPLEMENTATION_PLAN.md`.
 
 ## What lives here when complete
 
@@ -85,7 +85,7 @@ The buyer plugin **must not**:
 manifest_version: 1
 name: chaos-buyer
 description: |
-  Buyer agent for the chaos Nostr-based marketplace. Subscribes
+  Buyer agent for the chaos Nostr+MCP protocol. Subscribes
   to NIP-99 filters, evaluates listings, sends NIP-17 inquiries,
   connects to seller MCP servers and invokes the cars-pack@1 tool
   surface for photos and inspection reports.
@@ -151,7 +151,7 @@ Phase 1 (week 1):
 
 Phase 2 (week 2):
 
-- Implement `inquiry.py` (NIP-04 path first), `mcp_client.py` using
+- Implement `inquiry.py` (NIP-17 path first), `mcp_client.py` using
   the `mcp` SDK's HTTP+SSE client and the `tools/list` + `call_tool`
   flow proven in `../spike/buyer_mcp.py`. Verify two-machine
   end-to-end test (inquiry → MCP connect → `request_photos` returns
@@ -176,4 +176,4 @@ Phase 4 (week 4):
 - `../verticals/cars-pack/skills/buyer-cars/SKILL.md` — the canonical buyer skill
 - `../PROTOCOL.md` — the on-the-wire design
 - `../SECURITY.md` — pre-launch security checklist
-- `../CLAUDE.md` — engineering rules every PR must respect
+- `../AGENTS.md` — engineering rules every PR must respect

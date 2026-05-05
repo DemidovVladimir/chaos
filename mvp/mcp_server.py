@@ -68,10 +68,7 @@ import os
 import sys
 from pathlib import Path
 
-try:
-    import tomllib            # Python 3.11+
-except ImportError:
-    import tomli as tomllib   # type: ignore
+import tomllib  # Python 3.11+ stdlib
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import (

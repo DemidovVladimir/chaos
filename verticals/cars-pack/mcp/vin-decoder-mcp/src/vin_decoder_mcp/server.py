@@ -4,8 +4,9 @@ Stub server. Real WMI/VDS/year/plant decoding lands in Phase 2.
 
 Threat model: bundled SAE WMI registry only. No outbound HTTP. No
 vehicle-history lookup (commercial data, explicitly out of scope per
-CLAUDE.md rule 6).
+AGENTS.md rule 6).
 """
+
 from __future__ import annotations
 
 import logging

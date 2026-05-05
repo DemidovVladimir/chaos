@@ -4,8 +4,10 @@ The keypair lives at ``~/.chaos/keys/buyer.key`` mode 0600.
 Same shape and rules as the seller's identity module, kept separate
 so each plugin installs as a self-contained wheel.
 """
+
 from __future__ import annotations
 
+import contextlib
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -67,8 +69,6 @@ def ensure_keys_dir(path: Path = KEYS_DIR) -> Path:
         The directory path.
     """
     path.mkdir(parents=True, exist_ok=True)
-    try:
+    with contextlib.suppress(OSError):
         os.chmod(path, 0o700)
-    except OSError:
-        pass
     return path

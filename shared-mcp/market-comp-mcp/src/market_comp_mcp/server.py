@@ -5,6 +5,7 @@ Stub server. Real relay query + percentile logic lands in Phase 2.
 Threat model: queries Nostr relays the user has configured (read-
 only). No outbound HTTP. No external comp data sources. No PII.
 """
+
 from __future__ import annotations
 
 import logging

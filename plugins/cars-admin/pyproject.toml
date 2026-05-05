@@ -1,10 +1,12 @@
 [project]
 name = "chaos-cars-admin"
 version = "0.1.0"
-description = "Operator-deployed admin agent for the cars vertical."
-requires-python = ">=3.11"
+description = "Operator-deployed admin agent for cars-pack@1."
+requires-python = ">=3.12"
 dependencies = [
-  "chaos-admin-engine>=0.1",
+  # The admin engine package is being authored in parallel (see
+  # plugin.yaml). Restore the workspace dep below once it ships 0.1:
+  #   "chaos-admin-engine>=0.1",
   "reputation-mcp>=0.1",
 ]
 
@@ -12,8 +14,8 @@ dependencies = [
 dev = ["pytest", "ruff"]
 
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_cars_admin"]

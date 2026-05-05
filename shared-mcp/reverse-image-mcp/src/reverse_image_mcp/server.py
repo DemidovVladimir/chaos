@@ -7,6 +7,7 @@ local. Image bytes are received as base64 from the calling agent
 (typically passed through from `ImageContent` blocks the buyer's
 agent received from the seller's MCP server) and are NOT retained.
 """
+
 from __future__ import annotations
 
 import logging

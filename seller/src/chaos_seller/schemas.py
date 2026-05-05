@@ -4,9 +4,10 @@ Each constant is a JSON-schema dict the Hermes plugin loader passes
 to ``ctx.register_tool()``. Descriptions follow the build-a-plugin
 guide rule: "Be specific about what it does and when to use it."
 
-CLAUDE.md rule 6 forbids any tool that resells third-party data. Our
+AGENTS.md rule 6 forbids any tool that resells third-party data. Our
 tool surface is intentionally narrow.
 """
+
 from __future__ import annotations
 
 PUBLISH_ITEM = {

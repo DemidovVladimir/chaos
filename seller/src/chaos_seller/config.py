@@ -6,8 +6,9 @@ own MCP server lives (so it can include the public URL in NIP-99
 explicit user confirmation regardless of the default policy.
 
 The file is plain YAML so non-engineers can edit it. Secrets stay in
-``~/.chaos/.env`` per CLAUDE.md § "Code conventions".
+``~/.chaos/.env`` per AGENTS.md § "Code conventions".
 """
+
 from __future__ import annotations
 
 import os
@@ -98,9 +99,7 @@ class SellerConfig:
             ValueError: if required fields (``relays``, ``mcp``,
                 ``mcp_url``) are empty or missing.
         """
-        raise NotImplementedError(
-            "config.SellerConfig.load not implemented yet"
-        )
+        raise NotImplementedError("config.SellerConfig.load not implemented yet")
 
     def assert_valid(self) -> None:
         """Self-check that values pass the architecture constraints.

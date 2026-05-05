@@ -6,6 +6,7 @@ index. Numeric ranges that don't fit discrete buckets (precise year,
 exact mileage) are expressed as the set of acceptable bucket values.
 Buyer-side post-filtering handles whatever the relay can't.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

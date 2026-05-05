@@ -3,7 +3,7 @@
 Drop vertical-specific local capability MCP specs here, one per
 file (`<mcp-name>.md`). These are MCPs the seller or buyer agent
 calls **under the hood** while preparing a listing or evaluating
-one — not the seller's marketplace MCP server (which exposes the
+one — not the seller's peer MCP server (which exposes the
 vertical's tool surface to buyers).
 
 Examples from `cars-pack`: `reverse-image-mcp` (paid, perceptual-
@@ -13,7 +13,7 @@ listings already on the relay).
 
 ## Rules these must follow
 
-(All of these come from `CLAUDE.md`; restating here so a vertical
+(All of these come from `AGENTS.md`; restating here so a vertical
 author can sanity-check their proposal in one place.)
 
 1. **Free, or one-shot paid (per-call, x402-style).** Subscriptions
@@ -51,7 +51,7 @@ Each file `mcp/<mcp-name>.md` should describe:
 - **Data sources** — free / local / public; explicitly state that
   no commercial broker is queried
 - **Rationale** — why this MCP belongs at the pack level and why
-  it satisfies `CLAUDE.md` rule 6
+  it satisfies `AGENTS.md` rule 6
 
 ## Adding a new MCP
 

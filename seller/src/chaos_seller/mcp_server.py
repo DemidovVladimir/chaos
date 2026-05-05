@@ -3,7 +3,7 @@
 This is the network-facing leaf where the seller's photos and
 inspection PDFs cross from disk into the buyer's process. It is the
 canonical wire for buyer↔seller dialogue and binary content
-(CLAUDE.md rule 2).
+(AGENTS.md rule 2).
 
 The server is a ``FastMCP`` instance running over the SSE transport on
 ``SellerConfig.mcp.bind``. The cars-pack@1 tool surface (the
@@ -28,28 +28,27 @@ item)`` before the underlying ``catalog`` lookup runs. Calls marked
 ``ASK_USER`` block until ``tools_inquire.grant_asks`` resolves them.
 Calls marked ``DENY`` raise an MCP tool error with the policy reason.
 
-CLAUDE.md rule 2 ("Binary content moves over MCP only") and rule 5
+AGENTS.md rule 2 ("Binary content moves over MCP only") and rule 5
 ("No data custody") are *enforced here*, not just described. Every
 byte streamed leaves through this module — no other path exists.
 
 Reference: the proven spike in ``spike/seller_mcp.py`` which boots
 two of these on different ports for multi-seller fanout testing.
 """
+
 from __future__ import annotations
 
-import base64
 import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
     from mcp.types import EmbeddedResource, ImageContent
 
     from .catalog import Catalog
-    from .grant_policy import GrantOutcome
 
 
 logger = logging.getLogger(__name__)
@@ -117,9 +116,9 @@ def build_server(
     name: str,
     host: str,
     port: int,
-    catalog: "Catalog",
+    catalog: Catalog,
     registry: SessionRegistry,
-) -> "FastMCP":
+) -> FastMCP:
     """Construct the ``FastMCP`` instance and register cars-pack@1 tools.
 
     The resulting server is what ``serve()`` runs. Splitting it out
@@ -159,7 +158,7 @@ def build_server(
 # ---------------------------------------------------------------------------
 
 
-def view_listing_impl(item_id: str, *, catalog: "Catalog") -> str:
+def view_listing_impl(item_id: str, *, catalog: Catalog) -> str:
     """Return a short textual summary of the item.
 
     Args:
@@ -176,8 +175,8 @@ def request_photos_impl(
     item_id: str,
     *,
     kinds: list[str] | None = None,
-    catalog: "Catalog",
-) -> "list[ImageContent]":
+    catalog: Catalog,
+) -> list[ImageContent]:
     """Return photos as inline ``ImageContent`` blocks.
 
     Args:
@@ -196,8 +195,8 @@ def request_photos_impl(
 def request_inspection_report_impl(
     item_id: str,
     *,
-    catalog: "Catalog",
-) -> "EmbeddedResource":
+    catalog: Catalog,
+) -> EmbeddedResource:
     """Return the inspection report as an ``EmbeddedResource``.
 
     Args:
@@ -207,12 +206,10 @@ def request_inspection_report_impl(
     Returns:
         An ``EmbeddedResource`` with the PDF bytes (base64).
     """
-    raise NotImplementedError(
-        "mcp_server.request_inspection_report_impl not implemented"
-    )
+    raise NotImplementedError("mcp_server.request_inspection_report_impl not implemented")
 
 
-def request_vin_impl(item_id: str, *, catalog: "Catalog") -> str:
+def request_vin_impl(item_id: str, *, catalog: Catalog) -> str:
     """Return the full VIN as text (always gated by user confirmation).
 
     Args:
@@ -259,7 +256,7 @@ def cancel_inquiry_impl(item_id: str, *, reason: str = "") -> str:
     raise NotImplementedError("mcp_server.cancel_inquiry_impl not implemented")
 
 
-def _b64_image(path: Path, mime_type: str = "image/jpeg") -> "ImageContent":
+def _b64_image(path: Path, mime_type: str = "image/jpeg") -> ImageContent:
     """Helper: read a photo from disk and wrap in ``ImageContent``."""
     raise NotImplementedError("mcp_server._b64_image not implemented")
 
@@ -273,7 +270,7 @@ def _sha_log(name: str, blob: bytes) -> None:
 async def serve(
     bind: str,
     *,
-    catalog: "Catalog",
+    catalog: Catalog,
     registry: SessionRegistry,
     name: str = "chaos-seller",
     transport: str = "sse",

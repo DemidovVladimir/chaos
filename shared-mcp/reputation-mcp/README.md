@@ -6,14 +6,14 @@ reputation oracle.
 
 ## Why this MCP
 
-`CLAUDE.md` rule 4 says trust must be **layered, not centralized**.
+`AGENTS.md` rule 4 says trust must be **layered, not centralized**.
 This MCP is the layering point. It reads multiple sources, weights
 them, and returns a structured `ReputationReport` the buyer skill
 can use as one input among many. It does NOT make the gatekeeping
 decision for the user.
 
 The MCP also implements the **peer-attestation submission** path
-(rules 12 and 13 of `CLAUDE.md`) and the **counter-attestation /
+(rules 12 and 13 of `AGENTS.md`) and the **counter-attestation /
 dispute** path (rule 14). It NEVER stores reputation centrally —
 attestations are signed Nostr events; aggregation is per-query and
 in-memory only.
@@ -36,7 +36,7 @@ in-memory only.
 7. **On-chain stake** — optional Phase 1 hook. The MVP returns
    `null`; later we can wire a small bonded-stake check (e.g. an
    on-chain commitment the seller posted, queryable via a free
-   public RPC). Per `CLAUDE.md` Rules 12–14 the on-chain stake is
+   public RPC). Per `AGENTS.md` Rules 12–14 the on-chain stake is
    **never** custodied by us; we only read it.
 
 See `reputation/scoring.md` for the reference algorithm and
@@ -105,7 +105,7 @@ Hermes/MCP clients call:
 
 Every submit tool refuses to run without `signing_key_hex`. The MCP
 is local-only: keys come from the calling agent's local keystore at
-`~/.chaos/<role>/seller.key` (mode 0600, per CLAUDE.md Rule 3)
+`~/.chaos/<role>/seller.key` (mode 0600, per AGENTS.md Rule 3)
 and are passed in only at call time. The server never logs the
 signing key, never persists it, and never derives identity from
 anywhere else.

@@ -1,4 +1,5 @@
 """Hermes tool handlers — inquiry-side tools."""
+
 from __future__ import annotations
 
 import json
@@ -62,7 +63,7 @@ def mcp_call_tool(args: dict, **kwargs: Any) -> str:
     - ``TextContent`` blocks are passed through ``input_safety.sanitize``
       and returned inline in the response payload.
 
-    Per CLAUDE.md rule 2, the buyer NEVER fetches binary content
+    Per AGENTS.md rule 2, the buyer NEVER fetches binary content
     from any URL — bytes are only ever decoded inline from the MCP
     response.
 

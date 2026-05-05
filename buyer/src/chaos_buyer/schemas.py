@@ -1,4 +1,5 @@
 """Tool schemas — buyer-side LLM-facing tools."""
+
 from __future__ import annotations
 
 CREATE_FILTER = {
@@ -61,7 +62,7 @@ SEND_INQUIRY = {
         "service_history, photos:exterior, inspection_at_shop), the "
         "buyer's pubkey, and a fresh `session_token` the seller will "
         "later bind to its grant. The seller's MCP HTTP+SSE URL is "
-        "discovered from the matched listing's `[\"mcp\", url]` tag — "
+        'discovered from the matched listing\'s `["mcp", url]` tag — '
         "it is NOT carried in the inquiry. Use after the user "
         "approves the draft asks list."
     ),
@@ -78,7 +79,7 @@ SEND_INQUIRY = {
 MCP_CONNECT = {
     "name": "mcp_connect",
     "description": (
-        "Open an MCP HTTP+SSE session to the seller's `[\"mcp\", url]` "
+        'Open an MCP HTTP+SSE session to the seller\'s `["mcp", url]` '
         "tag from the matched listing and call `tools/list` to "
         "bootstrap the seller's tool surface (cars-pack@1: "
         "view_listing, request_photos, request_inspection_report, "
@@ -102,7 +103,7 @@ MCP_CALL_TOOL = {
         "for an item. Decodes the returned content blocks: "
         "`ImageContent` and `EmbeddedResource` bytes are written to "
         "the inbox (photos/ and documents/ subfolders); `TextContent` "
-        "is sanitized and returned inline. Per CLAUDE.md rule 2 the "
+        "is sanitized and returned inline. Per AGENTS.md rule 2 the "
         "buyer NEVER fetches binary content from any URL — bytes only "
         "arrive inline as MCP content blocks."
     ),

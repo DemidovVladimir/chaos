@@ -13,18 +13,19 @@ MCP server — never as a URL, never as a remote fetch. EXIF /
 perceptual-hash / reverse-image-check operates on those decoded
 bytes directly.
 
-CLAUDE.md rule 6 forbids commercial vehicle-history providers — this
+AGENTS.md rule 6 forbids commercial vehicle-history providers — this
 module never reaches out to any third-party data broker. All inputs
 come from on-network listings (via ``market_comp``) or local files
 (VIN structural decode, perceptual photo hash).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 
-class FlagSeverity(str, Enum):
+class FlagSeverity(StrEnum):
     """Severity bucket for a single rubric finding."""
 
     HARD_RED = "hard_red"
@@ -74,8 +75,9 @@ class Verdict:
         return sum(1 for f in self.flags if f.severity is FlagSeverity.GREEN)
 
 
-def evaluate(event: object, *, market_comp: object | None = None,
-             trust_graph: object | None = None) -> Verdict:
+def evaluate(
+    event: object, *, market_comp: object | None = None, trust_graph: object | None = None
+) -> Verdict:
     """Run the rubric against one NIP-99 event.
 
     Args:

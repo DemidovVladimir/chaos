@@ -20,30 +20,31 @@ The aggregate is intentionally *advisory* — buyer/seller skills
 render the per-layer breakdown alongside the aggregate so the
 user sees "why" rather than just a number.
 """
+
 from __future__ import annotations
 
 import time
 from collections import deque
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 # ---------------------------------------------------------------------------
 # Default weights (from reputation/scoring.md)
 # ---------------------------------------------------------------------------
 
 DEFAULT_LAYER_WEIGHTS: dict[str, float] = {
-    "badges":          0.20,
-    "attestations":    0.40,
+    "badges": 0.20,
+    "attestations": 0.40,
     "admin_decisions": 0.20,
-    "mute_signal":     0.10,
-    "onchain_stake":   0.10,  # always 0 in MVP
+    "mute_signal": 0.10,
+    "onchain_stake": 0.10,  # always 0 in MVP
 }
 
 DEFAULT_WOT_DISTANCE: dict[str, float] = {
-    "direct":                 1.0,
+    "direct": 1.0,
     "two_hop_shared_contact": 0.4,
     "verified_badge_unknown": 0.2,
-    "unknown":                0.05,
+    "unknown": 0.05,
 }
 
 DEFAULT_ATTESTATION_DECAY_DAYS: int = 365
@@ -51,7 +52,9 @@ SECONDS_PER_DAY: int = 86400
 
 DECISION_VALUES: frozenset[str] = frozenset({"clear", "warning", "flag", "escalated"})
 SEVERITY_MULT: dict[str, float] = {"low": 0.3, "moderate": 0.6, "high": 1.0}
-ATTESTATION_STATUSES: frozenset[str] = frozenset({"completed-clean", "disputed", "counterparty-vanished"})
+ATTESTATION_STATUSES: frozenset[str] = frozenset(
+    {"completed-clean", "disputed", "counterparty-vanished"}
+)
 
 
 # ---------------------------------------------------------------------------
@@ -68,6 +71,7 @@ class BadgeRecord:
     `decision=flag` event referencing it (per
     `operator_revocation.md`). Either alone is insufficient.
     """
+
     issuer_pubkey: str
     badge_id: str
     award_event_id: str
@@ -84,28 +88,30 @@ class AttestationRecord:
     30412. `signer_pubkey` is the publishing party (the side whose
     signature the relay verified), `subject_pubkey` is the target.
     """
-    kind: int                           # 30410, 30411, or 30412
-    sale_id: str                        # `d` tag value
+
+    kind: int  # 30410, 30411, or 30412
+    sale_id: str  # `d` tag value
     signer_pubkey: str
     subject_pubkey: str
     listing_event_id: str
     pack: str
-    status: str                         # "completed-clean" | "disputed" | "counterparty-vanished"
-    sale_closed_at: int                 # unix seconds
-    paired: bool = False                # True if a matching 30411 was found within 14d
+    status: str  # "completed-clean" | "disputed" | "counterparty-vanished"
+    sale_closed_at: int  # unix seconds
+    paired: bool = False  # True if a matching 30411 was found within 14d
     counterparty_status: str | None = None  # status reported by the OTHER side, if paired
 
 
 @dataclass(frozen=True)
 class AdminDecisionRecord:
     """A kind 30430 admin-decision about the target."""
+
     dispute_id: str
     admin_pubkey: str
     affected_pubkey: str
     related_event_id: str
     pack: str
-    decision: str                       # clear|warning|flag|escalated
-    severity: str                       # low|moderate|high
+    decision: str  # clear|warning|flag|escalated
+    severity: str  # low|moderate|high
     reason_hash: str
     appeal_until: int
     has_open_appeal: bool = False
@@ -114,6 +120,7 @@ class AdminDecisionRecord:
 @dataclass(frozen=True)
 class ScoringReport:
     """Final aggregate plus the breakdown that produced it."""
+
     score: float
     score_components: dict[str, float] = field(default_factory=dict)
     wot_distance: int | None = None
@@ -218,16 +225,12 @@ def _badge_layer(
                     f"{b.issuer_pubkey[:12]}...{b.badge_id}"
                 )
             else:
-                red_flags.append(
-                    f"badge revoked by issuer {b.issuer_pubkey[:12]}..."
-                )
+                red_flags.append(f"badge revoked by issuer {b.issuer_pubkey[:12]}...")
             continue
         if weight is not None and weight > 0:
             if weight > score:
                 score = weight
-            green_flags.append(
-                f"badge {b.badge_id!r} held, issuer trust={weight:.2f}"
-            )
+            green_flags.append(f"badge {b.badge_id!r} held, issuer trust={weight:.2f}")
     return _clamp(score, -1.0, 1.0)
 
 
@@ -275,15 +278,11 @@ def _attestation_layer(
             elif a.status == "disputed-by-me" or a.counterparty_status == "disputed":
                 score -= 0.15 * w
                 disputed += 1
-                red_flags.append(
-                    f"paired-disputed attestation from {a.signer_pubkey[:12]}..."
-                )
+                red_flags.append(f"paired-disputed attestation from {a.signer_pubkey[:12]}...")
             # mismatched pair (one says clean, the other disputed):
             # `scoring.md` flags it but contributes no positive evidence.
             elif a.status != a.counterparty_status:
-                red_flags.append(
-                    f"mismatched attestation pair sale={a.sale_id[:8]}..."
-                )
+                red_flags.append(f"mismatched attestation pair sale={a.sale_id[:8]}...")
 
     summary["completed_clean"] = completed
     summary["disputed"] = disputed
@@ -311,22 +310,19 @@ def _admin_layer(
         if d.has_open_appeal:
             weight *= 0.5
         sev_mult = SEVERITY_MULT.get(d.severity, 0.0)
-        if d.decision == "clear":
-            score += 0.10 * weight
-            green_flags.append(
-                f"admin clear by {d.admin_pubkey[:12]}... (weight {weight:.2f})"
-            )
-        elif d.decision == "warning":
-            score -= 0.20 * weight * sev_mult
-            red_flags.append(
-                f"admin warning, severity={d.severity}"
-            )
-        elif d.decision == "flag":
-            score -= 0.50 * weight * sev_mult
-            red_flags.append(
-                f"admin flag, severity={d.severity}"
-            )
-        # "escalated" is neutral by design (awaiting human review).
+        match d.decision:
+            case "clear":
+                score += 0.10 * weight
+                green_flags.append(f"admin clear by {d.admin_pubkey[:12]}... (weight {weight:.2f})")
+            case "warning":
+                score -= 0.20 * weight * sev_mult
+                red_flags.append(f"admin warning, severity={d.severity}")
+            case "flag":
+                score -= 0.50 * weight * sev_mult
+                red_flags.append(f"admin flag, severity={d.severity}")
+            case "escalated":
+                # neutral by design — awaiting human review.
+                pass
     return _clamp(score, -1.0, 1.0)
 
 
@@ -373,16 +369,12 @@ def aggregate_score(
 
     # Pubkeys that hold any (non-revoked) badge — used by the
     # WoT-weight fallback for "verified-badge unknown" signers.
-    badge_holders: set[str] = {
-        b.issuer_pubkey for b in badges if not b.revoked
-    }
+    badge_holders: set[str] = {b.issuer_pubkey for b in badges if not b.revoked}
     badge_holders.add(counterparty_pubkey) if any(
         not b.revoked for b in badges
     ) else None  # the target itself when it holds a live badge
 
-    badge_score = _badge_layer(
-        badges, trust_issuers, red_flags=red_flags, green_flags=green_flags
-    )
+    badge_score = _badge_layer(badges, trust_issuers, red_flags=red_flags, green_flags=green_flags)
     att_score = _attestation_layer(
         attestations,
         user_pubkey,
@@ -405,10 +397,10 @@ def aggregate_score(
     stake_score = 0.0  # Phase 1 — always 0 in MVP
 
     raw = (
-        layer_weights["badges"]          * badge_score
-        + layer_weights["attestations"]  * att_score
+        layer_weights["badges"] * badge_score
+        + layer_weights["attestations"] * att_score
         + layer_weights["admin_decisions"] * admin_score
-        + layer_weights["mute_signal"]   * mute_layer_score
+        + layer_weights["mute_signal"] * mute_layer_score
         + layer_weights["onchain_stake"] * stake_score
     )
     aggregate = _clamp((raw + 1.0) / 2.0, 0.0, 1.0)

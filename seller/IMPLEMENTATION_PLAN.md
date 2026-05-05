@@ -5,13 +5,13 @@ plan one engineer follows to convert the scaffold under
 `src/chaos_seller/` into a working Hermes plugin that
 participates end-to-end in the protocol described in `../PROTOCOL.md`.
 
-This is *Week 1* of the seller plugin work-stream (overall
-`LAUNCH_PLAN.md` milestone is "Weeks 3-4 — Hermes plugin baseline").
-Four engineering days; the rest of the milestone slips to Week 2.
+This is the first seller plugin work-stream: four engineering days
+for the production-shaped baseline; follow-on MCP/grant-policy work
+continues in later phases below.
 
 > Source-of-truth references this plan touches:
 >
-> - `../CLAUDE.md` — non-negotiable rules
+> - `../AGENTS.md` — non-negotiable rules
 > - `../PROTOCOL.md` — wire format
 > - `../mvp/seller.py`, `../mvp/shared.py` — runnable starter
 > - `../verticals/cars-pack/skills/seller-cars/SKILL.md` — grant policy + flow
@@ -35,9 +35,9 @@ Four engineering days; the rest of the milestone slips to Week 2.
 ### Goal
 
 A minimal Hermes plugin that loads, holds the seller identity,
-publishes a NIP-99 listing with PoW, and decodes incoming NIP-04
-inquiries (NIP-17 follows in Phase 3). No FastMCP server yet — this
-phase is wire-format-only on the Nostr side.
+publishes a NIP-99 listing with PoW, and decodes incoming NIP-17
+inquiries. No FastMCP server yet — this phase is wire-format-only on
+the Nostr side.
 
 ### Steps
 
@@ -67,7 +67,7 @@ phase is wire-format-only on the Nostr side.
    key directly.
 
 5. Implement `input_safety.py` — copy the Layer-1 sanitizer pattern
-   per `../CLAUDE.md` § "Input safety". Functions:
+   per `../AGENTS.md` § "Input safety". Functions:
 
    - `sanitize(text: str, *, source: str, key: str = "") -> str` —
      NFKC normalize, strip invisible, strip reserved tags, length
@@ -105,11 +105,8 @@ phase is wire-format-only on the Nostr side.
 
 9. Implement the Phase-1 form of `inquiry_listener.py`:
 
-   - NIP-04 path **only**, copied from `mvp/seller.py`.
-     Add a `# TODO(phase-3): replace with NIP-17 gift-wrap` comment so
-     the ratchet is visible. (CLAUDE.md rule 7 — NIP-04 is MVP-only;
-     this scaffold is week-1 of seller plugin, NIP-17 lands in
-     Phase 3.)
+   - NIP-17 path **only**. AGENTS.md rule 7 keeps NIP-04 isolated to
+     `mvp/`.
    - The rumor's structured payload type is `mcp_inquiry_open` and
      carries `{ "type": "mcp_inquiry_open", "session_token": "...",
      "item_id": "...", "free_text": "..." }`.
@@ -153,7 +150,7 @@ phase is wire-format-only on the Nostr side.
 - `publish_item` lands a kind-30402 event with cars-pack tags
   (`mcp`, `pack=cars-pack@1`) + PoW.
 - No `image` tag and no public photo URL anywhere on the event.
-- `inquiry_listener` decodes a NIP-04 DM, validates the
+- `inquiry_listener` decodes a NIP-17 gift-wrap, validates the
   `mcp_inquiry_open` rumor type, and binds the session token to the
   buyer's pubkey.
 
@@ -169,9 +166,8 @@ through the per-tool grant policy, and returns photos as MCP
 `ImageContent` blocks and inspection PDFs as `EmbeddedResource`
 blocks.
 
-This phase replaces the previously-planned ACP server. The proven
-shape is in `../spike/seller_mcp.py`; `mcp_server.py` is the
-production-shaped scaffold of that spike.
+The proven shape is in `../spike/seller_mcp.py`; `mcp_server.py` is
+the production-shaped scaffold of that spike.
 
 ### Steps
 
@@ -272,8 +268,7 @@ production-shaped scaffold of that spike.
 
    - Seller publishes a listing with a local item folder containing
      three test photos.
-   - Buyer (using `mvp/buyer.py` patched to dial MCP) sends a NIP-04
-     inquiry asking for photos.
+   - Buyer sends a NIP-17 inquiry asking for photos.
    - Seller's `inquiry_listener` binds the session token.
    - Buyer's MCP client opens `https://localhost:7501/sse` with the
      token and calls `request_photos(item_id, kinds=["exterior"])`.
@@ -294,19 +289,19 @@ production-shaped scaffold of that spike.
 
 ### Goal
 
-Replace the Phase-1 NIP-04 inquiry path with full NIP-17 gift-wrap
+Use full NIP-17 gift-wrap
 plumbing. Wire the negotiation and attestation modules.
 
 ### Steps
 
-1. Replace the NIP-04 path in `inquiry_listener.py` with NIP-17:
+1. Implement NIP-17 handling in `inquiry_listener.py` with NIP-17:
 
    - Subscribe to kind-1059 events tagged `["p", <our_pubkey>]`.
    - Decrypt gift wrap → seal → rumor (kind 14, sender-signed).
    - Validate `rumor.content.type == "mcp_inquiry_open"`.
    - Bind `(session_token, sender_pubkey)` in `SessionRegistry`.
 
-2. Replace the NIP-04 path in `send_reply` with NIP-17 gift-wrapped
+2. Implement NIP-17 handling in `send_reply` with NIP-17 gift-wrapped
    `mcp_inquiry_ack` rumors. Used when we need to deliver a
    human-readable note outside the MCP session itself (e.g. an
    explicit denial when no MCP session will be opened).
@@ -344,7 +339,7 @@ Wire the supporting MCPs and polish the CLI.
    marked for replacement.
 
 2. `vin_decode` MCP — free, structural decode using the public WMI
-   registry (CLAUDE.md rule 6 forbids third-party data resellers).
+   registry (AGENTS.md rule 6 forbids third-party data resellers).
    `request_vin` calls into this for any returned VIN to add a small
    inline summary.
 
@@ -376,7 +371,7 @@ In `seller/src/chaos_seller/`:
 | `input_safety.py` | Layer-1 sanitizer: NFKC, strip invisible/tags, length cap, wrap in `<untrusted>` |
 | `catalog.py` | Local item store at `~/.chaos/items/<uuid>/` |
 | `publish.py` | NIP-99 build, NIP-13 PoW mine, sign, publish |
-| `inquiry_listener.py` | NIP-17 / (MVP NIP-04) gift-wrap listener, decrypt, route, bind session_token |
+| `inquiry_listener.py` | NIP-17 gift-wrap listener, decrypt, route, bind session_token |
 | `grant_policy.py` | Per-tool policy decision table (cars-pack@1 tool surface) |
 | `mcp_server.py` | FastMCP HTTP+SSE server: cars-pack@1 tools (`view_listing`, `request_photos`, `request_inspection_report`, `request_vin`, `submit_offer`, `cancel_inquiry`, …) returning `ImageContent` / `EmbeddedResource` |
 | `negotiation.py` | Round tracking, `bid_min_cents`, user-confirm gates |
@@ -598,7 +593,7 @@ Run target: `pytest seller/tests/ -q`.
    reconnect after a relay drop? Audited briefly in the MVP but not
    under sustained churn. Answer this before going to production.
 
-2. **NIP-17 maturity in `pynostr` 0.6.2.** The MVP uses NIP-04 because
+2. **NIP-17 maturity in `pynostr` 0.6.2.** The MVP uses NIP-04, but production uses NIP-17. Historical note:
    `pynostr`'s NIP-44 / NIP-59 helpers are partial. Confirm by
    reading `pynostr/encrypted_dm.py` and the NIP-44 module. If
    missing, write a thin NIP-44 encrypt + gift-wrap helper inline
@@ -644,7 +639,7 @@ Run target: `pytest seller/tests/ -q`.
   job to fill in).
 - A live demo: `hermes chaos-seller serve item.toml` boots,
   publishes a listing on the Mode A relay, accepts an MVP buyer's
-  NIP-04 DM, binds the session_token → buyer pubkey, and the buyer's
+  NIP-17 gift-wrap, binds the session_token → buyer pubkey, and the buyer's
   MCP client successfully calls `view_listing`, `request_photos` and
   `request_inspection_report` against the FastMCP server. Photos
   come back as `ImageContent` blocks, the inspection report as an

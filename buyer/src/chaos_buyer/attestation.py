@@ -4,6 +4,7 @@ Buyer-side counterpart to
 ``chaos_seller.attestation``. We only ever VERIFY (never
 sign) — buyers don't issue attestations, sellers do.
 """
+
 from __future__ import annotations
 
 ATTESTATION_KIND = 30078

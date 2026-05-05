@@ -4,6 +4,7 @@ See `plugins/cars-seller/__init__.py` for the rationale; this is the
 buyer-side mirror. The real implementation lives under
 `src/chaos_cars_buyer/__init__.py`.
 """
+
 from __future__ import annotations
 
 import sys

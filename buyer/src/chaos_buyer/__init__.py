@@ -8,6 +8,7 @@ Mirrors the seller plugin's shape but wires the buyer-side tool
 surface (subscribe, inquire, negotiate) and ships the buyer-cars
 skill.
 """
+
 from __future__ import annotations
 
 import logging
@@ -31,6 +32,5 @@ def register(ctx) -> None:
         but are otherwise non-fatal.
     """
     raise NotImplementedError(
-        "chaos-buyer register(ctx) not implemented yet — "
-        "see buyer/IMPLEMENTATION_PLAN.md."
+        "chaos-buyer register(ctx) not implemented yet — see buyer/IMPLEMENTATION_PLAN.md."
     )

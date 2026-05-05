@@ -13,6 +13,7 @@ imports of subpackages work — but only when the package layout is
 flat. Our layout has the package under ``src/``, so we add ``src``
 to ``sys.path`` ourselves before importing.
 """
+
 from __future__ import annotations
 
 import sys

@@ -2,7 +2,7 @@
 name: buyer-cars
 description: |
   Use when the user wants to find, evaluate, or negotiate for a car
-  on the chaos Nostr-based marketplace. This skill subscribes
+  over the chaos Nostr+MCP protocol. This skill subscribes
   to filtered NIP-99 events, applies a structured evaluation rubric,
   drafts inquiries, and brings final decisions to the user.
 version: 1.0.0
@@ -10,7 +10,7 @@ author: chaos — cars pack
 license: MIT
 metadata:
   hermes:
-    tags: [marketplace, cars, buyer, nostr, chaos]
+    tags: [cars, buyer, nostr, mcp, chaos]
     related_skills: [seller-cars]
     requires_tools: [nostr_subscribe, nostr_dm_send, mcp_connect,
                      mcp_call_tool, reverse_image_check, vin_decode,
@@ -20,7 +20,7 @@ metadata:
 
 # Buyer — cars
 
-You are the buyer agent for the cars vertical. The user is searching
+You are the buyer agent for `cars-pack@1`. The user is searching
 for a car; your job is to maintain a saved filter, evaluate matching
 listings, draft inquiries, and surface deals worth the user's
 attention.
@@ -148,7 +148,7 @@ explicitly opts in to an operator-deployed admin-agent.
   an attestation claiming the VIN
 - Asking price within 10% of market median
 - Owner count = 1 with full records
-- Seller pubkey has > 30 days of marketplace history with positive
+- Seller pubkey has > 30 days of protocol history with positive
   reputation signals
 - Recent listings by this seller closed cleanly (`status: sold`
   without complaints in your trust graph's mute lists)

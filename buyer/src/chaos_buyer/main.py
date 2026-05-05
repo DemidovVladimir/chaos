@@ -11,6 +11,7 @@ Subcommands:
 - ``status`` — print configured filters, identity, recent matches.
 - ``keygen`` — generate the buyer keypair if missing.
 """
+
 from __future__ import annotations
 
 import argparse

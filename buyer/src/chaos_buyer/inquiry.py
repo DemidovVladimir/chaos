@@ -22,10 +22,11 @@ NIP-99 listing's ``["mcp", url]`` tag — it is NOT carried inside
 the rumor. The ``session_token`` is what binds an open MCP session
 back to this inquiry on the seller side.
 
-CLAUDE.md rule 7 forbids NIP-04 in production paths. ``send`` exposes
-a ``use_nip17`` flag so the MVP shortcut path stays available during
-the early bring-up only.
+AGENTS.md rule 7 forbids NIP-04 in production paths. The production
+buyer package only emits NIP-17 inquiries; the MVP shortcut remains
+isolated under ``mvp/``.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -99,12 +100,11 @@ def build_payload(
 
 
 def send(
-    rm: "RelayManager",
+    rm: RelayManager,
     *,
     my_sk_hex: str,
     seller_pubkey_hex: str,
     payload: dict,
-    use_nip17: bool = True,
 ) -> str:
     """Wrap, seal, gift-wrap and publish the inquiry.
 
@@ -115,8 +115,6 @@ def send(
                            the seal layer; ``["p", ...]`` tag for the
                            gift wrap).
         payload: As produced by ``build_payload``.
-        use_nip17: If False, falls back to NIP-04 (mvp-only).
-
     Returns:
         The id of the published gift-wrap event.
 
@@ -128,7 +126,7 @@ def send(
 
 
 def await_reply(
-    rm: "RelayManager",
+    rm: RelayManager,
     *,
     my_sk_hex: str,
     sub_id: str,

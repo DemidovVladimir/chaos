@@ -4,13 +4,12 @@ Covers the pure scoring algorithm (no relay round-trips), the
 WoT-distance helper, and the input-validation layer of the submit
 tools. Relay I/O is mocked end-to-end — we never open a socket.
 """
+
 from __future__ import annotations
 
-import time
 from unittest.mock import patch
 
 import pytest
-
 from reputation_mcp.scoring import (
     AdminDecisionRecord,
     AttestationRecord,
@@ -19,22 +18,21 @@ from reputation_mcp.scoring import (
     wot_distance,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 # 64-hex pubkeys for fixture readability.
 ALICE = "a" * 64
-BOB   = "b" * 64
+BOB = "b" * 64
 CAROL = "c" * 64
-DAVE  = "d" * 64
+DAVE = "d" * 64
 
 # For tests that talk about an "admin" or "issuer" we use distinct
 # constants to keep the role obvious in failure output.
-ADMIN1   = "f" * 64
-ADMIN2   = "e" * 64
-ISSUER1  = "1" * 64
+ADMIN1 = "f" * 64
+ADMIN2 = "e" * 64
+ISSUER1 = "1" * 64
 
 NOW_TS = 1_714_800_000  # fixed clock for deterministic decay
 
@@ -174,7 +172,7 @@ def test_wot_distance_computation() -> None:
     """alice -> bob -> carol => distance(alice, carol) == 2."""
     graph = {
         ALICE: {BOB},
-        BOB:   {CAROL},
+        BOB: {CAROL},
         CAROL: set(),
     }
     assert wot_distance(ALICE, BOB, graph) == 1
@@ -305,9 +303,7 @@ def fake_relay_publish():
     class _FakePrivateKey:
         def __init__(self, hexv):
             self._hex = hexv
-            self.public_key = type(
-                "_PK", (), {"hex": lambda self_: ALICE}
-            )()
+            self.public_key = type("_PK", (), {"hex": lambda self_: ALICE})()
 
         @classmethod
         def from_hex(cls, h):

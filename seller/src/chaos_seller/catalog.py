@@ -14,15 +14,16 @@ An *item* is everything the seller has on disk for one car:
 - ``private/vin.txt`` — full VIN, never leaves the user's machine
   unless explicitly granted per-buyer (via ``request_vin``).
 
-Per CLAUDE.md rule 5 ("No data custody"), the platform never sees
+Per AGENTS.md rule 5 ("No data custody"), the platform never sees
 this data. ``catalog.py`` is local-only and explicitly does not have
 any network surface.
 """
+
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 
 @dataclass(frozen=True, slots=True)

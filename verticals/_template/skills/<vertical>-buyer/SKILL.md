@@ -2,7 +2,7 @@
 name: <vertical>-buyer
 description: |
   Use when the user wants to find, evaluate, or negotiate for a
-  <DOMAIN_NOUN> on the chaos Nostr-based marketplace. This
+  <DOMAIN_NOUN> over the chaos Nostr+MCP protocol. This
   skill subscribes to filtered NIP-99 events, applies a structured
   evaluation rubric, drafts inquiries, and brings final decisions
   to the user.
@@ -11,7 +11,7 @@ author: chaos — <vertical> pack
 license: MIT
 metadata:
   hermes:
-    tags: [marketplace, "<vertical>", buyer, nostr, chaos]
+    tags: ["<vertical>", buyer, nostr, mcp, chaos]
     related_skills: ["<vertical>-seller"]
     requires_tools:
       - nostr_subscribe
@@ -154,7 +154,7 @@ When the user says "ask the seller about this":
 > commercial vertical-data providers. If the user wants a paid
 > third-party report, they buy it themselves and share the file
 > with the agent for local analysis. We do not act as a gatekeeper
-> or reseller for that data. (See `CLAUDE.md` rule 6.)
+> or reseller for that data. (See `AGENTS.md` rule 6.)
 
 ## Negotiation drafting
 

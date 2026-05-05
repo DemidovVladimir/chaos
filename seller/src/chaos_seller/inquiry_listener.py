@@ -23,16 +23,16 @@ Per ``PROTOCOL.md`` § "1-to-1 messaging":
         -> Seal (kind 13, NIP-44 from sender)
             -> Rumor (kind 14, sender-signed structured payload)
 
-The MVP path (`mvp/seller.py`) used NIP-04 plaintext DMs because
-``pynostr`` 0.6.2 has partial NIP-44 / NIP-59 support. CLAUDE.md
-rule 7 forbids NIP-04 in production. During Week 1 of plugin work
-this module supports both behind a feature flag; week 3 of the
-overall LAUNCH_PLAN.md drops NIP-04 entirely.
+The MVP path (`mvp/seller.py`) uses NIP-04 plaintext DMs as an
+isolated demo shortcut. AGENTS.md rule 7 forbids NIP-04 in production,
+so this production package accepts NIP-17 gift wraps only.
 """
+
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pynostr.event import Event
@@ -64,17 +64,15 @@ class Inquiry:
 
 
 def listen(
-    rm: "RelayManager",
+    rm: RelayManager,
     *,
     my_sk_hex: str,
     my_pk_hex: str,
-    use_nip17: bool = True,
 ) -> Iterator[Inquiry]:
     """Yield decrypted ``Inquiry`` objects forever.
 
     Subscribes to the configured relays via a REQ filter for
-    kind-1059 events tagged with our pubkey (or kind-4 in the
-    NIP-04 fallback path). Decrypts each, sanitizes free text,
+    kind-1059 events tagged with our pubkey. Decrypts each, sanitizes free text,
     validates the rumor type is ``mcp_inquiry_open``, and yields a
     frozen ``Inquiry``.
 
@@ -82,10 +80,6 @@ def listen(
         rm: Live relay manager.
         my_sk_hex: Seller's secret key hex.
         my_pk_hex: Seller's pubkey hex.
-        use_nip17: If True, only accept NIP-17 gift wraps. If False,
-                   fall back to NIP-04 — only allowed in mvp/ contexts;
-                   production code MUST set ``True``.
-
     Yields:
         ``Inquiry`` instances. Generator never returns.
 
@@ -96,7 +90,7 @@ def listen(
     raise NotImplementedError("inquiry_listener.listen not implemented")
 
 
-def unwrap_gift(ev: "Event", *, my_sk_hex: str) -> tuple[str, str]:
+def unwrap_gift(ev: Event, *, my_sk_hex: str) -> tuple[str, str]:
     """Decrypt a kind-1059 gift wrap → seal → rumor.
 
     Args:
@@ -116,12 +110,11 @@ def unwrap_gift(ev: "Event", *, my_sk_hex: str) -> tuple[str, str]:
 
 
 def send_reply(
-    rm: "RelayManager",
+    rm: RelayManager,
     *,
     my_sk_hex: str,
     recipient_pubkey_hex: str,
     payload: dict,
-    use_nip17: bool = True,
 ) -> str:
     """Wrap, seal, gift-wrap and publish a structured reply.
 
@@ -138,8 +131,6 @@ def send_reply(
                               key).
         payload: Dict matching the ``mcp_inquiry_ack`` shape in
                  ``PROTOCOL.md`` § "1-to-1 messaging".
-        use_nip17: If False, falls back to NIP-04 (mvp-only).
-
     Returns:
         The id of the published gift-wrap event.
 

@@ -1,15 +1,17 @@
 """Seller-side Nostr identity: keypair load/save + Schnorr signing.
 
 The keypair lives at ``~/.chaos/keys/seller.key`` mode 0600.
-Per CLAUDE.md rule 3 ("Identity is sovereign") and rule 5 ("No data
+Per AGENTS.md rule 3 ("Identity is sovereign") and rule 5 ("No data
 custody"), the platform never holds, escrows, or recovers user keys
 — if the file is lost, the user loses their pubkey.
 
 Mirrors the structure of ``mvp/shared.py::Identity`` but typed and
 without side-effects at module load time.
 """
+
 from __future__ import annotations
 
+import contextlib
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -81,9 +83,7 @@ def ensure_keys_dir(path: Path = KEYS_DIR) -> Path:
         The directory path.
     """
     path.mkdir(parents=True, exist_ok=True)
-    try:
+    # On some filesystems chmod is a no-op; we tolerate that.
+    with contextlib.suppress(OSError):
         os.chmod(path, 0o700)
-    except OSError:
-        # On some filesystems chmod is a no-op; we tolerate that.
-        pass
     return path

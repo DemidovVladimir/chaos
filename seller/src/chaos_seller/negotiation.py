@@ -13,17 +13,18 @@ the seller compares the buyer's offer against the user's
 ``bid_min_cents``, escalates to the user, and replies with one of
 ``accept`` / ``counter`` / ``reject``.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 DEFAULT_MAX_ROUNDS = 5
 DEFAULT_MAX_CHARS_PER_OFFER = 1_000
 DEFAULT_MAX_CHARS_PER_MATCH = 50_000
 
 
-class Action(str, Enum):
+class Action(StrEnum):
     """Reply actions for a negotiation step."""
 
     ACCEPT = "accept"

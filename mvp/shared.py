@@ -13,10 +13,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-try:
-    import tomllib            # Python 3.11+
-except ImportError:
-    import tomli as tomllib   # type: ignore
+import tomllib  # Python 3.11+ stdlib
 
 
 # Public, low-friction relays for the MVP. Five relays for redundancy

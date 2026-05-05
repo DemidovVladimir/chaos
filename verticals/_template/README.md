@@ -61,7 +61,7 @@ and `<vertical>-buyer` to your concrete names.
 
 ## Rules every pack must respect
 
-These come from `CLAUDE.md` and apply uniformly:
+These come from `AGENTS.md` and apply uniformly:
 
 - No tag introduced without a `schema_version` policy. Within a
   major version, changes are additive only; breaking changes require
@@ -93,4 +93,4 @@ These come from `CLAUDE.md` and apply uniformly:
    tree.
 4. If your pack ships any local capability MCPs, document each one
    in its own file under `mcp/<mcp-name>.md` with the rationale
-   that satisfies `CLAUDE.md` rule 6.
+   that satisfies `AGENTS.md` rule 6.

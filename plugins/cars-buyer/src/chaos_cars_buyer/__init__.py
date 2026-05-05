@@ -17,11 +17,12 @@ Wiring (modest scope):
 3. CLI subcommand: `hermes cars-buyer {watch,inquire,status,keygen}`
    delegating to `mvp/buyer.py`.
 
-CLAUDE.md rules touched: Rule 11 (no `mcp_serve`-shaped tools here;
+AGENTS.md rules touched: Rule 11 (no `mcp_serve`-shaped tools here;
 this plugin is buyer-side only), Rule 2 (binary content stays
 inside MCP responses, not stored long-term), Rule 7 (NIP-17 in
 production paths once mvp/buyer.py upgrades).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -38,15 +39,14 @@ __version__ = "1.0.0"
 
 _THIS = Path(__file__).resolve()
 _REPO_ROOT = _THIS.parent.parent.parent.parent.parent  # chaos/
-_SKILL_PATH = (
-    _REPO_ROOT / "verticals" / "cars-pack" / "skills" / "buyer-cars" / "SKILL.md"
-)
+_SKILL_PATH = _REPO_ROOT / "verticals" / "cars-pack" / "skills" / "buyer-cars" / "SKILL.md"
 _MVP_BUYER = _REPO_ROOT / "mvp" / "buyer.py"
 
 
 # ---------------------------------------------------------------------------
 # Slash command
 # ---------------------------------------------------------------------------
+
 
 def _slash_status(_raw_args: str) -> str:
     relays = os.getenv("CHAOS_RELAYS", "<unset>")
@@ -68,6 +68,7 @@ def _slash_status(_raw_args: str) -> str:
 # ---------------------------------------------------------------------------
 # CLI — `hermes cars-buyer …`
 # ---------------------------------------------------------------------------
+
 
 def _cli_setup(subparser: argparse.ArgumentParser) -> None:
     subs = subparser.add_subparsers(dest="cars_buyer_cmd")
@@ -127,6 +128,7 @@ def _cli_dispatch(args: argparse.Namespace) -> None:
 # register()
 # ---------------------------------------------------------------------------
 
+
 def register(ctx: Any) -> None:
     """Wire the cars-buyer plugin into Hermes."""
     if _SKILL_PATH.exists():
@@ -161,7 +163,7 @@ def register(ctx: Any) -> None:
             setup_fn=_cli_setup,
             handler_fn=_cli_dispatch,
             description=(
-                "Subscribe to NIP-99 car listings, send NIP-04/17 inquiries, "
+                "Subscribe to NIP-99 car listings, send NIP-17 inquiries, "
                 "and pull photos / inspection PDFs from sellers' MCP servers."
             ),
         )

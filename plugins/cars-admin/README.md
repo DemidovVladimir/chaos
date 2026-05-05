@@ -2,28 +2,28 @@
 
 **Operator-deployed only. Not for end users.**
 
-The admin agent for the cars vertical. Run by whoever operates a
-chaos cars relay (Mode A or Mode B). Reads dispute
-submissions, publishes admin decisions, manages NIP-58 badge
-issuance.
+Operator-side admin plugin for `cars-pack@1`. Run by a trust root that
+wants to operate an optional admin-signal service. Reads opt-in
+admin-signal inputs and publishes kind-30430 admin decisions.
 
 ## What it does
 
-- Receives **encrypted dispute submissions** via the `submit_dispute`
+- Receives **encrypted admin-signal submissions** via the `submit_dispute`
   MCP tool (NIP-44 encrypted package: conversation log + complaint
   + counter-attestations + manifest). Decrypts in memory only.
-- Subscribes to **kind 30412** unilateral dispute-attestations and
+- Subscribes to **kind 30412** unilateral observations and
   **kind 30411** counter-attestations referencing sellers / buyers
-  in the cars vertical.
+  in `cars-pack@1`.
 - Reviews them against the cars-pack admin rubric (see
   `verticals/cars-pack/skills/admin-cars/SKILL.md`) and the
   reputation report (`reputation-mcp`'s `get_reputation` tool).
-- Publishes **kind 30430** admin decisions — operator-signed
+- Publishes **kind 30430** admin decisions — admin-key-signed
   verdicts (`clear`/`warning`/`flag`/`escalated`) that downstream
   buyers can choose to weight via opt-in admin-trust.
 - Affected parties may publish **kind 30431** appeals; admin
   re-reviews on new evidence.
-- Issues / revokes **NIP-58** verified-seller badges.
+- Does not issue or revoke **NIP-58** badges. Badge workflow is an
+  operator responsibility documented in `operator/cars/badge_issuance.md`.
 
 ## Hard constraints
 
@@ -34,7 +34,7 @@ issuance.
   not pull from their agents.
 - **Does NOT decrypt third-party DMs.** NIP-17 gift wraps between
   buyer and seller are opaque to the admin. Admin only decrypts
-  dispute packages explicitly submitted to `submit_dispute` (NIP-44
+  admin-signal packages explicitly submitted to `submit_dispute` (NIP-44
   encrypted to admin's pubkey by the submitter), and only in
   memory — plaintext never lands on disk per the 90-day forgetting
   policy in `reputation/dispute_protocol.md`. Admin's on-relay
@@ -46,17 +46,17 @@ issuance.
 
 ## Why this is a separate plugin (not a buyer/seller variant)
 
-The admin agent runs continuously in the operator's environment.
-It speaks both the seller and buyer pack contracts (it has to
-parse listings AND attestations) but its toolset and policy
-defaults are different from either end-user plugin. Bundling it
-keeps the operator install one-shot.
+The admin agent runs continuously in a trust root's environment. It
+parses listing references and attestations, but its toolset and policy
+defaults are different from either end-user plugin. Bundling it keeps
+the admin-signal install one-shot while keeping it separate from relay
+operations and badge issuance.
 
 ## Install (operator workflow)
 
 ```sh
 hermes plugin install chaos-cars-admin
-export CHAOS_OPERATOR_KEY=~/.chaos/operator.key
+export CHAOS_ADMIN_KEY=~/.chaos/admin-agent.key
 export CHAOS_ADMIN_RELAYS=wss://relay.your-domain.app
 hermes run chaos-cars-admin
 ```

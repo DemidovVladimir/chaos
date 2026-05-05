@@ -1,6 +1,6 @@
 # `chaos-cars-seller`
 
-Sell cars on the chaos Nostr-based marketplace.
+Sell cars on the chaos Nostr+MCP protocol.
 
 ## What it bundles
 
@@ -41,4 +41,4 @@ server will bind to).
   proactively — that runs through the buyer-side MCP when the
   seller is also a buyer.)
 - No payment processing. Money flows off-platform; the platform
-  never custodies funds (see `CLAUDE.md` rule 8).
+  never custodies funds (see `AGENTS.md` rule 8).

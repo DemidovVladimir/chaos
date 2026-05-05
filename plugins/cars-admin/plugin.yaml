@@ -1,6 +1,6 @@
 manifest_version: 1
 name: chaos-cars-admin
-description: "Operator-deployed admin agent for the cars vertical. Reads dispute submissions, publishes admin decisions, manages NIP-58 badge issuance. NOT for end users."
+description: "Operator-deployed admin agent for cars-pack@1. Reads opt-in admin-signal inputs and publishes kind-30430 decisions. Does not operate the relay or issue NIP-58 badges. NOT for end users."
 version: 0.1.0
 entry_point: chaos_cars_admin:register
 
@@ -17,17 +17,18 @@ includes:
     - reputation-mcp@1                           # admin reads attestations and publishes decisions
 
 required_env:
-  - CHAOS_OPERATOR_KEY                     # path to operator's secp256k1 key (mode 0600)
-  - CHAOS_ADMIN_RELAYS                     # write set: operator-controlled relays
+  - CHAOS_ADMIN_KEY                        # path to admin-agent secp256k1 key (mode 0600)
+  - CHAOS_ADMIN_RELAYS                     # write set: configured relays
 
 # Default: same closed toolset as end-user plugins. The admin agent
-# DOES need outbound MCP for relay writes, but `mcp` is not a Hermes
-# toolset-class — it's the wire — so it's not listed here.
+# needs Nostr publish/subscribe plus its own MCP server for intake; it
+# does not get peer-MCP client access.
 #
 # Admin scope rules:
-#   - admin-agent only writes (publishes) to its own relay set + reads dispute submissions.
+#   - admin-agent only publishes to configured relays + reads admin-signal submissions.
 #   - admin-agent does NOT inquire to seller/buyer MCP servers (no direct peer-MCP calls).
+#   - admin-agent does NOT operate strfry and does NOT issue/revoke NIP-58 badges.
 #   - admin-agent does NOT custody DM content; reads only structured kinds
 #     30410/30411/30412 (peer attestations) and publishes 30430/30431 (decisions/appeals).
-#     Encrypted dispute submissions via `submit_dispute` are decrypted in memory only.
+#     Encrypted admin-signal submissions via `submit_dispute` are decrypted in memory only.
 forbidden_toolsets: [terminal, delegation, file, web]

@@ -266,6 +266,5 @@ These all live in `seller/`, `buyer/`, `plugins/cars-seller`,
 
 ## Next steps once it works
 
-See `../MVP_WEEKEND.md` § "After the weekend" for the four-week
-follow-up plan, and the `seller/` and `buyer/` component scaffolds
-for the production wiring path.
+Use the `seller/` and `buyer/` component scaffolds for the production
+wiring path after the demo works.

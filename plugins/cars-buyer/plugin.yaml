@@ -1,6 +1,6 @@
 name: cars-buyer
 version: 1.0.0
-description: "Buy cars on the chaos Nostr-based marketplace. Free tier: bundles cars-pack@1 contract with the universal buyer engine. Watches NIP-99 listings, sends NIP-17 inquiries, and pulls photos / inspection PDFs from sellers' MCP servers."
+description: "Find and evaluate cars over the chaos Nostr+MCP protocol. Free tier: bundles cars-pack@1 with the universal buyer engine. Watches NIP-99 listings, sends NIP-17 inquiries, and pulls photos / inspection PDFs from sellers' MCP servers."
 author: chaos
 kind: standalone
 

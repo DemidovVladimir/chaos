@@ -2,15 +2,15 @@
 name = "chaos-vertical-role"
 version = "0.1.0"
 description = "Copy-and-fill skeleton for a chaos role-vertical plugin."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_vertical_role"]

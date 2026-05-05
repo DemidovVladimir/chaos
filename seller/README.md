@@ -8,9 +8,9 @@ applies the per-tool grant policy from
 
 > **Status**: scaffold. The runnable starter is in `../mvp/seller.py`
 > (text-only, no MCP server, NIP-04 instead of NIP-17, no PoW).
-> Wiring the production version is week 1–4 of `LAUNCH_PLAN.md`. This
-> folder exists so the contract is clear and so future Claude sessions
-> know where to put the production code.
+> Wiring the production version follows `IMPLEMENTATION_PLAN.md`. This
+> folder exists so the contract is clear and future Codex sessions know
+> where to put the production code.
 
 ## What lives here when complete
 
@@ -82,7 +82,7 @@ The seller plugin **must not**:
 - Have `terminal`, `execute_code`, `delegation`, `web`, or general
   outbound `mcp` toolsets enabled (the seller's own MCP server is
   inbound-only — it serves tools to buyers; the seller agent does
-  not call arbitrary outside MCPs) (per `CLAUDE.md` § Architecture
+  not call arbitrary outside MCPs) (per `AGENTS.md` § Architecture
   rules)
 
 ## Hermes plugin shape
@@ -92,7 +92,7 @@ The seller plugin **must not**:
 manifest_version: 1
 name: chaos-seller
 description: |
-  Seller agent for the chaos Nostr-based marketplace. Publishes
+  Seller agent for the chaos Nostr+MCP protocol. Publishes
   NIP-99 listings, handles NIP-17 inquiries, exposes a cars-pack@1
   MCP server for photo and inspection-report delivery.
 version: 0.1.0
@@ -121,7 +121,7 @@ relays:
 
 mcp:
   bind: "0.0.0.0:8645"
-  public_url: "https://a.io/mcp"        # ngrok or other tunnel; the public face
+  public_url: "https://a.io/mcp"        # HTTPS endpoint for this agent's MCP server
   transport: "http+sse"                 # FastMCP HTTP+SSE; stdio for local dev only
   pack: "cars-pack@1"                   # vertical-pack contract this server speaks
 
@@ -145,7 +145,7 @@ negotiation:
 
 ## How to build it
 
-Phase 1 (week 1 of `LAUNCH_PLAN.md`):
+Phase 1:
 
 - Implement `identity.py`, `publish.py`, `inquiry_listener.py` —
   enough to publish a listing and decrypt an inquiry. Reuses
@@ -166,7 +166,7 @@ Phase 2 (week 2):
 
 Phase 3 (week 3):
 
-- Replace NIP-04 with NIP-17 gift-wrap path (NIP-44 encryption).
+- Harden NIP-17 gift-wrap handling (NIP-44 encryption).
 - Implement attestation signing (`attestation.py`).
 - Implement negotiation rounds (`negotiation.py`).
 
@@ -183,4 +183,4 @@ Phase 4 (week 4+):
   skill
 - `../PROTOCOL.md` — the on-the-wire design
 - `../SECURITY.md` — pre-launch security checklist
-- `../CLAUDE.md` — engineering rules every PR must respect
+- `../AGENTS.md` — engineering rules every PR must respect

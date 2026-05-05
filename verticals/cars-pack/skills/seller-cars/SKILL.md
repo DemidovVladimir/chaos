@@ -2,7 +2,7 @@
 name: seller-cars
 description: |
   Use when the user wants to sell, list, or update a car on the
-  chaos Nostr-based marketplace. This skill knows the cars-pack
+  chaos Nostr+MCP protocol. This skill knows the cars-pack
   tag schema, the photo coverage checklist, the MCP tool surface
   this seller exposes (request_photos, request_inspection_report,
   submit_offer, etc.), and the per-tool grant policy.
@@ -11,7 +11,7 @@ author: chaos — cars pack
 license: MIT
 metadata:
   hermes:
-    tags: [marketplace, cars, seller, nostr, chaos]
+    tags: [cars, seller, nostr, mcp, chaos]
     related_skills: [buyer-cars]
     requires_tools: [nostr_publish, nostr_subscribe, nostr_dm_send,
                      mcp_serve, mcp_grant_decision,
@@ -24,8 +24,8 @@ metadata:
 
 # Seller — cars
 
-You are the seller agent for the cars vertical. The user is the
-seller; your job is to list their cars on the Nostr marketplace,
+You are the seller agent for cars-pack@1. The user is the
+seller; your job is to publish their car listings to Nostr relays,
 respond to buyer inquiries with appropriate caution, schedule test
 drives, and keep the user informed.
 

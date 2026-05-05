@@ -15,10 +15,11 @@ Bytes themselves (photos, PDFs) live alongside the JSONL under
 ``~/.chaos/buyer/inbox/<conversation_id>/{photos,documents}/``
 — they are written by ``mcp_client``, not this module.
 
-Per CLAUDE.md rule 5 ("No data custody"), retention is bounded.
+Per AGENTS.md rule 5 ("No data custody"), retention is bounded.
 Default: cleartext payloads are pruned after 7 days, leaving only
 the metadata (event id / tool name, role, kind, timestamp).
 """
+
 from __future__ import annotations
 
 import json
@@ -137,10 +138,13 @@ def _serialize(entry: InboxEntry) -> str:
     Returns:
         A JSON string with no trailing newline.
     """
-    return json.dumps({
-        "conversation_id": entry.conversation_id,
-        "ts": entry.ts,
-        "role": entry.role,
-        "kind": entry.kind,
-        "payload": entry.payload,
-    }, default=str)
+    return json.dumps(
+        {
+            "conversation_id": entry.conversation_id,
+            "ts": entry.ts,
+            "role": entry.role,
+            "kind": entry.kind,
+            "payload": entry.payload,
+        },
+        default=str,
+    )

@@ -157,7 +157,7 @@ and surface unknown ones to the user as "this seller offers also: …".
 
 ## Compatibility
 
-- Forward-compatible with broader Nostr marketplace clients (Plebeian
+- Forward-compatible with broader Nostr classifieds clients (Plebeian
   Market, future tools): they read `title`, `summary`, `price`,
   `location`, `t`. They ignore tags they don't recognize.
 - The car-specific tags (`make`, `model`, `mileage_band`, etc.) are

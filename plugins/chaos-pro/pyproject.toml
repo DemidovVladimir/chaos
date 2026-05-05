@@ -2,7 +2,7 @@
 name = "chaos-pro"
 version = "0.1.0"
 description = "Cross-vertical paid upgrade for chaos buyer plugins."
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
   "reverse-image-mcp>=0.1",
   "market-comp-mcp>=0.1",
@@ -13,8 +13,8 @@ dependencies = [
 dev = ["pytest", "ruff"]
 
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/chaos_pro"]

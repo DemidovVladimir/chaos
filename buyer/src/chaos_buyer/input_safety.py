@@ -1,7 +1,7 @@
 """Layer-1 input sanitizer — buyer-side copy.
 
 Identical contract to ``chaos_seller.input_safety``. Copied
-across components per CLAUDE.md § "Repository layout" so each
+across components per AGENTS.md § "Repository layout" so each
 component installs independently.
 
 Every untrusted text surface that reaches the planner passes through
@@ -23,6 +23,7 @@ Every untrusted text surface that reaches the planner passes through
 See ``../../../seller/src/chaos_seller/input_safety.py`` for
 the full pipeline rationale.
 """
+
 from __future__ import annotations
 
 import re

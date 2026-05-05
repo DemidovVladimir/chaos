@@ -18,16 +18,17 @@ Decision categories:
   call for this specific buyer.
 - ``DENY`` — refuse the tool call with a one-line ``denial_reason``.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from .catalog import Item
 
 
-class Decision(str, Enum):
+class Decision(StrEnum):
     """Possible per-tool-call decisions."""
 
     GRANT = "grant"

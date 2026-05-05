@@ -5,10 +5,11 @@ helpers tuned for short-lived REQ scans and one-shot publishes.
 The aggregator queries are read-mostly; we open connections,
 collect for a few seconds, and tear down.
 
-We intentionally do not cache events across calls — per CLAUDE.md
+We intentionally do not cache events across calls — per AGENTS.md
 Rule 5 (no data custody) reputation-mcp keeps no state between
 queries beyond the in-flight request.
 """
+
 from __future__ import annotations
 
 # --- macOS / generic SSL preamble ----------------------------------------
@@ -17,8 +18,10 @@ from __future__ import annotations
 # certifi's bundle if it's available. No-op on systems where the CA
 # bundle is already wired in (most Linux distros).
 import os
+
 try:
-    import certifi as _certifi  # noqa: WPS433
+    import certifi as _certifi
+
     _ca = _certifi.where()
     os.environ.setdefault("SSL_CERT_FILE", _ca)
     os.environ.setdefault("REQUESTS_CA_BUNDLE", _ca)
@@ -26,6 +29,7 @@ try:
 except ImportError:
     pass
 
+import contextlib
 import logging
 import time
 import uuid
@@ -52,7 +56,7 @@ class ReputationRelayClient:
         *,
         timeout_seconds: float = 6.0,
     ) -> None:
-        from pynostr.relay_manager import RelayManager  # noqa: WPS433
+        from pynostr.relay_manager import RelayManager
 
         if not relays:
             raise ValueError("at least one relay URL required")
@@ -70,14 +74,14 @@ class ReputationRelayClient:
 
     def query_events(
         self,
-        filters: list["Filters"],
+        filters: list[Filters],
         timeout_seconds: float | None = None,
-    ) -> list["Event"]:
+    ) -> list[Event]:
         """Open a REQ subscription, collect for `timeout_seconds`, dedupe.
 
         Returns events in arrival order, deduplicated by `event.id`.
         """
-        from pynostr.filters import FiltersList  # noqa: WPS433
+        from pynostr.filters import FiltersList
 
         wait = self._timeout if timeout_seconds is None else timeout_seconds
         sub_id = uuid.uuid4().hex[:16]
@@ -85,7 +89,7 @@ class ReputationRelayClient:
 
         deadline = time.monotonic() + wait
         seen: set[str] = set()
-        results: list["Event"] = []
+        results: list[Event] = []
         while time.monotonic() < deadline:
             self._rm.run_sync()
             while self._rm.message_pool.has_events():
@@ -99,7 +103,7 @@ class ReputationRelayClient:
 
         return results
 
-    def publish_event(self, event: "Event") -> None:
+    def publish_event(self, event: Event) -> None:
         """Publish a signed event and pump the relay manager briefly.
 
         We do not block on relay-side OK confirmations because pynostr
@@ -126,13 +130,11 @@ class ReputationRelayClient:
             self._rm.close_all_relay_connections()
         except AttributeError:
             for relay in getattr(self._rm, "relays", {}).values():
-                try:
+                with contextlib.suppress(Exception):
                     relay.close()
-                except Exception:  # noqa: BLE001
-                    pass
 
     # Context-manager sugar for callers that want one-shot use.
-    def __enter__(self) -> "ReputationRelayClient":
+    def __enter__(self) -> ReputationRelayClient:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -149,14 +151,14 @@ def filter_for_pubkey_tag(
     kinds: list[int],
     pubkey_hex: str,
     limit: int = 500,
-) -> "Filters":
+) -> Filters:
     """Build a Filters object that matches `kind in kinds` and `#p == pubkey`.
 
     pynostr 0.6.2's Filters has no first-class tag-filter helper; we
     use `add_arbitrary_tag` to set the `#p` filter (the one-character
     "p" is what NIP-01 uses on the wire).
     """
-    from pynostr.filters import Filters  # noqa: WPS433
+    from pynostr.filters import Filters
 
     f = Filters(kinds=kinds, limit=limit)
     f.add_arbitrary_tag("p", [pubkey_hex])
@@ -168,9 +170,9 @@ def filter_for_event_tag(
     kinds: list[int],
     event_id_hex: str,
     limit: int = 200,
-) -> "Filters":
+) -> Filters:
     """Build a Filters object matching `#e == event_id`."""
-    from pynostr.filters import Filters  # noqa: WPS433
+    from pynostr.filters import Filters
 
     f = Filters(kinds=kinds, limit=limit)
     f.add_arbitrary_tag("e", [event_id_hex])
@@ -182,8 +184,8 @@ def filter_for_authors(
     kinds: list[int],
     authors: list[str],
     limit: int = 200,
-) -> "Filters":
+) -> Filters:
     """Build a Filters object matching `kind in kinds` from `authors`."""
-    from pynostr.filters import Filters  # noqa: WPS433
+    from pynostr.filters import Filters
 
     return Filters(kinds=kinds, authors=authors, limit=limit)

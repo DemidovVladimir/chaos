@@ -4,6 +4,7 @@ Holds: relays, identity location, MCP client knobs (timeout, in-flight
 call cap, per-response byte cap, allowed pack ids), default REQ filter,
 evaluator thresholds, and trust-graph anchor.
 """
+
 from __future__ import annotations
 
 import os
@@ -58,7 +59,7 @@ class EvaluatorConfig:
 class TrustGraphConfig:
     """Trust graph configuration.
 
-    Per CLAUDE.md rule 4 ("Trust signals layered, not centralized"),
+    Per AGENTS.md rule 4 ("Trust signals layered, not centralized"),
     no single signal is decisive. The badge is one input among
     several.
     """

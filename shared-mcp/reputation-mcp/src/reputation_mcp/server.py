@@ -12,7 +12,7 @@ Implements the four tools documented in `manifest.yaml`:
 - `submit_dispute_attestation` — publishes a kind 30412 unilateral
   dispute when the counterparty refuses to acknowledge a sale.
 
-Honors CLAUDE.md rules:
+Honors AGENTS.md rules:
 
   - Rule 1 (Nostr-only discovery)   — relays only, no central DB.
   - Rule 2 (MCP-only binary)        — no binary content here at all.
@@ -31,12 +31,15 @@ Honors CLAUDE.md rules:
 See `reputation/scoring.md` for the algorithm and
 `reputation/kinds.md` for the kind-number registry.
 """
+
 from __future__ import annotations
 
 # --- macOS / generic SSL preamble ---------------------------------------
 import os
+
 try:
-    import certifi as _certifi  # noqa: WPS433
+    import certifi as _certifi
+
     _ca = _certifi.where()
     os.environ.setdefault("SSL_CERT_FILE", _ca)
     os.environ.setdefault("REQUESTS_CA_BUNDLE", _ca)
@@ -94,7 +97,7 @@ DEFAULT_RELAYS: list[str] = [
 ]
 
 # ------------------------------------------------------------------
-# Input safety — replicated locally per CLAUDE.md guidance to keep
+# Input safety — replicated locally per AGENTS.md guidance to keep
 # this MCP component installable independent of the rest of the
 # repo. Mirrors `shared/input_safety.py` shape.
 # ------------------------------------------------------------------
@@ -113,9 +116,7 @@ _RESERVED_TAG_RE = re.compile(
     r"</?(?:" + "|".join(_RESERVED_TAGS) + r")\b[^>]*>",
     flags=re.IGNORECASE,
 )
-_INVISIBLE_RE = re.compile(
-    r"[​-‏‪-‮⁠-⁤﻿]"
-)
+_INVISIBLE_RE = re.compile(r"[​-‏‪-‮⁠-⁤﻿]")
 _INJECTION_PHRASES = (
     "ignore previous instructions",
     "disregard all prior",
@@ -146,11 +147,13 @@ def _sanitize(text: str, *, max_bytes: int = 1024) -> str:
 # Allowlists — refuse unknown enum values rather than passing through
 # ------------------------------------------------------------------
 
-ALLOWED_30410_STATUS = frozenset({
-    "completed-clean",
-    "disputed-by-me",
-    "counterparty-vanished",
-})
+ALLOWED_30410_STATUS = frozenset(
+    {
+        "completed-clean",
+        "disputed-by-me",
+        "counterparty-vanished",
+    }
+)
 ALLOWED_30411_STATUS = frozenset({"confirmed", "disputed"})
 ALLOWED_DECISION = frozenset({"clear", "warning", "flag", "escalated"})
 ALLOWED_SEVERITY = frozenset({"low", "moderate", "high"})
@@ -198,9 +201,7 @@ def _require_currency_band(value: str) -> str:
 
 def _allowed(value: str, allowed: frozenset[str], *, field: str) -> str:
     if value not in allowed:
-        raise ValueError(
-            f"{field}={value!r} not in {sorted(allowed)}"
-        )
+        raise ValueError(f"{field}={value!r} not in {sorted(allowed)}")
     return value
 
 
@@ -265,9 +266,7 @@ def _build_badge_records(
         else:
             issuer = (getattr(ev, "pubkey", "") or "").lower()
             badge_id = a_tag or "unknown"
-        revoked = (
-            award_id in deleted_event_ids and award_id in flagged_event_ids
-        )
+        revoked = award_id in deleted_event_ids and award_id in flagged_event_ids
         records.append(
             BadgeRecord(
                 issuer_pubkey=issuer,
@@ -396,9 +395,8 @@ def _build_admin_records(
             continue
         decision_event_id = (getattr(d, "id", "") or "").lower()
         appeal_until = int(_tag_value(d, "appeal_until") or "0")
-        has_appeal = (
-            decision_event_id in open_appeal_for
-            and (appeal_until == 0 or appeal_until > now_ts)
+        has_appeal = decision_event_id in open_appeal_for and (
+            appeal_until == 0 or appeal_until > now_ts
         )
         records.append(
             AdminDecisionRecord(
@@ -498,7 +496,10 @@ def get_reputation(
 
     log.info(
         "get_reputation target=%s... pack=%s viewer=%s relays=%d",
-        target[:12], pack, "yes" if user_pk else "anon", len(used_relays),
+        target[:12],
+        pack,
+        "yes" if user_pk else "anon",
+        len(used_relays),
     )
 
     with ReputationRelayClient(used_relays) as client:
@@ -507,16 +508,13 @@ def get_reputation(
         badge_events = client.query_events([badge_filter], timeout_seconds=4.0)
 
         award_event_ids = [
-            (getattr(b, "id", "") or "").lower() for b in badge_events
-            if getattr(b, "id", None)
+            (getattr(b, "id", "") or "").lower() for b in badge_events if getattr(b, "id", None)
         ]
 
         # ----- 2. NIP-09 deletions referencing those awards -------
         deletion_events: list[Any] = []
         if award_event_ids:
-            del_filter = filter_for_event_tag(
-                kinds=[5], event_id_hex=award_event_ids[0], limit=200
-            )
+            del_filter = filter_for_event_tag(kinds=[5], event_id_hex=award_event_ids[0], limit=200)
             # add the rest of the e-tags via add_arbitrary_tag
             for eid in award_event_ids[1:]:
                 del_filter.add_arbitrary_tag("e", [eid])
@@ -528,25 +526,13 @@ def get_reputation(
         )
         # 30411 also references the seller's 30410 by `e`, so also
         # query 30410s where target is the *signer* (signer-side).
-        att_authored = filter_for_authors(
-            kinds=[30410, 30411, 30412], authors=[target], limit=500
-        )
-        admin_filter = filter_for_pubkey_tag(
-            kinds=[30430], pubkey_hex=target, limit=200
-        )
-        appeal_filter = filter_for_pubkey_tag(
-            kinds=[30431], pubkey_hex=target, limit=200
-        )
+        att_authored = filter_for_authors(kinds=[30410, 30411, 30412], authors=[target], limit=500)
+        admin_filter = filter_for_pubkey_tag(kinds=[30430], pubkey_hex=target, limit=200)
+        appeal_filter = filter_for_pubkey_tag(kinds=[30431], pubkey_hex=target, limit=200)
 
-        peer_events = client.query_events(
-            [att_filter, att_authored], timeout_seconds=4.0
-        )
-        admin_events = client.query_events(
-            [admin_filter], timeout_seconds=3.0
-        )
-        appeal_events = client.query_events(
-            [appeal_filter], timeout_seconds=2.0
-        )
+        peer_events = client.query_events([att_filter, att_authored], timeout_seconds=4.0)
+        admin_events = client.query_events([admin_filter], timeout_seconds=3.0)
+        appeal_events = client.query_events([appeal_filter], timeout_seconds=2.0)
 
         # Flag-events for badge revocation are kind 30430 too,
         # filtered to those referencing badge-award event ids.
@@ -557,24 +543,18 @@ def get_reputation(
             )
             for eid in award_event_ids[1:]:
                 flag_filter.add_arbitrary_tag("e", [eid])
-            flag_events = client.query_events(
-                [flag_filter], timeout_seconds=2.0
-            )
+            flag_events = client.query_events([flag_filter], timeout_seconds=2.0)
 
         # ----- 4. WoT graph (NIP-02 contact lists) -----------------
         wot_graph: dict[str, set[str]] = {}
         if user_pk:
-            seed_filter = filter_for_authors(
-                kinds=[3], authors=[user_pk], limit=5
-            )
+            seed_filter = filter_for_authors(kinds=[3], authors=[user_pk], limit=5)
             seed_events = client.query_events([seed_filter], timeout_seconds=2.0)
             wot_graph = _build_wot_graph(seed_events)
             # depth-2 walk: fetch contact-of-contact lists
             second_hop = list(wot_graph.get(user_pk, set()))[:50]
             if second_hop:
-                hop_filter = filter_for_authors(
-                    kinds=[3], authors=second_hop, limit=200
-                )
+                hop_filter = filter_for_authors(kinds=[3], authors=second_hop, limit=200)
                 hop_events = client.query_events([hop_filter], timeout_seconds=3.0)
                 hop_graph = _build_wot_graph(hop_events)
                 for k, v in hop_graph.items():
@@ -642,7 +622,7 @@ def _build_signed_event(
     signing_key_hex: str,
 ) -> Any:
     """Construct, sign, and return a pynostr Event."""
-    from pynostr.event import Event  # noqa: WPS433
+    from pynostr.event import Event
 
     event = Event(
         kind=kind,
@@ -674,12 +654,12 @@ def _resolve_signer(signing_key_hex: str | None) -> tuple[str, str]:
     """
     if not signing_key_hex:
         raise ValueError(
-            "signing_key_hex is required — reputation-mcp refuses "
-            "to publish unsigned events"
+            "signing_key_hex is required — reputation-mcp refuses to publish unsigned events"
         )
     if not re.match(r"^[0-9a-f]{64}$", signing_key_hex):
         raise ValueError("signing_key_hex must be 64 hex chars")
-    from pynostr.key import PrivateKey  # noqa: WPS433
+    from pynostr.key import PrivateKey
+
     sk = PrivateKey.from_hex(signing_key_hex)
     return signing_key_hex, sk.public_key.hex()
 
@@ -735,7 +715,10 @@ def submit_peer_attestation(
     event_id = _publish_or_die(event, used_relays)
     log.info(
         "submit_peer_attestation OK sale_id=%s signer=%s... cp=%s... status=%s",
-        sale_id, pk_hex[:12], counterparty[:12], status,
+        sale_id,
+        pk_hex[:12],
+        counterparty[:12],
+        status,
     )
     return event_id
 
@@ -760,9 +743,7 @@ def submit_counter_attestation(
         status: `confirmed` or `disputed`.
     """
     sale_id = _require_uuid(sale_id, field="sale_id")
-    parent_id = _require_event_id(
-        seller_attestation_event_id, field="seller_attestation_event_id"
-    )
+    parent_id = _require_event_id(seller_attestation_event_id, field="seller_attestation_event_id")
     seller = _require_pubkey(seller_pubkey, field="seller_pubkey")
     status = _allowed(status, ALLOWED_30411_STATUS, field="status")
     pack = _require_pack(pack)
@@ -789,7 +770,10 @@ def submit_counter_attestation(
     event_id = _publish_or_die(event, used_relays)
     log.info(
         "submit_counter_attestation OK sale_id=%s signer=%s... seller=%s... status=%s",
-        sale_id, pk_hex[:12], seller[:12], status,
+        sale_id,
+        pk_hex[:12],
+        seller[:12],
+        status,
     )
     return event_id
 
@@ -849,7 +833,9 @@ def submit_dispute_attestation(
     event_id = _publish_or_die(event, used_relays)
     log.info(
         "submit_dispute_attestation OK sale_id=%s signer=%s... cp=%s...",
-        sale_id, pk_hex[:12], counterparty[:12],
+        sale_id,
+        pk_hex[:12],
+        counterparty[:12],
     )
     return event_id
 

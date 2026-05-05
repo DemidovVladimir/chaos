@@ -2,9 +2,8 @@
 
 The cars-pack is a self-contained installable bundle: tag schema +
 **MCP tool surface contract** + seller skill + buyer skill +
-custom-MCP specs + an example listing. It's the first vertical pack
-and the template every later vertical pack (real-estate, watches,
-services) will copy.
+custom-MCP specs + an example listing. It is the working reference
+pack because it exercises the full protocol surface.
 
 The pack defines what every cars-pack@1 seller's MCP server must
 expose: `view_listing`, `request_photos`,
@@ -28,7 +27,7 @@ cars-pack/
     └── market-comp-mcp.md      free — pricing comps from on-network listings
 ```
 
-## Why cars first
+## Why cars-pack is the reference
 
 - **High average transaction value** — a $15k car justifies $50–$500
   in seller-side tooling spend
@@ -44,12 +43,12 @@ cars-pack/
   inconsistently and filters wouldn't match.
 - **MCP tool surface contract** — the named tools every cars seller
   must expose, with schemas and semantics. This is the real
-  marketplace protocol; the wire layer (MCP) is universal.
+  pack protocol; the wire layer (MCP) is universal.
 - **Seller and buyer skills** — Hermes skills tuned for car-specific
   flows: photo coverage checklist, per-tool grant policy, financing
   conversation patterns, history-report etiquette.
 - **Three custom MCP utility servers** (different from the seller's
-  marketplace MCP server — these are local capability MCPs the
+  peer MCP server — these are local capability MCPs the
   agents use under the hood):
   - `reverse-image-mcp` (paid, photo-fraud detection across all verticals)
   - `vin-decoder-mcp` (free, pure structural decode)

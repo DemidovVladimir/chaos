@@ -11,16 +11,16 @@ the contract:
 
     hermes-agent/website/docs/guides/build-a-hermes-plugin.md
 
-CLAUDE.md rules enforced here:
+AGENTS.md rules enforced here:
     - Rule 1: discovery is Nostr-only (no central registry).
     - Rule 2: binary content via MCP only.
     - Rule 3: identity stays in ``~/.chaos/keys/seller.key``.
     - Rule 7: NIP-17 in production paths; NIP-04 only in mvp/.
 """
+
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,5 @@ def register(ctx) -> None:
     # inquiry_listener, grant_policy, tools_inquire, tools_publish,
     # tools_negotiate.
     raise NotImplementedError(
-        "chaos-seller register(ctx) not implemented yet — "
-        "see seller/IMPLEMENTATION_PLAN.md."
+        "chaos-seller register(ctx) not implemented yet — see seller/IMPLEMENTATION_PLAN.md."
     )

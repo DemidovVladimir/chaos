@@ -1,6 +1,6 @@
 # `chaos-cars-buyer`
 
-Buy cars on the chaos Nostr-based marketplace. **Free tier.**
+Buy cars on the chaos Nostr+MCP protocol. **Free tier.**
 
 ## What it bundles
 

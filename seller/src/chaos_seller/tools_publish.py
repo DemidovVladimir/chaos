@@ -8,6 +8,7 @@ Each handler matches the Hermes plugin contract:
 
 See the build-a-plugin guide § "Step 4: Write the tool handlers".
 """
+
 from __future__ import annotations
 
 import json

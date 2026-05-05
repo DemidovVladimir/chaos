@@ -3,6 +3,7 @@
 Copy this file alongside the rest of the plugin scaffold and rename
 the package to `chaos_<vertical>_<role>`.
 """
+
 from __future__ import annotations
 
 from typing import Any

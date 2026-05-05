@@ -13,7 +13,7 @@ deltas:
 
 > Source-of-truth references this plan touches:
 >
-> - `../CLAUDE.md`, `../PROTOCOL.md`
+> - `../AGENTS.md`, `../PROTOCOL.md`
 > - `../mvp/buyer.py`, `../mvp/shared.py`
 > - `../verticals/verticals/cars-pack/skills/buyer-cars/SKILL.md`
 > - `../spike/buyer_mcp.py` — the proven MCP HTTP+SSE client spike
@@ -89,12 +89,12 @@ with a cars-tag filter, dedupes events, prints matches.
   tags it carries.
 - `seen.jsonl` survives a process restart.
 
-## Phase 2 — inquiry sender (NIP-04) + MCP client round-trip
+## Phase 2 — inquiry sender (NIP-17) + MCP client round-trip
 
 ### Goal
 
 Apply hard-red-flag heuristics that don't need photo bytes. Send an
-inquiry over NIP-04 (NIP-17 follows in Phase 3). Open an MCP HTTP+SSE
+inquiry over NIP-17. Open an MCP HTTP+SSE
 session to the seller's MCP URL, run the bootstrap (`tools/list`),
 and complete one `request_photos` round-trip — exactly the shape the
 spike at `spike/buyer_mcp.py` proved.
@@ -125,7 +125,7 @@ spike at `spike/buyer_mcp.py` proved.
      carries `{type, item_id, buyer_pubkey, session_token, asks}`.
      The buyer gets the seller's MCP HTTP URL from the matched
      listing's `["mcp", url]` tag — it is NOT inside the rumor.
-   - `send(rm, sk, recipient_pk, payload)` — Phase-2 NIP-04
+   - `send(rm, sk, recipient_pk, payload)` — Phase-2 NIP-17
      (`# TODO(phase-3): replace with NIP-17 gift wrap`); Phase-3
      swaps to NIP-17.
    - `await_reply(rm, sk, sub_id, *, timeout: float)` — pulls the
@@ -135,7 +135,7 @@ spike at `spike/buyer_mcp.py` proved.
    `~/.chaos/buyer/inbox/<conversation_id>.jsonl`. One line per
    event we send or receive, plus one line per MCP tool call /
    response. No decrypted content for stored DMs is kept beyond a
-   7-day window unless the user opts in (CLAUDE.md rule 5 — minimize
+   7-day window unless the user opts in (AGENTS.md rule 5 — minimize
    custody).
 
 4. `mcp_client.py`. Based on `spike/buyer_mcp.py`. Thin wrapper
@@ -176,7 +176,7 @@ spike at `spike/buyer_mcp.py` proved.
 - A staged listing whose description contains "front collision
   repair" but whose tags include `accident_history=none_known` is
   flagged as a hard red flag and never surfaces to the user.
-- An inquiry round-trip via NIP-04 against an MVP `mvp/seller.py`
+- An inquiry round-trip via NIP-17 against an MVP `mvp/seller.py`
   works and lands an entry in the inbox JSONL.
 - `mcp_connect` against the spike seller exposes the cars-pack@1
   tool surface; `mcp_call_tool("request_photos", ...)` returns at
@@ -195,7 +195,7 @@ photo-derived flags computed from MCP-delivered inline bytes.
 1. Swap `inquiry.send` to NIP-17: rumor (kind 14) → seal (kind 13,
    NIP-44 to recipient) → gift wrap (kind 1059, NIP-44 from
    ephemeral keypair). The rumor type stays `mcp_inquiry_open` with
-   a `session_token`. Drop the NIP-04 path from the production
+   a `session_token`. Drop the NIP-17 path from the production
    path; keep it only inside `mvp/` for the legacy CLI shortcut.
 
 2. Full `evaluator.py`:
@@ -579,7 +579,7 @@ Run target: `pytest buyer/tests/ -q`.
 - Live demo: `hermes chaos-buyer watch` runs against the
   Mode A relay, sees seller MVP listings, and prints them.
   `hermes chaos-buyer inquire <item_id>` round-trips an
-  NIP-04 inquiry to the seller MVP. The MCP path is wired up to
+  NIP-17 inquiry to the seller MVP. The MCP path is wired up to
   the point of receiving 3 test photos in a controlled localhost
   run; the production-quality two-machine NIP-17 + MCP run is
   Phase 3.

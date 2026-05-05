@@ -1,4 +1,5 @@
 """Hermes tool handlers — subscription-side tools."""
+
 from __future__ import annotations
 
 import json

@@ -35,5 +35,5 @@ placeholders. Every role-vertical plugin must:
       `shared-mcp/` or `verticals/<vertical>-pack/mcp/`).
 - [ ] `forbidden_toolsets` includes everything the role doesn't
       need.
-- [ ] No new HTTP host introduced for binary content (CLAUDE.md
+- [ ] No new HTTP host introduced for binary content (AGENTS.md
       rule 2).

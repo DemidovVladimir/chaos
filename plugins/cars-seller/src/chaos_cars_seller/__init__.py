@@ -24,21 +24,21 @@ What we actually wire:
    `chaos-seller` engine is implemented
    (`PluginContext.register_cli_command`, plugins.py:298).
 
-CLAUDE.md rules touched: Rule 1 (Nostr-only discovery), Rule 2
+AGENTS.md rules touched: Rule 1 (Nostr-only discovery), Rule 2
 (MCP-only binary), Rule 3 (sovereign keys at `~/.chaos/`),
 Rule 11 (toolset isolation: this plugin registers zero `register_tool`
 calls — no buyer-side capability MCPs leak in).
 """
+
 from __future__ import annotations
 
 import argparse
 import logging
 import os
-import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +55,14 @@ __version__ = "1.0.0"
 
 _THIS = Path(__file__).resolve()
 _REPO_ROOT = _THIS.parent.parent.parent.parent.parent  # chaos/
-_SKILL_PATH = (
-    _REPO_ROOT / "verticals" / "cars-pack" / "skills" / "seller-cars" / "SKILL.md"
-)
+_SKILL_PATH = _REPO_ROOT / "verticals" / "cars-pack" / "skills" / "seller-cars" / "SKILL.md"
 _MVP_SELLER = _REPO_ROOT / "mvp" / "seller.py"
 
 
 # ---------------------------------------------------------------------------
 # Slash command — visible inside a Hermes session
 # ---------------------------------------------------------------------------
+
 
 def _slash_status(_raw_args: str) -> str:
     """`/cars-seller` slash handler. Reports plugin + env status."""
@@ -94,6 +93,7 @@ def _slash_status(_raw_args: str) -> str:
 # hermes_integration_notes.md § "Future work".
 # ---------------------------------------------------------------------------
 
+
 def _cli_setup(subparser: argparse.ArgumentParser) -> None:
     """Build the argparse tree for `hermes cars-seller`.
 
@@ -109,7 +109,7 @@ def _cli_setup(subparser: argparse.ArgumentParser) -> None:
     p_publish.add_argument("file", help="Path to a TOML listing definition")
     p_publish.set_defaults(func=_cli_dispatch)
 
-    p_listen = subs.add_parser("listen", help="Listen for incoming NIP-04/17 inquiries")
+    p_listen = subs.add_parser("listen", help="Listen for incoming NIP-17 inquiries")
     p_listen.set_defaults(func=_cli_dispatch)
 
     p_serve = subs.add_parser(
@@ -130,7 +130,7 @@ def _cli_dispatch(args: argparse.Namespace) -> None:
     """Forward the parsed args to mvp/seller.py via subprocess.
 
     The MVP seller is a self-contained script that already does
-    Nostr publishing, NIP-04 inquiry handling, and FastMCP serving.
+    Nostr publishing, NIP-17 inquiry handling, and FastMCP serving.
     Until the universal seller engine is implemented, the plugin's
     job is to surface that script as a Hermes-discoverable CLI.
     """
@@ -171,6 +171,7 @@ def _cli_dispatch(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------------
 # register() — called by Hermes' plugin manager
 # ---------------------------------------------------------------------------
+
 
 def register(ctx: Any) -> None:
     """Wire the cars-seller plugin into a Hermes runtime.
@@ -214,7 +215,7 @@ def register(ctx: Any) -> None:
             setup_fn=_cli_setup,
             handler_fn=_cli_dispatch,
             description=(
-                "Publish NIP-99 car listings, listen for inquiries over NIP-04/17, "
+                "Publish NIP-99 car listings, listen for inquiries over NIP-17, "
                 "and serve photos / inspection PDFs from a per-seller FastMCP server."
             ),
         )

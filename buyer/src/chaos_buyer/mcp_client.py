@@ -29,10 +29,11 @@ the ``mcp`` Python SDK 1.27.0):
                     img_bytes = base64.b64decode(block.data)
                     ...
 
-CLAUDE.md rule 2: binary content moves over MCP only. This module
+AGENTS.md rule 2: binary content moves over MCP only. This module
 NEVER writes a URL into a fetch — its only inputs are the bytes
 already-decoded from base64 inside an incoming content block.
 """
+
 from __future__ import annotations
 
 import base64
@@ -64,7 +65,7 @@ class InboxEntry:
     text_blocks: list[str] = field(default_factory=list)
 
 
-async def connect(url: str) -> "ClientSession":
+async def connect(url: str) -> ClientSession:
     """Open an MCP HTTP+SSE session to the seller's MCP URL.
 
     Wraps ``mcp.client.sse.sse_client`` + ``mcp.ClientSession`` and
@@ -85,7 +86,7 @@ async def connect(url: str) -> "ClientSession":
     raise NotImplementedError("mcp_client.connect not implemented")
 
 
-async def list_tools(session: "ClientSession") -> list[Any]:
+async def list_tools(session: ClientSession) -> list[Any]:
     """Bootstrap discovery — call ``tools/list`` on an open session.
 
     Per the MCP spike, the buyer learns the seller's full tool
@@ -103,7 +104,7 @@ async def list_tools(session: "ClientSession") -> list[Any]:
 
 
 async def call_tool(
-    session: "ClientSession",
+    session: ClientSession,
     name: str,
     arguments: dict,
 ) -> list[Any]:
@@ -148,7 +149,7 @@ def persist_blocks(
       string through ``input_safety.sanitize`` before showing it to
       the planner).
 
-    Per CLAUDE.md rule 2 the only input is the bytes already-decoded
+    Per AGENTS.md rule 2 the only input is the bytes already-decoded
     from the MCP response — there is no URL fetch here, ever.
 
     Args:
@@ -205,5 +206,5 @@ def _decode_b64(data: str, *, max_bytes: int) -> bytes:
             valid base64.
     """
     if len(data) > max_bytes * 2:
-        raise ValueError(f"mcp content block too large: {len(data)} chars > {max_bytes*2}")
+        raise ValueError(f"mcp content block too large: {len(data)} chars > {max_bytes * 2}")
     return base64.b64decode(data, validate=True)

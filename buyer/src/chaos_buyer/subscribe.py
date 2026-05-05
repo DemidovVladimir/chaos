@@ -6,10 +6,12 @@ events, and dedupes by ``event.id`` across relays. Already-seen
 events are persisted at ``~/.chaos/buyer/seen.jsonl`` so a
 process restart doesn't notify the user twice.
 """
+
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pynostr.event import Event
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 DEFAULT_SEEN_PATH = Path.home() / ".chaos" / "buyer" / "seen.jsonl"
 
 
-def start(rm: "RelayManager", sub_id: str, filters: list[dict]) -> None:
+def start(rm: RelayManager, sub_id: str, filters: list[dict]) -> None:
     """Open a REQ subscription on every relay in ``rm``.
 
     Args:
@@ -31,11 +33,11 @@ def start(rm: "RelayManager", sub_id: str, filters: list[dict]) -> None:
 
 
 def iter_events(
-    rm: "RelayManager",
+    rm: RelayManager,
     sub_id: str,
     *,
     seen_cache: Path = DEFAULT_SEEN_PATH,
-) -> Iterator["Event"]:
+) -> Iterator[Event]:
     """Yield deduplicated events forever.
 
     Each event is checked against an in-memory LRU and the

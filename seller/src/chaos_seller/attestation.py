@@ -12,10 +12,11 @@ We use ``kind: 30078`` (NIP-78 application-specific data) with a
 namespacing ``["d", "chaos:attestation:<topic>"]`` tag so
 relays can address them and the buyer can find them by topic.
 
-CLAUDE.md rule 4 ("Trust signals layered, not centralized") — these
+AGENTS.md rule 4 ("Trust signals layered, not centralized") — these
 attestations are just one input among NIP-58 badges, PoW, and pubkey
 reputation. They are NOT a gatekeeper.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

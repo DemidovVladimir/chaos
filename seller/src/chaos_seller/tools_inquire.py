@@ -16,6 +16,7 @@ Conceptually:
   marked ``ASK_USER``.
 - ``deny_ask`` denies one specific tool call with a reason.
 """
+
 from __future__ import annotations
 
 import json

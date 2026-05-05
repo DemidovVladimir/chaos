@@ -6,10 +6,10 @@ installed buyer plugins (any plugin whose name matches
 tier from `fast` to `thorough`. The same subscription / x402 entry
 covers every vertical the user has installed.
 """
+
 from __future__ import annotations
 
 from typing import Any
-
 
 MCP_OVERRIDES = {
     "reverse-image-mcp": {"tier": "thorough"},

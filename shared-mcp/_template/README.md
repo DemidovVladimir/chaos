@@ -8,7 +8,7 @@ Replace this with: what this MCP does, in one sentence.
 - **Paid tier** (if any) — per-call x402 price, what extra it
   unlocks.
 
-This MCP follows `CLAUDE.md` rule 6: no commercial data brokers, no
+This MCP follows `AGENTS.md` rule 6: no commercial data brokers, no
 third-party file hosts, no PII reseller. All computation is local
 or against free authoritative sources.
 

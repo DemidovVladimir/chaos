@@ -142,7 +142,7 @@ surface unknown tools to the user as "this seller offers also: …".
 
 ## Compatibility
 
-- Forward-compatible with broader Nostr marketplace clients: they
+- Forward-compatible with broader Nostr classifieds clients: they
   read `title`, `summary`, `price`, `location`, `t`. They ignore
   tags they don't recognize.
 - The vertical-specific tags should be neither prefixed with

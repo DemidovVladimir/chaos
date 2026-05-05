@@ -2,9 +2,10 @@
 
 ``accept_offer`` is the safety-sensitive tool on the buyer side and
 MUST refuse to act without explicit user confirmation in the same
-session, per CLAUDE.md and the buyer-cars SKILL.md hard rule "Never
+session, per AGENTS.md and the buyer-cars SKILL.md hard rule "Never
 auto-commit to a purchase."
 """
+
 from __future__ import annotations
 
 import json
