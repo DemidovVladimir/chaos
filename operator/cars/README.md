@@ -1,9 +1,26 @@
-# operator/cars — Mode A Nostr relay deployment for the cars vertical
+# operator/cars — Mode A Nostr relay for cars-pack
 
-The deployable part of chaos's cars-vertical registry. One
-strfry instance behind Caddy on a small VPS. Cost: ~€5–7/month
-all-in. The sibling `operator/cars/admin-agent/` folder runs the
-opt-in admin-agent for dispute resolution.
+The deployable relay node for `cars-pack@1`. One strfry instance
+behind Caddy on a small VPS. Cost: ~€5–7/month all-in.
+
+This folder has one primary job: run the Mode A relay. The optional
+`admin-agent/` subfolder is a deployment runbook for a separate Hermes
+instance that publishes opt-in admin trust signals. It is not part of
+the relay process.
+
+## Operator vs admin-agent
+
+| Concern | Lives in | Purpose |
+|---|---|---|
+| Relay operations | `operator/cars/` root | strfry, Caddy, PoW, rate limits, backups, monitoring, moderation contact |
+| Badge issuance | `operator/cars/badge_issuance.md` | Manual operator due diligence for NIP-58 badges |
+| Admin-signal service | `operator/cars/admin-agent/` + `plugins/cars-admin/` | Optional Hermes service that receives encrypted submissions and publishes kind 30430/30431 events |
+| Admin behavior contract | `verticals/cars-pack/skills/admin-cars/SKILL.md` | The prompt-injection-safe rubric and allowed tool surface |
+
+The operator may run the relay without running an admin-agent. The
+operator may issue NIP-58 badges without running an admin-agent. The
+admin-agent does not issue badges, operate strfry, change relay
+policy, or call buyer/seller MCP servers.
 
 ## Files
 
@@ -17,10 +34,11 @@ operator/cars/
 ├── caddyfile                     reverse proxy with auto-LE TLS + NIP-11 (production)
 ├── writePolicy.js                kind allowlist + per-pubkey rate limits (both modes)
 ├── verify_relay.py               WebSocket smoke test for a local relay
+├── badge_issuance.md             manual NIP-58 badge issuance / revocation workflow
 ├── moderation_policy.md          published transparency policy + operator runbook
 ├── backup.md                     daily snapshot script + restore drill
 ├── monitoring.md                 metrics, alerts, external canary
-└── admin-agent/                  opt-in dispute-resolution Hermes instance
+└── admin-agent/                  optional trust/admin-signal Hermes instance
 ```
 
 ## Quick start: 5-min local relay
@@ -145,10 +163,14 @@ Will need an upgrade when you hit:
 - [ ] Moderation contact email (`info.contact`) is monitored daily
 - [ ] Published moderation policy live at
       `https://moderation.<your-domain>` (`moderation_policy.md`)
+- [ ] If issuing badges: badge workflow reviewed
+      (`badge_issuance.md`)
 
 ## What this relay accepts
 
-Only marketplace + DM kinds. See `strfry-config.toml` for the
+Only chaos protocol kinds: NIP-99 listings, encrypted inquiry
+messages, profile metadata needed by agents, badge/trust events, and
+reputation/admin-signal kinds. See `strfry-config.toml` for the
 allowlist. General Nostr social events (kind 1 text notes, kind 6
 reposts) are rejected — direct users to general-purpose relays for
 chitchat.
@@ -189,7 +211,8 @@ slice of the network; it cannot reach into community relays.
 
 - `../../PROTOCOL.md` for the on-the-wire design
 - `../../SECURITY.md` for the threat model and pre-launch checklist
-- `../../reputation/dispute_protocol.md` for the admin-agent dispute flow
+- `../../reputation/dispute_protocol.md` for the opt-in admin signal flow
 - `moderation_policy.md` for the published policy + operator runbook
+- `badge_issuance.md` for NIP-58 badge workflow
 - `backup.md` and `monitoring.md` for ops
-- `admin-agent/README.md` for the opt-in dispute-resolution agent
+- `admin-agent/README.md` for the opt-in admin-signal agent

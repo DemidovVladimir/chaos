@@ -11,7 +11,7 @@ a default.
 The admin-agent is the highest-value prompt-injection target in
 the system (see `reputation/admin_threat_model.md`). Forcing trust
 on every user would mean a single compromised admin-agent could
-poison the marketplace's reputation graph for everyone. Opt-in
+poison the protocol's reputation graph for everyone. Opt-in
 limits the blast radius:
 
 - Users who never add the admin-pubkey see no admin decisions.
@@ -25,10 +25,10 @@ limits the blast radius:
 1. Verify the admin-pubkey through **two independent channels**:
    - Fetch `https://<operator-domain>/.well-known/chaos-admin/cars-pack.json`
      and read `admin_pubkey` plus `operator_signature`.
-   - Cross-check by reading the operator's NIP-58 badge-issuer
-     pubkey from a different mirror (mailing list, GitHub
-     `pubkey.json`, etc.).
-   - The two sources must agree.
+   - Cross-check the same admin-pubkey from a different mirror
+     controlled by the operator (mailing list, GitHub
+     `operator/cars/admin-agent/pubkey.json`, etc.).
+   - The announced admin-pubkey and operator signature must agree.
 
 2. Add the pubkey to your `~/.chaos/config.yaml`:
 

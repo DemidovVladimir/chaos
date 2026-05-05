@@ -2,7 +2,7 @@
 """
 seller_mcp.py — neuro-spati MCP seller spike.
 
-A FastMCP server (HTTP + SSE transport) exposing a small marketplace
+A FastMCP server (HTTP + SSE transport) exposing a small cars-pack
 tool surface:
 
   • view_listing(item_id) → text summary
@@ -10,8 +10,8 @@ tool surface:
   • request_inspection_report(item_id) → EmbeddedResource (PDF-shaped binary)
 
 Run two of these on different ports to exercise multi-seller fanout:
-    A2A_PORT=7501 SELLER_NAME=alice python3 seller_mcp.py
-    A2A_PORT=7502 SELLER_NAME=bob   python3 seller_mcp.py
+    MCP_PORT=7501 SELLER_NAME=alice python3 seller_mcp.py
+    MCP_PORT=7502 SELLER_NAME=bob   python3 seller_mcp.py
 """
 from __future__ import annotations
 
@@ -37,8 +37,8 @@ logging.basicConfig(
 )
 
 NAME = os.environ.get("SELLER_NAME", "seller")
-PORT = int(os.environ.get("A2A_PORT", "7501"))
-HOST = os.environ.get("A2A_HOST", "127.0.0.1")
+PORT = int(os.environ.get("MCP_PORT", "7501"))
+HOST = os.environ.get("MCP_HOST", "127.0.0.1")
 
 log = logging.getLogger(NAME)
 

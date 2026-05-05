@@ -28,7 +28,6 @@ import sys
 
 import websockets
 
-
 RELAY_URL = "ws://localhost:7777"
 
 
@@ -40,7 +39,7 @@ async def main() -> int:
             for _ in range(3):
                 try:
                     msg = await asyncio.wait_for(ws.recv(), timeout=2)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     print("[-] no frame within 2s (relay may be idle)")
                     break
                 print(msg)

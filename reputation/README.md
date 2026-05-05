@@ -17,7 +17,7 @@ This is a hard architectural commitment, not a default we'll relax
 later. Centralizing reputation would (a) make us a marketplace
 operator in the regulatory sense, (b) put us on the hook for libel
 exposure when a score goes wrong, and (c) re-introduce the platform
-risk we built on Nostr to avoid. See `CLAUDE.md` Rules 12–16.
+risk we built on Nostr to avoid. See `AGENTS.md` Rules 12–16.
 
 ## The five layers (plus a future sixth)
 
@@ -71,12 +71,12 @@ can show "why" — never just a number.
 
 ## Cross-references
 
-- `CLAUDE.md` Rule 12 — discovery is Nostr-only.
-- `CLAUDE.md` Rule 13 — binary content moves over MCP only.
-- `CLAUDE.md` Rule 14 — trust signals layered, not centralized.
-- `CLAUDE.md` Rule 15 — admin-agent input safety + escalate-on-
+- `AGENTS.md` Rule 12 — discovery is Nostr-only.
+- `AGENTS.md` Rule 13 — binary content moves over MCP only.
+- `AGENTS.md` Rule 14 — trust signals layered, not centralized.
+- `AGENTS.md` Rule 15 — admin-agent input safety + escalate-on-
   ambiguity.
-- `CLAUDE.md` Rule 16 — admin trust is opt-in.
+- `AGENTS.md` Rule 16 — admin trust is opt-in.
 
 ## Non-goals
 
@@ -84,5 +84,5 @@ can show "why" — never just a number.
 - No "official" platform ranking.
 - No machine-learned model that combines layers behind a black
   box — the algorithm is open and the weights are user-configurable.
-- No gating of marketplace access on reputation. Low score reduces
+- No gating of protocol access on reputation. Low score reduces
   buyer/seller appetite to engage; it never blocks the wire.

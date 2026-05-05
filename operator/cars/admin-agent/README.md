@@ -1,20 +1,32 @@
-# `operator/cars/admin-agent` — opt-in dispute-resolution Hermes instance
+# `operator/cars/admin-agent` — opt-in admin-signal Hermes instance
 
-This is the deployable admin-agent for the cars vertical. It is a
+This is the optional deployable admin agent for `cars-pack@1`. It is a
 Hermes instance running the `admin-cars` skill (see
 `verticals/cars-pack/skills/admin-cars/SKILL.md`) packaged via the
 `plugins/cars-admin/` plugin.
 
-The admin-agent receives encrypted dispute packages from buyers and
-sellers via MCP, applies the per-pack rubric, and publishes signed
-kind-30430 admin-decision events to the relay. Its trust is
-**opt-in**: a user only sees its decisions if they have explicitly
-added this admin's pubkey to their trust list at install time
-(Rule 16).
+The admin agent receives encrypted admin-signal packages from
+participants via MCP, applies the per-pack rubric, and publishes
+signed kind-30430 admin-decision events to the relay. It does not
+operate the relay, issue NIP-58 badges, or arbitrate disputes for the
+platform. Its trust is **opt-in**: a user only sees its decisions if
+they have explicitly added this admin's pubkey to their trust list at
+install time (Rule 16).
+
+## Boundary with `operator/cars`
+
+`operator/cars/` is relay infrastructure: strfry, Caddy, PoW policy,
+backups, monitoring, moderation contact, and manual NIP-58 badge
+workflow. This folder is only the deployment runbook for a separate
+Hermes admin-signal process.
+
+The admin-agent can publish kind 30430/30431 events. It cannot change
+relay policy, delete relay data, issue badges, revoke badges, or call
+buyer/seller MCP servers.
 
 See also:
 
-- `../../../reputation/dispute_protocol.md` — full dispute flow
+- `../../../reputation/dispute_protocol.md` — admin signal / appeal flow
 - `../../../reputation/admin_threat_model.md` — required defenses
 - `../../../reputation/kinds.md` — kind 30430 / 30431 schemas
 - `verticals/cars-pack/skills/admin-cars/SKILL.md` — the skill itself
@@ -27,7 +39,8 @@ See also:
 2. The `cars-admin` plugin installed
    (`hermes plugin install cars-admin`).
 3. A dedicated keypair for this admin role (NEVER the operator's
-   personal keypair). Stored in `~/.chaos/.env` mode 0600.
+   relay key, badge key, or personal keypair). Stored in
+   `~/.chaos/.env` mode 0600.
 4. Outbound websocket connectivity to the operator's relay
    (`wss://relay.<domain>`) and 2–3 community relays.
 5. An MCP HTTP+SSE bind that buyers/sellers can reach (default
@@ -94,7 +107,7 @@ returns `admin_decisions: []` regardless of what's on the relay.
 ## Pre-launch checklist
 
 - [ ] Admin-pubkey generated, stored mode 0600, NEVER colocated
-      with the operator's personal key
+      with the relay key, badge key, or operator's personal key
 - [ ] `pubkey.json` populated and operator-signed
 - [ ] `.well-known/chaos-admin/cars-pack.json` reachable
 - [ ] `trust_list_announcement.md` reviewed and posted publicly

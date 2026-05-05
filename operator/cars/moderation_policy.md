@@ -1,7 +1,7 @@
 # Moderation policy — chaos Mode A relay
 
 This is both the published policy (link from your relay's NIP-11
-contact field and from the marketplace website at
+contact field and from the project website at
 `moderation.<your-domain>`) and the operator's runbook.
 
 ## What this relay accepts

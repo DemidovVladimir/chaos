@@ -2,7 +2,7 @@
 
 The operator issues NIP-58 badges (`verified-private-seller`,
 `verified-dealer`). Issuance is a manual due-diligence process
-documented in `operator/cars/`. **Revocation** is the
+documented in `operator/cars/badge_issuance.md`. **Revocation** is the
 counterpart: when, why, and how the operator pulls a badge.
 
 ## When the operator revokes
@@ -19,8 +19,7 @@ A badge is revoked when at least one of:
 3. The original due-diligence basis is invalidated (e.g. dealer
    license revoked by the relevant authority, identity proof
    later proven forged).
-4. The holder requests revocation themselves (e.g. exiting the
-   marketplace).
+4. The holder requests revocation themselves.
 
 Cases 1 and 2 require the operator to give the holder ≥ 7 days'
 notice via NIP-17 sealed DM, and to consider any response, before
@@ -43,31 +42,28 @@ Before publishing a revocation, the operator runs:
 
 ## Revocation event format
 
-We emit two events when revoking:
+The operator emits a NIP-09 deletion event (kind 5) targeting the
+original badge award event. Standard Nostr deletion semantics apply:
+the deletion must be signed by the same key that issued the badge.
 
-1. A NIP-09 deletion event (kind 5) targeting the original badge
-   award event. Standard Nostr deletion semantics.
-2. A `badge-revoked` event — kind 30430 (admin-decision) with:
-   - `decision = flag` (revocation is a strong public signal)
-   - `severity` matching the trigger
-   - `e` pointing at the original NIP-58 badge-award event id
-   - `p` the holder's pubkey
-   - `reason_hash` = sha256 over the operator's case-file notes
-   - `appeal_until` = `created_at + 30d`
-   - `content`: short public reason (≤ 280 chars), no PII
+The deletion event SHOULD include:
 
-The pair (NIP-09 deletion + 30430 flag) is what reputation-mcp
-treats as a revocation. Either alone is insufficient: the
-deletion alone could be a key compromise; the flag alone leaves
-the badge "live" in caches.
+- `e` pointing at the original NIP-58 badge-award event id
+- `p` the holder's pubkey
+- `reason_hash` = sha256 over the operator's case-file notes
+- `content`: short public reason (≤ 280 chars), no PII
 
 ## Transparency requirement
 
-The 30430 above is public, signed, and auditable on the relay.
+The deletion event is public, signed, and auditable on the relay.
 The `reason_hash` lets the operator commit to a specific rationale
 without disclosing PII or third-party complaint content. If a
 court later compels disclosure, the operator can reveal the
 preimage, and any third party can verify.
+
+If an admin-agent previously published a related 30430 decision, that
+decision remains a separate opt-in trust signal. It is not the badge
+revocation mechanism.
 
 The operator's own attestation log (a private `cases.jsonl` in
 `operator/cars/`) maps `dispute_id → reason_hash → outcome`.
@@ -78,9 +74,8 @@ This file never leaves the operator's machine.
 A revoked holder may apply for restoration after either:
 
 - An accepted appeal (kind 30431) resolved in their favor — the
-  operator publishes a fresh 30430 with `decision=clear`
-  referencing the original revocation's `e` tag, and re-issues
-  the original NIP-58 badge.
+  operator re-issues the NIP-58 badge and may reference the accepted
+  appeal in the new award event.
 - 12 months elapsed since revocation, plus a clean record (no new
   30430 negative decisions) over that window, plus a fresh
   due-diligence pass.

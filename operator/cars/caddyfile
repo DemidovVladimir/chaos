@@ -1,5 +1,5 @@
 {
-    email abuse@your-domain.app
+    email uncojet@neurocorventis.app
 }
 
 relay.your-domain.app {
@@ -15,7 +15,7 @@ relay.your-domain.app {
         header Access-Control-Allow-Methods "GET"
         respond `{
             "name": "chaos cars relay",
-            "description": "Curated Nostr relay for the chaos cars marketplace. NIP-99 listings, NIP-17 sealed DMs.",
+            "description": "Curated Nostr relay for chaos cars-pack events. NIP-99 listings, NIP-17 sealed DMs.",
             "pubkey": "<your-operator-pubkey-hex>",
             "contact": "abuse@your-domain.app",
             "supported_nips": [1, 9, 11, 12, 13, 15, 16, 17, 33, 40, 42, 50, 58, 99],

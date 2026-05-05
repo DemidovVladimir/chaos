@@ -151,7 +151,7 @@ async def main() -> int:
     # 1. Spawn both sellers in parallel
     procs: list[subprocess.Popen] = []
     for s in SELLERS:
-        env = {**os.environ, "SELLER_NAME": s["name"], "A2A_PORT": str(s["port"])}
+        env = {**os.environ, "SELLER_NAME": s["name"], "MCP_PORT": str(s["port"])}
         p = subprocess.Popen(
             [sys.executable, str(HERE / "seller_mcp.py")],
             env=env,

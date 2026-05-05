@@ -106,7 +106,7 @@ on register.
 8. **Identity / keys**: Hermes does not custody any keys. Hermes' own
    secrets land in `~/.hermes/.env` and `~/.hermes/auth.json`
    (`hermes_constants.get_hermes_home()`). chaos keeps its
-   keys at `~/.chaos/keys/seller.key` (mode 0600 per CLAUDE.md
+   keys at `~/.chaos/keys/seller.key` (mode 0600 per AGENTS.md
    Rule 3) — Hermes does not need to know about them.
 
 9. **Logging**: `logging.getLogger(__name__)` is fine; Hermes
@@ -174,7 +174,7 @@ constraints.
 - Implement the seller / buyer engines so the plugin can drive them
   in-process instead of `subprocess`-shelling out to `mvp/seller.py`.
 - Build a `lint_plugin.py` in `plugins/_template/` that enforces
-  CLAUDE.md Rule 11 against the manifest's `forbidden_toolsets`.
+  AGENTS.md Rule 11 against the manifest's `forbidden_toolsets`.
 - Add a `register_mcp_server` method to a chaos `PluginContext`
   wrapper, so the seller plugin can spawn its FastMCP at register time.
 - Once seller/buyer engines exist, drop the `subprocess` shim.

@@ -11,7 +11,7 @@ realIpHeader = "X-Forwarded-For"
 
 info {
     name = "chaos cars relay"
-    description = "Curated Nostr relay for the chaos cars marketplace. NIP-99 listings, NIP-17 sealed DMs. Moderated. PoW required."
+    description = "Curated Nostr relay for chaos cars-pack events. NIP-99 listings, NIP-17 sealed DMs. Moderated. PoW required."
     pubkey = "<your-operator-pubkey-hex>"
     contact = "abuse@<your-domain>"
     supported_nips = [1, 9, 11, 12, 13, 15, 16, 17, 33, 40, 42, 50, 58, 99]

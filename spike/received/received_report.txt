@@ -1,8 +1,0 @@
-INSPECTION REPORT (test)
-Item: 2018 Mazda 6 hatchback
-VIN ending: 8K2J
-Mileage at inspection: 65,432 km
-Tires: Continental PremiumContact, ~5000 km wear
-Body: no rust, no panel repaint indicators
-Mechanical: clean, no codes
-Verdict: pass
