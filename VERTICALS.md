@@ -31,7 +31,7 @@ A pack defines, for one domain:
   much detail to share before the user explicitly approves more.
 - **Pack-local capability MCPs** (optional) — vertical-specific
   MCPs that don't generalize. Most capability MCPs are
-  cross-vertical (`reverse-image-mcp`, `market-comp-mcp`,
+  cross-domain (`reverse-image-mcp`, `market-comp-mcp`,
   `reputation-mcp`) and live in `shared-mcp/`. A handful are
   pack-local (e.g. cars-pack@1 ships `vin-decoder-mcp` for ISO-3779
   VIN structural decode, which only makes sense for vehicles).
@@ -68,12 +68,12 @@ What it ships:
   tools and applies the grant policy.
 - **Buyer skill** —
   `verticals/cars-pack/skills/buyer-cars/SKILL.md`. Knows the tool
-  surface, runs the evaluation rubric (cross-vertical capability
+  surface, runs the evaluation rubric (cross-domain capability
   MCPs plus VIN decode), classifies listings as `surface` /
   `watchlist` / `suppress`.
 - **Admin skill** —
   `verticals/cars-pack/skills/admin-cars/SKILL.md`. Hardened
-  against prompt injection per CLAUDE.md Rule 15; publishes
+  against prompt injection per AGENTS.md Rule 15; publishes
   decisions as kind 30430 per Rule 16.
 - **Pack-local capability MCP** —
   `verticals/cars-pack/mcp/vin-decoder-mcp/`. Free, local, public-
@@ -84,8 +84,8 @@ What it ships:
   `plugins/cars-buyer/`, `plugins/cars-admin/`. Operator deploys
   the admin plugin; end users install seller and / or buyer.
 - **Operator infra-as-code** — `operator/cars/` (Mode A strfry
-  relay deployment + admin-agent service config + monitoring +
-  backup).
+  relay deployment, badge workflow, monitoring, backup, and optional
+  admin-agent deployment runbook).
 
 Source of truth: `verticals/cars-pack/`.
 
@@ -221,7 +221,7 @@ to copy from is `verticals/cars-pack/`; the skeleton is at
    Knows which tools to call in which order, runs the evaluation
    rubric, classifies listings.
 6. **Identify pack-local capability MCPs.** Most capability MCPs
-   are cross-vertical and already exist in `shared-mcp/`. Only
+   are cross-domain and already exist in `shared-mcp/`. Only
    build a pack-local MCP if the capability genuinely doesn't
    generalize (cars-pack@1's `vin-decoder-mcp` is the only one we
    ship today).
@@ -231,13 +231,13 @@ to copy from is `verticals/cars-pack/`; the skeleton is at
 8. **Build the plugin pair.** Create
    `plugins/<vertical>-seller/` and `plugins/<vertical>-buyer/`
    with `plugin.yaml` declaring the toolset. CI lint enforces
-   role isolation per CLAUDE.md Rule 11 (no buyer-side capability
+   role isolation per AGENTS.md Rule 11 (no buyer-side capability
    MCPs in seller plugins; no `mcp_serve` in buyer plugins; no
    `mcp_connect` in seller plugins).
 9. **Optional: build the admin plugin.** If the vertical needs an
    operator-deployed admin-agent, create
    `plugins/<vertical>-admin/`. The admin skill must follow
-   CLAUDE.md Rules 15–16 — anti-injection hardening, no
+   AGENTS.md Rules 15–16 — anti-injection hardening, no
    destructive unilateral action, public auditability.
 10. **Optional: operator infra-as-code.** If you're operating a
     Mode A relay for the vertical, write
@@ -282,7 +282,7 @@ narrow and the toolsets compose without conflict.
 behaviour in one vertical is a (weak) signal for its trustworthiness
 in another. Each agent decides whether to import another vertical's
 reputation history into its own scoring via `reputation-mcp`. The
-default is per-vertical; cross-vertical merging is something the
+default is per-domain; cross-domain merging is something the
 user explicitly opts into.
 
 **The relay tier may be split or unified.** An operator can run one

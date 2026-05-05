@@ -1,7 +1,7 @@
 # SECURITY
 
 Threat model, defense in depth, and the pre-launch checklist. Read
-alongside `CLAUDE.md` (engineering rules) and `PROTOCOL.md` (on-the-
+alongside `AGENTS.md` (engineering rules) and `PROTOCOL.md` (on-the-
 wire design).
 
 ## Trust model
@@ -199,7 +199,7 @@ flagging decisions on the relay. A successful injection that
 flipped a decision would burn the trust signal for everyone who
 opted into that admin-pubkey.
 
-Defense (per Rule 15 in `CLAUDE.md`):
+Defense (per Rule 15 in `AGENTS.md`):
 
 1. **Sanitize every input** through `shared/input_safety.py` —
    NFKC normalize, strip invisible Unicode, strip reserved tags,
@@ -230,7 +230,7 @@ Detail: `reputation/admin_threat_model.md`.
 
 ## Plugin role isolation
 
-Per Rule 11 in `CLAUDE.md`, every plugin under
+Per Rule 11 in `AGENTS.md`, every plugin under
 `plugins/<vertical>-<role>/plugin.yaml` declares exactly the
 toolset its role needs:
 
@@ -244,7 +244,7 @@ toolset its role needs:
 - **Multi-role users** install multiple plugins. One plugin = one
   role. CI lint rejects violations.
 
-The cross-vertical pro tier (`plugins/chaos-pro/`) is buyer-
+The cross-domain pro tier (`plugins/chaos-pro/`) is buyer-
 side only; it cannot be installed alongside a seller-only role.
 This isolates blast radius: a compromised buyer plugin cannot
 publish on behalf of the user as a seller; a compromised seller
@@ -280,7 +280,7 @@ memory:
 
 tools:
   enabled_toolsets:
-    - marketplace_seller    # OR marketplace_buyer
+    - seller_agent          # OR buyer_agent
     - skills
     - mcp                   # restricted via allowlist below
   disabled_toolsets:
@@ -394,8 +394,9 @@ Tick every box before any user-facing system is exposed.
       `request_inspection_report`, `request_vin`, `submit_offer`,
       `cancel_inquiry`); any extra tool exposed needs a written
       rationale and a pack version bump
-- [ ] No second peer transport (no parallel ACP, A2A, gRPC, custom
-      WebSocket layer) accepting buyer↔seller traffic alongside MCP
+- [ ] No second peer transport (no parallel gRPC, custom WebSocket
+      layer, or other peer wire) accepting buyer↔seller traffic
+      alongside MCP
 - [ ] TLS terminated at the seller's reverse proxy; MCP server
       bound to localhost behind it
 - [ ] No `Resource(uri="...")` returned by any cars-pack@1 tool

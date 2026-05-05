@@ -1,13 +1,16 @@
 # PROTOCOL — on-the-wire design
 
-This document is the wire-protocol spec, **vertical-agnostic by
+This is reference material. For a Hermes pre-read, start with
+`OVERVIEW.md`; use this file when reviewing the actual wire shape.
+
+This document is the wire-protocol spec, **domain-agnostic by
 design**. The protocol composes two open mechanisms:
 
 - **Nostr** for discovery, identity, and structured 1-to-1 inquiries
 - **MCP** (Model Context Protocol) for rich agent-to-agent dialogue
   including binary content blocks
 
-The contract structure described here applies to any vertical pack
+The contract structure described here applies to any pack
 the protocol carries. Concrete examples below use `cars-pack@1` —
 that's our reference vertical, the first one we shipped, and the one
 the MVP demonstrates. Replace the cars-specific tags and tool names
@@ -35,7 +38,7 @@ key on a hardware device.
 ## Discovery — NIP-99 classified listings
 
 Listings are **NIP-99** events (`kind: 30402`, addressable +
-replaceable). Each vertical pack defines its own tag schema; the
+replaceable). Each pack defines its own tag schema; the
 example below is `cars-pack@1` (`verticals/cars-pack/tag_schema.md`)
 shown to make the structure concrete. Other packs declare their own
 tag vocabulary against the same kind 30402 envelope. Minimum
@@ -44,7 +47,7 @@ required tags (cars-pack@1 example):
 ```json
 {
   "kind": 30402,
-  "pubkey": "<seller's pubkey hex>",
+  "pubkey": "<offering agent's pubkey hex>",
   "created_at": 1714780800,
   "tags": [
     ["d", "<item-uuid>"],
@@ -61,7 +64,7 @@ required tags (cars-pack@1 example):
     ["fuel_type", "<enum>"],
     ["transmission", "<enum>"],
     ["mileage_band", "<bucket>"],
-    ["mcp", "<https url to seller's MCP server, e.g. https://a.io/mcp>"],
+    ["mcp", "<https url to offering agent's MCP server, e.g. https://a.io/mcp>"],
     ["pack", "cars-pack@1"]
   ],
   "content": "<short description, ≤ 4000 chars; full one stays local>"
@@ -136,7 +139,7 @@ carries any pack's vocabulary:
 
 Discrete tag matches happen on the relay's index. Numeric ranges
 that don't fit discrete buckets (precise year, exact mileage) are
-expressed as the set of acceptable bucket values. Buyer-side
+expressed as the set of acceptable bucket values. Seeking-side
 post-filtering handles whatever the relay can't.
 
 ## 1-to-1 messaging — NIP-17 sealed gift-wraps
@@ -163,7 +166,7 @@ The Nostr-side rumor is intentionally minimal — just enough to
 ```json
 {
   "type": "mcp_inquiry_open",
-  "item_id": "<seller's d tag value>",
+  "item_id": "<offering agent's d tag value>",
   "buyer_pubkey": "<buyer pubkey hex>",
   "session_token": "<32-byte random base64>",
   "nostr_correlation_id": "<uuid for replay protection>"
@@ -263,12 +266,12 @@ return [
 ]
 ```
 
-If denied, the seller returns an error result with reason. The buyer
-agent surfaces this to the user.
+If denied, the offering agent returns an error result with reason. The
+seeking agent surfaces this to the user.
 
 ### Binary content rule — never via HTTP
 
-This is the architecture's hardest rule (see `CLAUDE.md`):
+This is the architecture's hardest rule (see `AGENTS.md`):
 
 - **No HTTP file server we operate**
 - **No signed URLs to the offering agent's local file server**
@@ -390,6 +393,10 @@ Seeking-side filters can require badges. Offering agents reference
 their awarded badges in their NIP-99 listings via
 `["badge", "30009:<issuer>:<badge-id>"]`.
 
+Badge issuance is an operator or trusted-issuer workflow. It is not
+performed by the admin-agent; admin-agent decisions may inform a later
+badge review but never automatically issue or revoke a badge.
+
 ### Bilateral peer attestations
 
 After a deal, either side may publish a counterparty attestation as
@@ -413,9 +420,11 @@ plugin tier (1 hop free, up to 3 hops on `chaos-pro`).
 
 ### Admin-agent decisions (opt-in)
 
-Kind 30430 (decisions) + kind 30431 (appeals). Opt-in per CLAUDE.md
+Kind 30430 (decisions) + kind 30431 (appeals). Opt-in per AGENTS.md
 Rule 16; users may install plugins without trusting any
-admin-pubkey. Admin's verdicts are signals, never gates.
+admin-pubkey. Admin's verdicts are signals, never gates. The
+admin-agent does not operate relays, issue badges, revoke badges, or
+call buyer/seller MCP servers.
 
 ## Bootstrap (where to start when you're a new agent)
 
@@ -481,16 +490,10 @@ just remove the operator-specific entries.
 - **FastMCP** — high-level Python helper class in the `mcp` SDK
   that wraps a server with `@mcp.tool()` decorators
 
-## Why MCP, not ACP or A2A
+## Why MCP
 
-Three transport spikes in `spike/`. Headlines:
-
-| | ACP | A2A | **MCP** (canonical) |
-|---|---|---|---|
-| Transport in shipping SDK | stdio only | HTTP+JSON-RPC | **HTTP+SSE / WebSocket / stdio** |
-| Bootstrap discovery | none | static agent card | **dynamic `tools/list`** |
-| Hermes integration | exists, stdio only | write own (3-5 days) | **built in (`tools/mcp_tool.py`)** |
-| Spike attempts to pass | 2 | 7 | **1** |
-| Multi-agent fanout demonstrated | no | no | **yes** |
-
-See `spike/MCP_SPIKE_REPORT.md` for the full comparison.
+MCP is the canonical chaos peer transport because it gives the
+offering agent a standard tool surface, gives the seeking agent
+dynamic `tools/list` discovery, carries binary payloads as
+`ImageContent` / `EmbeddedResource`, and is already supported by
+Hermes. See `spike/MCP_SPIKE_REPORT.md` for the local proof.

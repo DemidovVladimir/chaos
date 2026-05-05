@@ -1,21 +1,34 @@
 # PRD — chaos
 
+This is the long requirements document. For a Hermes first pass, read
+`OVERVIEW.md` and the short deck; use this file for diligence on
+scope, constraints, and phasing.
+
 A precise product-requirements document. Read alongside `OVERVIEW.md`
 (plain-English narrative), `PROTOCOL.md` (on-the-wire design),
-`VERTICALS.md` (the pack abstraction), and `CLAUDE.md` (engineering
+`VERTICALS.md` (the pack abstraction), and `AGENTS.md` (engineering
 rules).
 
 ## 1. Problem statement
 
-Two autonomous agents, owned by different users and running on
-different machines, need to coordinate. The offering agent has
-something — an item, a service, a model, a dataset, a block of
-inference cycles — and wants the right counterparty to find it. The
-seeking agent has a need and wants to evaluate offers without
-revealing its identity to a custodial intermediary. Today every
-shape of this handshake routes through a platform that holds the
-data, mediates the messaging, takes a percentage of the deal, and
-operates as a regulated data controller on both sides.
+Autonomous agents, owned by different users and running on
+different machines, need to coordinate. The cardinality is
+not fixed: sometimes one offering agent and one seeking agent
+pair up; often **one offering agent serves many seekers** at the
+same time (1:N fan-out); often **many offerings are converged
+by one seeker** (N:1 aggregation); and **many-to-many** concurrent
+sessions are the norm at scale. An offering agent has something
+— an item, a service, a model, a dataset, a block of inference
+cycles — and wants the right counterparties (one or many) to
+find it. A seeking agent has a need and wants to evaluate
+offers (one or many) without revealing its identity to a custodial
+intermediary. Today every shape of this handshake routes through
+a platform that holds the data, mediates the messaging, takes a
+percentage of the deal, and operates as a regulated data controller
+on both sides. `cars-pack@1` is the working reference because
+peer-to-peer vehicle discovery exercises the full surface — public
+metadata, rich binary inspection content, negotiation, trust signals —
+but the protocol contract is not cars-specific.
 
 That platform is structurally unnecessary. The discovery problem
 (signed events on a federated relay) and the rich-content problem
@@ -33,7 +46,7 @@ platform sitting in the data path.
 ## 2. Solution in one sentence
 
 Each user runs a Hermes-based agent that publishes signed offerings
-as Nostr events tagged according to a vertical pack, subscribes for
+as Nostr events tagged according to a pack, subscribes for
 matching offers, and connects directly to counterparties over MCP
 for the rich-content exchange — no custodial platform anywhere in
 the data path.
@@ -50,9 +63,10 @@ The protocol succeeds if it delivers all of the following:
   Mode A (one operator-run relay + community relays) is the v1
   default; Mode B (federation) and Mode C (community-only) are
   migration paths the architecture already supports.
-- **Peer transport for everything after pairing.** Once two agents
-  match, the conversation moves to MCP. No platform in the data
-  path. Binary content (images, PDFs, datasets, model artifacts) is
+- **Peer transport for everything after pairing.** Once a match
+  occurs (and a seeking agent may be matched with several offering
+  agents concurrently, or vice versa), the conversation moves to
+  MCP for each pair. No platform in the data path. Binary content (images, PDFs, datasets, model artifacts) is
   delivered exclusively as MCP `ImageContent` and `EmbeddedResource`
   blocks returned from `tools/call` results on the offering agent's
   own MCP server.
@@ -72,21 +86,20 @@ The protocol succeeds if it delivers all of the following:
 ## 4. Non-goals
 
 These are explicitly out of scope. A request to build any of them
-requires explicit user override per CLAUDE.md.
+requires explicit user override per AGENTS.md.
 
 - **Marketplace operator features.** No escrow, no refunds, no
   platform-mediated dispute arbitration with binding outcomes, no
   KYC, no AML.
 - **Payment processing of any kind.** Even token-pegged stablecoins.
   Future onchain integrations are non-custodial multi-sig only
-  (CLAUDE.md Rule 14).
+  (AGENTS.md Rule 14).
 - **Custodial photo or file hosting.** Binary content moves over MCP
   only. No HTTP file servers we operate, no signed URLs to
   third-party hosts.
 - **A second peer transport.** MCP is the canonical wire for
-  agent↔agent dialogue. Earlier iterations spiked ACP and A2A; both
-  superseded (`spike/MCP_SPIKE_REPORT.md`). No parallel gRPC, custom
-  WebSocket, or other peer transport without explicit override.
+  agent↔agent dialogue. No parallel gRPC, custom WebSocket, or other
+  peer transport without explicit override.
 - **Third-party data brokering.** Custom MCPs may compute over data
   the user already has, query free authoritative sources, or
   aggregate data already on the network. They may not resell
@@ -100,15 +113,15 @@ requires explicit user override per CLAUDE.md.
 - **In-app social features** beyond NIP-51 mute lists and NIP-58
   badges.
 - **Real-time voice or video.**
-- **Per-vertical paid plugins.** The cross-vertical pro tier
+- **Per-vertical paid plugins.** The cross-domain pro tier
   (`plugins/chaos-pro/`) is the only paid plugin shape;
-  per-vertical paid bundles like `cars-buyer-pro` are explicitly
+  per-domain paid bundles like `cars-buyer-pro` are explicitly
   forbidden.
 
 ## 5. Personas
 
-The personas are written domain-agnostically. For each role, the
-cars vertical is one concrete instantiation; the same shape applies
+The personas are written domain-agnostically. `cars-pack@1` is one
+concrete instantiation; the same shape applies
 to ML inference, data licensing, compute jobs, specialist services,
 and any future pack.
 
@@ -127,7 +140,7 @@ explicitly approved, finalize off-platform.
 
 ### 5.2 Offering-side user (institutional / bulk)
 
-A dealership, a model marketplace, a compute provider, a law firm —
+A dealership, a model provider, a compute provider, a law firm —
 anyone running multiple offerings under one identity. Wants
 efficient bulk listing, brand visibility, and a clean inquiry inbox.
 Often has an existing CRM or pipeline they don't want to replace.
@@ -147,18 +160,24 @@ the offering party, finalize.
 
 ### 5.4 Vertical operator
 
-Operates the Mode A relay for a domain, optionally issues NIP-58
-badges, optionally runs an admin-agent for that vertical, ships and
-supports the pack itself.
+Operates one or more vertical support services: the Mode A relay,
+optional NIP-58 badge issuance, and optional admin-agent trust signals.
+These are separate responsibilities and may be run independently.
 
 **Goals**: a clean low-spam relay; sustainable revenue from premium
 tools, badge issuance, and admin-tier subscriptions; minimal
 operational and regulatory burden.
 
+Boundary: the relay operator runs strfry/Caddy and relay policy; the
+badge issuer performs manual due diligence and signs NIP-58 badges; the
+admin-agent is a separate Hermes process that publishes opt-in kind
+30430/30431 trust signals. The admin-agent does not operate the relay,
+issue badges, revoke badges, or call buyer/seller MCP servers.
+
 ## 6. User stories
 
 Written for any vertical. **Agent A** is the offering side; **Agent
-B** is the seeking side. The cars vertical is one instantiation; the
+B** is the seeking side. `cars-pack@1` is one instantiation; the
 shape is identical for any pack.
 
 - **US-1 — Offering published.** Agent A's user describes their
@@ -170,7 +189,7 @@ shape is identical for any pack.
   matching that filter across configured relays, dedupes incoming
   events by `id`.
 - **US-3 — Evaluation.** When a matching event arrives, Agent B runs
-  the pack's evaluation rubric (cross-vertical capability MCPs plus
+  the pack's evaluation rubric (cross-domain capability MCPs plus
   pack-specific checks) and classifies the listing as `surface`,
   `watchlist`, or `suppress`.
 - **US-4 — Inquiry initiation.** Agent B's user taps "ask for more
@@ -248,7 +267,7 @@ shape is identical for any pack.
   publish gift-wrap.
 - **FR-S7**: Open MCP HTTP+SSE session against the offering agent's
   `mcp_url` carrying the `session_token`. Run `tools/list`. Call
-  pack-defined tools as needed. Run cross-vertical capability MCPs
+  pack-defined tools as needed. Run cross-domain capability MCPs
   (e.g. `reverse-image-mcp` thorough tier) on returned content.
 - **FR-S8**: Maintain a local inbox at `~/.chaos/inbox/` —
   one JSONL per inquiry conversation.
@@ -258,7 +277,7 @@ shape is identical for any pack.
 ### 7.3 Relay (FR-R)
 
 - **FR-R1**: A strfry-based Nostr relay reachable at
-  `wss://relay.<operator-domain>` (per-vertical or unified).
+  `wss://relay.<operator-domain>` (per-domain or unified).
 - **FR-R2**: Accept kinds 0, 5, 13, 14, 1059, 1985, 8, 30000–30099,
   30009, 30402, 30403, plus reputation kinds (30410–30431).
 - **FR-R3**: Enforce NIP-13 PoW ≥ 20 bits on kind-30402 events.
@@ -306,12 +325,13 @@ land.
 
 The 5-layer reputation model is documented in
 `reputation/README.md`. NIP-58 badges (FR-T1) are layer 1;
-admin-agent decisions (kind 30430, see CLAUDE.md Rules 15–16) are
+admin-agent decisions (kind 30430, see AGENTS.md Rules 15–16) are
 layer 5 and opt-in.
 
-- **FR-T1**: NIP-58 badge issuer agent operated by the vertical's
-  operator (under `operator/<vertical>/`), capable of issuing
-  domain-appropriate badges.
+- **FR-T1**: NIP-58 badge issuer workflow operated by the vertical's
+  operator (documented under `operator/<vertical>/`), capable of
+  issuing domain-appropriate badges. This is separate from the
+  admin-agent.
 - **FR-T2**: Verification flow combines email confirmation,
   payment-method confirmation (no money handled — just
   attestation), and (for institutional offerings) domain-ownership
@@ -326,7 +346,8 @@ layer 5 and opt-in.
   `reputation/scoring.md`.
 - **FR-T6**: Admin-agent (opt-in, operator-deployed) publishes
   structured decisions as kind 30430. Affected parties may publish
-  appeals as kind 30431. See `reputation/dispute_protocol.md`.
+  appeals as kind 30431. It does not issue/revoke NIP-58 badges or
+  operate the relay. See `reputation/dispute_protocol.md`.
 - **FR-T7**: All reputation reads route through
   `shared-mcp/reputation-mcp`. Each agent computes its own
   `score_aggregate` locally — no central rep store, no published
@@ -335,13 +356,13 @@ layer 5 and opt-in.
 ### 7.6 Plugins and pro tier (FR-PL)
 
 - **FR-PL1**: Each plugin under `plugins/<vertical>-<role>/`
-  declares its toolset in `plugin.yaml` and respects CLAUDE.md
+  declares its toolset in `plugin.yaml` and respects AGENTS.md
   Rule 11 (role isolation). CI lint rejects violations.
 - **FR-PL2**: `plugins/chaos-pro/` is the **single
-  cross-vertical paid upgrade** — applies to every installed buyer
-  plugin. No per-vertical paid plugins exist.
+  cross-domain paid upgrade** — applies to every installed buyer
+  plugin. No per-domain paid plugins exist.
 - **FR-PL3**: Admin plugins (`plugins/<vertical>-admin/`) are
-  operator-deployed only. Admin invariants per CLAUDE.md Rule 16;
+  operator-deployed only. Admin invariants per AGENTS.md Rule 16;
   threat model per Rule 15.
 
 ## 8. Non-functional requirements
@@ -412,7 +433,7 @@ layer 5 and opt-in.
 
 ## 10. Success criteria
 
-- **SC-1 — Composability.** A new vertical pack is implementable in
+- **SC-1 — Composability.** A new pack is implementable in
   ≤ 5 person-days end-to-end (tag schema + tool surface + skills +
   example listing). Measured by shipping a second pack alongside
   cars.
@@ -420,7 +441,7 @@ layer 5 and opt-in.
   composable into a per-agent local score. Measured by
   `reputation-mcp` returning each layer's contribution
   independently.
-- **SC-3 — Security.** All 16 architectural rules in CLAUDE.md are
+- **SC-3 — Security.** All 16 architectural rules in AGENTS.md are
   enforced (Rule 11 by CI lint; Rules 15–16 by admin-skill review
   before each release; Rules 1–10 by code review).
 - **SC-4 — Demonstrable working demo.** End-to-end run on two
@@ -440,12 +461,12 @@ layer 5 and opt-in.
 |---|---|---|---|
 | **P0 — MVP** | Weekend | Two laptops, encrypted text inquiry round-trip over public relays | Demo screen-capture works |
 | **P1 — Universal engines** | Week 1 | `seller/` + `buyer/` scaffolds wired into Hermes plugin loaders | A vacuous pack loads end-to-end |
-| **P2 — First vertical pack** | Week 2 | cars-pack@1 end-to-end via Hermes plugin (FastMCP server + client, `ImageContent` photo delivery) | Two-machine end-to-end test passes unattended |
-| **P3 — Second vertical pack** | Week 3 | One sketched vertical (e.g. data-licensing) implemented to prove generality + reputation-mcp wiring | Same Hermes instance runs both packs concurrently |
-| **P4 — Admin-agent + arbitration** | Week 4 | admin-cars live; community arbitration mechanism wired; Phase-1 staking research kicked off | First public dispute → decision → appeal cycle completes on relay |
-| **Beyond** | — | Multi-vertical user, federated relay topology, cross-vertical reputation | 100+ active agents across 2+ verticals on 3+ relays |
+| **P2 — First pack** | Week 2 | cars-pack@1 end-to-end via Hermes plugin (FastMCP server + client, `ImageContent` photo delivery) | Two-machine end-to-end test passes unattended |
+| **P3 — Second pack** | Week 3 | One sketched vertical (e.g. data-licensing) implemented to prove generality + reputation-mcp wiring | Same Hermes instance runs both packs concurrently |
+| **P4 — Admin-agent trust signals** | Week 4 | admin-cars live; opt-in dispute signal flow wired; Phase-1 staking remains research-only | First public dispute signal → decision → appeal cycle completes on relay |
+| **Beyond** | — | Multi-vertical user, federated relay topology, cross-domain reputation | 100+ active agents across 2+ verticals on 3+ relays |
 
-Detail in `LAUNCH_PLAN.md`.
+
 
 ## 12. Decisions log (high-stakes)
 
@@ -454,7 +475,6 @@ Detail in `LAUNCH_PLAN.md`.
 - **D2**: Binary content = MCP `ImageContent` / `EmbeddedResource`
   blocks only, returned from `tools/call`. Rejected: HTTP file
   server, signed URLs, Imgur, Dropbox, S3, Blossom.
-  Superseded: ACP and A2A — see `spike/MCP_SPIKE_REPORT.md`.
 - **D3**: First paid MCP = `reverse-image-mcp`. Rejected:
   `vin-lookup-mcp` Carfax-style aggregation.
 - **D4**: Production DM = NIP-17 sealed gift-wraps. NIP-04 only as
@@ -473,10 +493,59 @@ Detail in `LAUNCH_PLAN.md`.
   Manual review?
 - **OQ2**: Which community relays in the default relay list? Need
   2–3 stable, low-spam ones beyond ours.
-- **OQ3**: Sequencing of the second vertical pack — data-licensing
+- **OQ3**: Sequencing of the second pack — data-licensing
   vs. ml-inference vs. specialist-services. Driven by which
   community has the most pull.
 - **OQ4**: Pricing of `reverse-image-mcp` Pro tier — confirm $9/mo
   bundle vs. $0.10/call metered after first 100 free.
 - **OQ5**: Phase-1 staking jurisdiction sequencing — which target
   jurisdiction for the first legal review.
+
+## 14. Competitive landscape
+
+A brief pointer: there are three meaningfully different design
+points in the agent-coordination protocol space as of May 2026.
+Full analysis lives in `COMPETITIVE_LANDSCAPE.md`.
+
+- **Centralized agentic checkout** — custodial, KYC'd,
+  conventional money rails.
+  Optimized for retail-style purchases by AI shopping
+  assistants. **A single shape: AI buys from a regulated
+  merchant.**
+- **Agent-services vending on open rails** — **Elisym**
+  (elisym.network, elisymprotocol/elisym-core) is the
+  closest-adjacent project: Nostr discovery + NIP-90 Data
+  Vending Machines + self-custodial Lightning. **A single
+  shape: agent sells a service for sats.**
+- **Decentralised remote agentic collaboration substrate** —
+  chaos. NIP-99 classifieds + MCP rich-content delivery + no
+  money flow and no custodial platform in the data path +
+  public-OR-private deployment topology. **The general substrate**
+  any of the specific shapes above can ride on. `cars-pack@1` is
+  the working reference; `ml-inference`, `data-licensing`,
+  `compute-jobs`, and `specialist-services` are sketched.
+
+These are not substitutes. chaos and Elisym can coexist on the
+same Nostr fabric — same identity, different event kinds. See
+`COMPETITIVE_LANDSCAPE.md` for the head-to-head table and the
+six-point argument that chaos is the substrate Hermes-built
+applications most naturally compose against.
+
+## 15. Hermes collaboration framing
+
+chaos is **built on Hermes**, not merely compatible with it. The
+critical Hermes surfaces are MCP client/server tools, plugin loading,
+`forbidden_toolsets`, skills, and grant policy.
+
+The ask is partnership-shaped:
+
+1. Review the architecture and security model.
+2. If it holds up, list chaos as a Hermes ecosystem reference
+   protocol.
+3. Explore a private chaos node for Hermes-internal coordination.
+4. Co-design reusable MCPs: `reverse-image-mcp`, `market-comp-mcp`,
+   and `reputation-mcp`.
+
+Use `pitch/chaos-hermes-short.html` for the first conversation.
+`pitch/chaos-deck.html`, this PRD, and `COMPETITIVE_LANDSCAPE.md` are
+follow-up material.

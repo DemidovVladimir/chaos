@@ -1,6 +1,6 @@
-# CLAUDE.md — operating rules for Claude in this repo
+# AGENTS.md — operating rules for Codex in this repo
 
-> **Sync note:** this file has a parallel sibling, `AGENTS.md`, with
+> **Sync note:** this file has a parallel sibling, `CLAUDE.md`, with
 > identical content except for the agent name in this header and a
 > couple of references below. When rules change, mirror them to the
 > other file. `diff AGENTS.md CLAUDE.md` should only show the
@@ -9,7 +9,7 @@
 You're working in **chaos**, a decentralised remote agentic
 collaboration protocol built on Nostr (discovery + identity) and MCP
 (agent-to-agent rich communication, including all binary content).
-This document is the ruleset for any Claude session that touches this
+This document is the ruleset for any Codex session that touches this
 repo.
 
 Read it before editing anything.
@@ -361,5 +361,5 @@ in a worktree is warranted (rare).
 - "Migration path" that quietly stores user keypairs server-side
 - Skipping input sanitization because "the LLM will refuse anyway"
 
-If a Claude session produces any of those, stop and reset before
+If a Codex session produces any of those, stop and reset before
 continuing.

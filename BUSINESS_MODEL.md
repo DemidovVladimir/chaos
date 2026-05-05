@@ -19,7 +19,7 @@ funds, inventory, PII, or files.
 |---|---|
 | ARE | Discovery / classifieds layer |
 | ARE | Software vendor (open-source protocol + paid plugins) |
-| ARE | Reputation issuer (optional, per-vertical) |
+| ARE | Reputation issuer (optional, per-domain) |
 | ARE | Relay operator (optional, Modes A/B) |
 | ARE NOT | Custodian of funds |
 | ARE NOT | Custodian of inventory |
@@ -30,18 +30,18 @@ funds, inventory, PII, or files.
 
 ## Revenue streams
 
-The model is per-vertical pluralizable: each new pack extends the
+The model is per-domain pluralizable: each new pack extends the
 addressable market without re-engineering the wire. The discovery
 layer (Nostr) and the peer transport (MCP) are the same; only the
-per-vertical contract changes. That's leverage — packs compound, the
+per-domain contract changes. That's leverage — packs compound, the
 protocol does not.
 
 ### 1. Premium plugin tiers
 
-`plugins/chaos-pro/` is the **single cross-vertical paid
+`plugins/chaos-pro/` is the **single cross-domain paid
 upgrade**, applied to every installed seeking-side plugin the user
 runs. There is no `cars-buyer-pro`, no `realestate-buyer-pro`, no
-per-vertical paid bundle (CLAUDE.md cut list — the pack is the
+per-domain paid bundle (AGENTS.md cut list — the pack is the
 contract; the upgrade is universal).
 
 **What pro adds across every installed buyer plugin**:
@@ -56,7 +56,7 @@ contract; the upgrade is universal).
   with stronger weighting against muted edges
 - **Optional Phase-1 onchain stake reading** — surfaces the
   `onchain_stake` field from `reputation-mcp` (default off; opt-in
-  per CLAUDE.md Rule 14)
+  per AGENTS.md Rule 14)
 - **AI-assisted negotiation drafting** — cheap-LLM assist for buyer
   / seller turns
 - **Multi-modal item search** (text + content similarity via local
@@ -125,7 +125,7 @@ the operator sets.
 policy. Revoke on abuse. Substantially lower regulatory burden than
 custodial KYC.
 
-### 4. Vertical packs as paid templates
+### 4. Packs as paid templates
 
 A pack is `(skills + tag schema + relay list + capability MCPs +
 moderation policy)` shipped as a single installable for a domain.
@@ -207,7 +207,7 @@ install is gated behind the operator-tier subscription.
 
 - Admin-agent skill (`verticals/<vertical>-pack/skills/
   admin-<vertical>/SKILL.md`) hardened against prompt injection per
-  CLAUDE.md Rule 15
+  AGENTS.md Rule 15
 - Anti-injection hardening updates (signed, version-pinned skill
   releases)
 - Escalation queue tooling — dispute inbox, decision-publishing
@@ -215,20 +215,21 @@ install is gated behind the operator-tier subscription.
 - Decision-event templates (kind 30430 / 30431) and the
   `submit_dispute` MCP tool surface
 
-**What the operator earns from running admin-agent** (independent
-of the platform fee):
+**Adjacent revenue the same operator may earn** (independent of the
+admin-agent plugin fee):
 
-- NIP-58 badge issuance fees for their vertical
+- NIP-58 badge issuance fees for their vertical (separate operator
+  workflow, not performed by the admin-agent)
 - Paid-relay subscriptions on the operator's strfry deployment
 - Dispute-resolution-pool yield (Phase 1, opt-in;
-  see CLAUDE.md Rule 14 — non-custodial multi-sig only, no platform
+  see AGENTS.md Rule 14 — non-custodial multi-sig only, no platform
   cut of off-platform deals)
 
 **Pricing**: $200–500/mo per vertical the operator runs admin-agent
 for. Higher tiers for operators running admin-agent across multiple
 verticals.
 
-**Risk profile (CLAUDE.md Rule 16)**: an operator's admin-agent
+**Risk profile (AGENTS.md Rule 16)**: an operator's admin-agent
 cannot unilaterally take destructive action — only `clear` /
 `warning` / `flag` / `escalated` decisions. Anything stronger
 requires multi-sig with affected parties + a community arbitrator.
@@ -237,7 +238,7 @@ admin-pubkey individually.
 
 ### 7. Future: Phase-1 staking treasury yield
 
-Roadmap, not MVP. Per CLAUDE.md Rule 14, any money / value flows
+Roadmap, not MVP. Per AGENTS.md Rule 14, any money / value flows
 through open-source, audited, on-chain programs where chaos is
 at most one of N multi-sig signers — never custodian. Reference
 `reputation/STAKE.md` for the full Phase-1 design.
@@ -261,7 +262,7 @@ at most one of N multi-sig signers — never custodian. Reference
 **Where chaos earns** (none of which is a cut of off-platform
 deals):
 
-- **0.5% annual yield on the dispute-resolution pool** — treasury
+- **0.5% annual yield on the opt-in arbitration pool** — treasury
   revenue from idle staked funds parked in audited DeFi rails;
   fully non-custodial, fully opt-in, fully transparent.
 - **Optional pro-arbitrator NFT issuance fee** — community
@@ -270,7 +271,7 @@ deals):
   reduction" perk** — pro subscribers post a smaller required bond
   for the same trust signal weight.
 
-**Strict invariants** (CLAUDE.md Rule 14):
+**Strict invariants** (AGENTS.md Rule 14):
 
 - Money never flows through any platform piece.
 - We never %-of-deal.
@@ -282,8 +283,9 @@ deals):
 
 Things we explicitly do not take a cut of:
 
-- **Off-platform deal value.** Once two agents agree, they handle
-  payment and exchange themselves. We see nothing.
+- **Off-platform deal value.** Once counterparties agree (whether a
+  single pair, a fan-out, or many-to-many), they handle payment and
+  exchange themselves. We see nothing.
 - **Peer DM volume.** NIP-17 sealed gift-wraps are end-to-end
   encrypted. Relays carry the bytes; nobody but the recipient reads
   them.
@@ -297,9 +299,9 @@ Things we explicitly do not take a cut of:
 ## What stays free, forever
 
 The protocol implementation, the universal seller / buyer engines,
-the cross-vertical capability MCPs at their free tier, the
+the cross-domain capability MCPs at their free tier, the
 input-safety helpers, the bootstrap relay list, and the reference
-vertical pack (cars-pack@1). **Free forever, openly licensed.**
+pack (cars-pack@1). **Free forever, openly licensed.**
 That's the keel. Premium is the sail.
 
 ## Napkin model
