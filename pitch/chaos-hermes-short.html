@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>chaos × Hermes — partnership pitch</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
+
+<style>
+:root {
+  --ns-bg: #0a0a0c;
+  --ns-fg: #eaeaea;
+  --ns-dim: #8a8a92;
+  --ns-rule: #1f1f24;
+  --ns-accent: #5b8def;
+  --ns-accent-2: #a07dff;
+  --ns-warn: #ff9b6a;
+  --ns-ok: #6ad29a;
+  --ns-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --ns-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+}
+
+html, body, .reveal { background: var(--ns-bg); color: var(--ns-fg); }
+
+.reveal { font-family: var(--ns-sans); font-weight: 400; letter-spacing: 0.01em; }
+.reveal .slides { text-align: left; }
+.reveal .slides section {
+  padding: 0 1em 2.4em 1em;
+  height: 100%;
+  /* Graceful per-slide scroll for dense slides — invisible until needed */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.reveal .slides section::-webkit-scrollbar { width: 6px; }
+.reveal .slides section::-webkit-scrollbar-track { background: transparent; }
+.reveal .slides section::-webkit-scrollbar-thumb {
+  background: var(--ns-rule);
+  border-radius: 3px;
+}
+.reveal .slides section::-webkit-scrollbar-thumb:hover {
+  background: var(--ns-dim);
+}
+/* Firefox */
+.reveal .slides section { scrollbar-width: thin; scrollbar-color: var(--ns-rule) transparent; }
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--ns-sans); font-weight: 600;
+  text-transform: none; color: var(--ns-fg);
+  letter-spacing: -0.01em; margin-bottom: 0.4em;
+}
+.reveal h1 { font-size: 2.6em; }
+.reveal h2 { font-size: 1.7em; }
+.reveal h3 { font-size: 1.15em; color: var(--ns-accent); }
+.reveal h4 { font-size: 0.9em; color: var(--ns-dim); font-weight: 500; }
+
+.reveal p, .reveal li { font-size: 0.7em; line-height: 1.45; }
+
+.reveal code {
+  font-family: var(--ns-mono); font-size: 0.95em;
+  color: var(--ns-accent);
+  background: rgba(91, 141, 239, 0.08);
+  padding: 0.05em 0.3em; border-radius: 3px;
+}
+
+.reveal pre {
+  width: 100%; font-size: 0.42em; line-height: 1.4;
+  box-shadow: none; background: #111114;
+  border: 1px solid var(--ns-rule); border-radius: 6px;
+}
+.reveal pre code { padding: 1em; background: transparent; color: var(--ns-fg); max-height: 600px; }
+
+.reveal table { font-size: 0.5em; border-collapse: collapse; width: 100%; }
+.reveal table th, .reveal table td {
+  padding: 0.3em 0.6em;
+  border-bottom: 1px solid var(--ns-rule);
+  text-align: left; vertical-align: top;
+}
+.reveal table th {
+  color: var(--ns-accent); font-weight: 600;
+  border-bottom: 1px solid var(--ns-accent);
+}
+
+.reveal a { color: var(--ns-accent); text-decoration: none; }
+
+.reveal .small { font-size: 0.55em; color: var(--ns-dim); }
+.reveal .dim { color: var(--ns-dim); }
+.reveal .accent { color: var(--ns-accent); }
+.reveal .accent-2 { color: var(--ns-accent-2); }
+.reveal .warn { color: var(--ns-warn); }
+.reveal .ok { color: var(--ns-ok); }
+.reveal .mono { font-family: var(--ns-mono); }
+
+.reveal .lede { font-size: 0.85em; color: var(--ns-fg); line-height: 1.5; max-width: 92%; }
+
+.reveal .footer {
+  position: absolute; bottom: 1em; left: 1.2em; right: 1.2em;
+  font-size: 0.4em; color: var(--ns-dim);
+  display: flex; justify-content: space-between;
+  font-family: var(--ns-mono); letter-spacing: 0.05em;
+}
+.reveal .pager { font-variant-numeric: tabular-nums; }
+
+.reveal .label {
+  display: inline-block; font-family: var(--ns-mono);
+  font-size: 0.45em; color: var(--ns-dim);
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 1em; padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--ns-rule);
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1em; }
+.grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8em; }
+
+.card { background: #101014; border: 1px solid var(--ns-rule); border-radius: 6px; padding: 0.8em 1em; }
+.card h3 { font-size: 0.85em; margin-top: 0; margin-bottom: 0.3em; color: var(--ns-accent); }
+.card p, .card ul { font-size: 0.55em; margin: 0.2em 0; line-height: 1.4; }
+.card ul { padding-left: 1em; }
+
+.term {
+  background: #08080a; border: 1px solid var(--ns-rule); border-radius: 6px;
+  padding: 0.7em 0.9em; font-family: var(--ns-mono);
+  font-size: 0.42em; line-height: 1.4; color: var(--ns-fg);
+  white-space: pre; overflow: hidden;
+}
+.term .prompt { color: var(--ns-accent-2); }
+.term .ok { color: var(--ns-ok); }
+.term .dim { color: var(--ns-dim); }
+.term .warn { color: var(--ns-warn); }
+
+.title-block { margin-top: 4em; }
+.title-block h1 { font-size: 3em; margin-bottom: 0.1em; letter-spacing: -0.02em; }
+.title-block .tag { font-size: 0.85em; color: var(--ns-fg); margin-bottom: 0.6em; font-weight: 500; }
+.title-block .sub { font-size: 0.65em; color: var(--ns-dim); font-family: var(--ns-mono); letter-spacing: 0.04em; }
+.title-block .meta { margin-top: 3em; font-size: 0.45em; color: var(--ns-dim); font-family: var(--ns-mono); }
+
+/* Title block layered over background video — keep text readable without obscuring the visual */
+.title-block--over-video {
+  position: relative;
+  display: inline-block;
+  padding: 1.2em 1.6em 1.4em 1.6em;
+  background: linear-gradient(180deg, rgba(10,10,12,0.62) 0%, rgba(10,10,12,0.5) 100%);
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 0 60px rgba(10,10,12,0.55);
+}
+.title-block--over-video h1 {
+  text-shadow: 0 2px 24px rgba(0,0,0,0.55);
+}
+.title-block--over-video .tag,
+.title-block--over-video .sub,
+.title-block--over-video .meta {
+  text-shadow: 0 1px 8px rgba(0,0,0,0.55);
+}
+
+.bullet-list { list-style: none; padding-left: 0; }
+.bullet-list li {
+  padding-left: 1.2em; position: relative; margin-bottom: 0.35em;
+}
+.bullet-list li::before { content: "›"; color: var(--ns-accent); position: absolute; left: 0; }
+
+ul.tight li { margin: 0.1em 0; }
+
+.reveal .slide-number {
+  background: transparent; color: var(--ns-dim);
+  font-family: var(--ns-mono); font-size: 0.7em;
+}
+
+.diagram-frame {
+  width: 100%; background: #08080a;
+  border: 1px solid var(--ns-rule); border-radius: 6px; padding: 0.4em;
+}
+
+.reveal .progress { color: var(--ns-accent); height: 2px; }
+.reveal .controls { color: var(--ns-dim); }
+
+.thanks { text-align: center; margin-top: 4em; }
+.thanks h1 { font-size: 4em; letter-spacing: -0.03em; }
+.thanks p { font-size: 0.7em; color: var(--ns-dim); }
+
+/* Closing block layered over background video */
+.thanks--over-video {
+  display: inline-block;
+  padding: 1.6em 2.2em 1.8em 2.2em;
+  background: linear-gradient(180deg, rgba(10,10,12,0.62) 0%, rgba(10,10,12,0.5) 100%);
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 0 80px rgba(10,10,12,0.6);
+}
+.thanks--over-video h1 {
+  text-shadow: 0 2px 28px rgba(0,0,0,0.6);
+}
+.thanks--over-video p,
+.thanks--over-video div {
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+}
+/* Center the inline-block thanks card on the slide */
+section[data-background-video$="chaos-closing.mp4"] {
+  text-align: center;
+}
+
+.compare-table { font-size: 0.48em; }
+.compare-table th, .compare-table td { padding: 0.2em 0.5em; line-height: 1.35; }
+.compare-table th { color: var(--ns-fg); border-bottom: 1px solid var(--ns-rule); }
+.compare-table .col-a { color: var(--ns-accent); font-weight: 600; }
+.compare-table .col-b { color: var(--ns-accent-2); font-weight: 600; }
+.compare-table .yes { color: var(--ns-ok); font-family: var(--ns-mono); }
+.compare-table .no  { color: var(--ns-warn); font-family: var(--ns-mono); }
+.compare-table .mid { color: var(--ns-dim); font-family: var(--ns-mono); }
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================== -->
+<!-- 1. TITLE                                         -->
+<!-- ============================================== -->
+<section
+  data-background-color="#0a0a0c"
+  data-background-video="assets/chaos-demo.mp4"
+  data-background-video-loop="true"
+  data-background-video-muted="true"
+  data-background-opacity="0.45">
+  <div class="title-block title-block--over-video">
+    <div class="label">partnership pitch · 15–18 min · 2026</div>
+    <h1>chaos × Hermes</h1>
+    <div class="tag">a decentralised remote collaboration protocol for autonomous agents, built on Hermes.</div>
+    <div class="sub">Nostr discovery &nbsp;·&nbsp; MCP peer transport &nbsp;·&nbsp; Hermes runtime &nbsp;·&nbsp; public commons or private nodes</div>
+
+    <div class="meta">
+      for the Hermes team @ Nous Research &nbsp;·&nbsp; partnership &nbsp;·&nbsp; May 2026
+    </div>
+  </div>
+  <aside class="notes">
+    Twelve slides, fifteen to eighteen minutes. The thesis up front, so you
+    know where I'm going: chaos is a decentralised remote collaboration
+    protocol for autonomous agents — not a marketplace operator, not a
+    payments rail. Two
+    agents, different machines, different operators, no shared trust
+    authority — they need to find each other and exchange anything. The
+    substrate is Nostr for discovery + identity, MCP for peer transport
+    including binary content, Hermes as the runtime. It runs on the public
+    Nostr commons OR on a private node a team operates for itself. The data
+    never lives anywhere central. Marketplaces, research collabs, internal
+    task brokering, dataset exchange — all the same protocol shape. Let me
+    show you why this is a Hermes-native fit and what we'd love from you.
+
+    Speaker note: the background video is a chaos brand reel that loops
+    silently — let it play under the title while you frame the talk. If the
+    deck is rendered to PDF for follow-up, the video is replaced by the
+    static dark background automatically.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 2. THE PROBLEM                                   -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 02 / problem</div>
+  <h2>Agents finding agents — 1:1, 1:N, N:1, or N:M.</h2>
+
+  <p class="lede">
+    Autonomous agents on different machines, owned by different humans
+    or organisations, with no shared trust authority. Sometimes paired
+    one-to-one. Often <span class="accent">one offering agent serving
+    many seekers</span>, or <span class="accent">many offerings converged
+    by one seeker</span>, or <span class="accent">many-to-many
+    concurrently</span>. They need to discover each other and exchange
+    anything — structured data, files, intent, attestations — without
+    routing through a custodial intermediary. <span class="dim">No general
+    protocol solves this end-to-end today.</span>
+  </p>
+
+  <div class="grid-3" style="margin-top: 1.4em;">
+    <div class="card">
+      <h3>centralized SaaS</h3>
+      <p>Choke point. Whoever runs the registry sees every handshake, holds
+      the data, can deplatform either side. Fine for one company; doesn't
+      scale to "agents across organisations".</p>
+    </div>
+    <div class="card">
+      <h3>existing crypto rails</h3>
+      <p>Solve <i>money</i>, not <i>coordination</i>. No primitive for "find
+      me an agent that owns &lt;a dataset / inference cycles / inspection
+      photos / domain expertise&gt;." No binary-content channel.</p>
+    </div>
+    <div class="card">
+      <h3>federated chat / email</h3>
+      <p>No structured intent schema, no introspectable tool surface, no
+      binary content path, no handshake handoff to a private channel
+      after the discovery match.</p>
+    </div>
+  </div>
+
+  <p class="lede" style="margin-top: 1.2em;">
+    The shape is everywhere — distributed inference, dataset exchange
+    between labs, internal team task brokering, research collabs across
+    institutions, supply-chain coordination, federated tooling.
+    We want the wire to exist <span class="accent">without having to
+    operate it</span> — and to be <span class="accent-2">deployable
+    privately</span> when the work shouldn't live on a public commons.
+  </p>
+
+  <aside class="notes">
+    The shape: agents, owned by different humans or organisations, on
+    different machines, no shared trust authority, want to find each other
+    and exchange both structured data and binary content. The cardinality
+    isn't fixed — sometimes one agent reaches one other, often one fans
+    out to many seekers, often many converge on one offering, and many-to-
+    many runs concurrently. Today every flavour of that handshake routes
+    through somebody's SaaS. Crypto rails solve
+    money but not discovery. Federated chat carries no tool schemas and no
+    binary path. The use case spans far beyond marketplaces — distributed
+    inference, dataset exchange between research groups, internal task
+    brokering inside a company, supply-chain coordination between trading
+    partners, federated tooling between collaborators. And critically, the
+    same protocol must work both on the public Nostr commons and on private
+    nodes a team operates for itself. We had to compose something. That
+    something is what I'm walking you through.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 3. THREE OPEN STANDARDS                          -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 03 / substrate</div>
+  <h2>Three open standards, one substrate.</h2>
+
+  <div class="diagram-frame" style="margin-top: 0.6em;">
+    <svg viewBox="0 0 1100 380" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+      <defs>
+        <style>
+          .b-stroke { fill: none; stroke: #1f1f24; stroke-width: 1; }
+          .lbl-mono { font-family: ui-monospace, Menlo, monospace; fill: #8a8a92; font-size: 11px; letter-spacing: 0.08em; }
+          .lbl-title { font-family: -apple-system, Helvetica, sans-serif; font-size: 18px; font-weight: 600; }
+          .lbl-body { font-family: -apple-system, Helvetica, sans-serif; font-size: 12px; fill: #eaeaea; }
+          .lbl-dim { font-family: -apple-system, Helvetica, sans-serif; font-size: 11px; fill: #8a8a92; }
+          .accent-fill { fill: #5b8def; }
+          .accent-2-fill { fill: #a07dff; }
+          .ok-fill { fill: #6ad29a; }
+        </style>
+      </defs>
+
+      <rect x="40" y="280" width="1020" height="80" rx="6" fill="#0e1422" stroke="#1f2a44" stroke-width="1"/>
+      <text x="60" y="305" class="lbl-mono">LAYER 3 / RUNTIME</text>
+      <text x="60" y="332" class="lbl-title accent-fill">Hermes</text>
+      <text x="200" y="318" class="lbl-body">skill loader · grant policy · plugin manager · MCP client + server zero-glue</text>
+      <text x="200" y="340" class="lbl-dim">tools/mcp_tool.py · tools/mcp_serve.py · forbidden_toolsets manifest</text>
+
+      <rect x="40" y="170" width="1020" height="90" rx="6" fill="#160e22" stroke="#2a1f44" stroke-width="1"/>
+      <text x="60" y="195" class="lbl-mono">LAYER 2 / PEER TRANSPORT</text>
+      <text x="60" y="222" class="lbl-title accent-2-fill">MCP</text>
+      <text x="200" y="208" class="lbl-body">JSON-RPC · HTTP+SSE / stdio · tools/list introspection</text>
+      <text x="200" y="228" class="lbl-body">ImageContent + EmbeddedResource for binary, no third-party host</text>
+      <text x="200" y="248" class="lbl-dim">FastMCP Python SDK on both ends · per-tool grant policy</text>
+
+      <rect x="40" y="40" width="1020" height="110" rx="6" fill="#0e1c14" stroke="#1f3a2a" stroke-width="1"/>
+      <text x="60" y="65" class="lbl-mono">LAYER 1 / DISCOVERY + IDENTITY</text>
+      <text x="60" y="92" class="lbl-title ok-fill">Nostr</text>
+      <text x="200" y="78" class="lbl-body">federated relays · secp256k1 keypairs (user-owned, mode 0600)</text>
+      <text x="200" y="98" class="lbl-body">tagged classified-listing events (NIP-99) · end-to-end encrypted DMs (NIP-17)</text>
+      <text x="200" y="118" class="lbl-body">proof-of-work spam-gate (NIP-13) · issuer-signed badges (NIP-58)</text>
+      <text x="200" y="138" class="lbl-body">subscribable block-lists (NIP-51) · follow-graph weighting (NIP-02)</text>
+      <text x="200" y="158" class="lbl-dim">NIP = Nostr Implementation Possibility · discovery is a public event stream; the operator is not in the data path</text>
+
+      <line x1="20" y1="50" x2="20" y2="350" class="b-stroke"/>
+      <text x="14" y="50" class="lbl-mono" transform="rotate(-90 14 50)">stack</text>
+    </svg>
+  </div>
+
+  <p class="small" style="margin-top: 0.5em;">
+    Three layers, three open specs, three independent communities. We are
+    not inventing a protocol — we are <span class="accent">composing</span>
+    one. The composability primitive on top is the <span class="accent-2">domain
+    pack</span>: per-domain tag schema + named MCP tool surface + skills +
+    grant policy.
+    &nbsp;<span class="ok">Public commons or private node</span> — the
+    same Nostr/MCP/Hermes substrate runs against the global relay set, a
+    consortium relay shared by partners, or a single private relay
+    operated by one team. <span class="dim">Rich content never traverses
+    the relay or operator in any deployment mode.</span>
+  </p>
+
+  <aside class="notes">
+    Three layers, three open specs. Nostr handles discovery and identity:
+    public-key identity, federated relays, signed events. We use NIP-99 for
+    classified listings, NIP-17 for sealed gift-wrapped DMs, NIP-13 for
+    proof-of-work spam-gating, and three reputation primitives. MCP is the
+    peer transport — it carries tool surfaces and binary content as
+    ImageContent and EmbeddedResource blocks. Hermes is the runtime, and
+    critically it already speaks both ends of MCP zero-glue, which made
+    Hermes the obvious runtime as soon as MCP became a serious peer
+    transport. One point I want to emphasise here: the same substrate runs
+    against the public Nostr commons OR against a private relay a team
+    operates for itself OR against a consortium relay shared between
+    partners. The protocol shape doesn't change — only the discovery surface
+    does. Private deployments inherit all the same properties: federated
+    identity, peer-to-peer rich content over MCP, no central data custody.
+    The composability primitive on top is the domain pack — next slide.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 4. NETWORK TOPOLOGY                              -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 04 / network</div>
+  <h2>Decentralised. Permissionless. Any topology.</h2>
+
+  <p class="lede">
+    Discovery rides on Nostr relays. <span class="accent">Anyone can run a
+    relay; anyone can publish or subscribe</span>, subject to that relay's
+    own policy. The same protocol runs on the public commons or on a
+    private node a single team operates. After a discovery match, the
+    conversation goes directly between agents over MCP. <span class="accent-2">One
+    pair, one offering serving many seekers, many offerings converged by
+    one seeker, or many-to-many — all run concurrently on the same
+    substrate</span>. The relay is never in the data path.
+  </p>
+
+  <div class="diagram-frame" style="margin-top: 0.5em;">
+    <svg viewBox="0 0 1100 460" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+      <defs>
+        <style>
+          .n4-relay { fill: #0e1c14; stroke: #6ad29a; stroke-width: 1.5; }
+          .n4-relay-private { fill: #160e22; stroke: #a07dff; stroke-width: 1.5; }
+          .n4-relay-label { font-family: ui-monospace, Menlo, monospace; font-size: 10px; fill: #eaeaea; }
+          .n4-agent { fill: #0e1422; stroke: #5b8def; stroke-width: 1.5; }
+          .n4-agent-text { font-family: ui-monospace, Menlo, monospace; font-size: 11px; fill: #eaeaea; font-weight: 600; }
+          .n4-conn { stroke: #2a3a5a; stroke-width: 0.8; opacity: 0.7; }
+          .n4-mcp-arc { stroke: #ff9b6a; stroke-width: 2.5; fill: none; stroke-dasharray: 4 3; }
+          .n4-mcp-label { font-family: ui-monospace, Menlo, monospace; font-size: 11px; fill: #ff9b6a; font-weight: 600; }
+          .n4-header { font-family: ui-monospace, Menlo, monospace; font-size: 10px; fill: #8a8a92; letter-spacing: 0.12em; }
+          .n4-caption { font-family: -apple-system, Helvetica, sans-serif; font-size: 11px; fill: #8a8a92; }
+          .n4-pill { fill: #101014; stroke: #1f1f24; stroke-width: 1; }
+          .n4-pill-title { font-family: -apple-system, Helvetica, sans-serif; font-size: 12px; font-weight: 600; }
+        </style>
+      </defs>
+
+      <!-- LEFT PANEL: PUBLIC COMMONS -->
+      <text x="40" y="26" class="n4-header">PUBLIC COMMONS — anyone can run a relay, anyone can join</text>
+
+      <circle cx="80"  cy="80" r="22" class="n4-relay"/>
+      <text x="80"  y="84" text-anchor="middle" class="n4-relay-label">damus</text>
+      <circle cx="180" cy="80" r="22" class="n4-relay"/>
+      <text x="180" y="84" text-anchor="middle" class="n4-relay-label">nos.lol</text>
+      <circle cx="280" cy="80" r="22" class="n4-relay"/>
+      <text x="280" y="84" text-anchor="middle" class="n4-relay-label">snort</text>
+      <circle cx="380" cy="80" r="22" class="n4-relay"/>
+      <text x="380" y="84" text-anchor="middle" class="n4-relay-label">band</text>
+      <circle cx="480" cy="80" r="22" class="n4-relay"/>
+      <text x="480" y="84" text-anchor="middle" class="n4-relay-label">yours</text>
+      <text x="565" y="84" text-anchor="middle" class="n4-relay-label" style="fill: #5b8def;">+ anyone</text>
+
+      <rect x="60"  y="240" width="120" height="36" rx="4" class="n4-agent"/>
+      <text x="120" y="263" text-anchor="middle" class="n4-agent-text">Agent A</text>
+      <rect x="240" y="240" width="120" height="36" rx="4" class="n4-agent"/>
+      <text x="300" y="263" text-anchor="middle" class="n4-agent-text">Agent B</text>
+      <rect x="420" y="240" width="120" height="36" rx="4" class="n4-agent"/>
+      <text x="480" y="263" text-anchor="middle" class="n4-agent-text">Agent C</text>
+
+      <line x1="120" y1="240" x2="80"  y2="100" class="n4-conn"/>
+      <line x1="120" y1="240" x2="180" y2="100" class="n4-conn"/>
+      <line x1="120" y1="240" x2="280" y2="100" class="n4-conn"/>
+      <line x1="300" y1="240" x2="180" y2="100" class="n4-conn"/>
+      <line x1="300" y1="240" x2="280" y2="100" class="n4-conn"/>
+      <line x1="300" y1="240" x2="380" y2="100" class="n4-conn"/>
+      <line x1="480" y1="240" x2="280" y2="100" class="n4-conn"/>
+      <line x1="480" y1="240" x2="380" y2="100" class="n4-conn"/>
+      <line x1="480" y1="240" x2="480" y2="100" class="n4-conn"/>
+
+      <!-- Multiple MCP arcs — peer-to-peer between many pairs, concurrently -->
+      <path d="M 120 240 Q 300 130 480 240" class="n4-mcp-arc"/>
+      <path d="M 120 240 Q 210 198 300 240" class="n4-mcp-arc"/>
+      <path d="M 300 240 Q 390 198 480 240" class="n4-mcp-arc"/>
+
+      <text x="300" y="125" text-anchor="middle" class="n4-mcp-label">MCP peer-to-peer · 1:1, 1:N, N:M — concurrent</text>
+      <text x="300" y="142" text-anchor="middle" class="n4-caption">ImageContent / EmbeddedResource — relay NOT in any of these paths</text>
+
+      <text x="300" y="305" text-anchor="middle" class="n4-caption">each agent picks its own relay set · pubkey identity portable · any topology</text>
+
+      <!-- Vertical divider -->
+      <line x1="640" y1="20" x2="640" y2="320" stroke="#1f1f24" stroke-width="1"/>
+
+      <!-- RIGHT PANEL: PRIVATE NODE -->
+      <text x="660" y="26" class="n4-header">PRIVATE NODE — same protocol, closed access</text>
+
+      <circle cx="900" cy="80" r="32" class="n4-relay-private"/>
+      <text x="900" y="76" text-anchor="middle" class="n4-relay-label">team.local</text>
+      <text x="900" y="92" text-anchor="middle" class="n4-relay-label" style="fill: #a07dff;">allowlist</text>
+
+      <rect x="780" y="240" width="120" height="36" rx="4" class="n4-agent"/>
+      <text x="840" y="263" text-anchor="middle" class="n4-agent-text">Agent X</text>
+      <rect x="940" y="240" width="120" height="36" rx="4" class="n4-agent"/>
+      <text x="1000" y="263" text-anchor="middle" class="n4-agent-text">Agent Y</text>
+
+      <line x1="840"  y1="240" x2="900" y2="112" class="n4-conn"/>
+      <line x1="1000" y1="240" x2="900" y2="112" class="n4-conn"/>
+
+      <path d="M 840 240 Q 920 160 1000 240" class="n4-mcp-arc"/>
+      <text x="920" y="155" text-anchor="middle" class="n4-mcp-label">MCP peer-to-peer · same topology range</text>
+      <text x="920" y="305" text-anchor="middle" class="n4-caption">single team / consortium · same tagged events + encrypted DMs + MCP wire</text>
+
+      <!-- Bottom: 3 takeaway pills -->
+      <g transform="translate(0, 348)">
+        <rect x="40"  y="0" width="320" height="86" rx="6" class="n4-pill"/>
+        <text x="200" y="24" text-anchor="middle" class="n4-pill-title" fill="#a07dff">permissionless</text>
+        <text x="200" y="46" text-anchor="middle" class="n4-caption">anyone can run a relay</text>
+        <text x="200" y="64" text-anchor="middle" class="n4-caption">no central operator approval</text>
+
+        <rect x="380" y="0" width="320" height="86" rx="6" class="n4-pill"/>
+        <text x="540" y="24" text-anchor="middle" class="n4-pill-title" fill="#5b8def">pluralistic discovery</text>
+        <text x="540" y="46" text-anchor="middle" class="n4-caption">your world = union of relays you trust</text>
+        <text x="540" y="64" text-anchor="middle" class="n4-caption">public commons, private node, or both</text>
+
+        <rect x="720" y="0" width="340" height="86" rx="6" class="n4-pill"/>
+        <text x="890" y="24" text-anchor="middle" class="n4-pill-title" fill="#ff9b6a">operator out of the data path</text>
+        <text x="890" y="46" text-anchor="middle" class="n4-caption">after match → MCP HTTP+SSE direct</text>
+        <text x="890" y="64" text-anchor="middle" class="n4-caption">photos, PDFs, datasets flow agent-to-agent</text>
+      </g>
+    </svg>
+  </div>
+
+  <aside class="notes">
+    This slide is the network topology. Three things to notice. First:
+    anyone can run a Nostr relay. The public commons today already
+    includes damus.io, nos.lol, snort, relay.nostr.band, plus anyone else
+    who spins one up — including chaos's operator running their own. There
+    is no central operator approving relays or agents. Second: each agent
+    picks its own set of relays to subscribe to. An agent's "world" is the
+    union of relays it trusts; there is no global view. Pubkey identity is
+    portable across all of them. Third — the load-bearing one — once two
+    agents match on a relay, they hand off to a direct MCP HTTP+SSE
+    session between themselves. The relay is never in the data path for
+    rich content. Photos, PDFs, datasets, model artifacts flow
+    agent-to-agent. The right panel shows the same protocol deployed
+    against a single private relay — same agent runtime, same wire, just a
+    closed access list. Internal team coordination, consortium handoff,
+    cross-lab research collab — all the same protocol shape.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 5. DISCOVERY ON THE WIRE                         -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 05 / discovery</div>
+  <h2>How an agent finds another agent in the swarm.</h2>
+
+  <p class="lede">
+    Discovery is signed events on relays, indexed by tags, matched by
+    filters. <span class="accent">Tags are the directory; pubkey is
+    identity, not the lookup key.</span> Each agent picks the relays
+    it trusts and the tags it cares about; the relay returns the
+    events that match.
+  </p>
+
+  <div class="grid-2" style="margin-top: 0.6em;">
+    <div>
+      <h4>1 · offering agent publishes a signed event (kind 30402, NIP-99)</h4>
+<pre><code class="language-json">{
+  "kind": 30402,
+  "pubkey": "7c4f3b8d...e7f",
+  "tags": [
+    ["d",     "8f4a2b1e-..."],
+    ["t",     "cars"],          // searchable keyword
+    ["t",     "mazda3"],
+    ["pack",  "cars-pack@1"],   // which domain contract
+    ["make",  "mazda"],         // pack-specific structured tag
+    ["year",  "2018"],
+    ["mcp",   "https://a.io/mcp"]  // dial after match
+  ],
+  "content": "...",
+  "id":  "&lt;sha256&gt;",
+  "sig": "&lt;schnorr&gt;"
+}</code></pre>
+
+      <h4 style="margin-top: 0.5em;">2 · seeking agent subscribes via REQ on a WebSocket</h4>
+<pre><code class="language-json">["REQ", "sub-1", {
+  "kinds": [30402],
+  "#t":    ["cars"],
+  "since": 1714780000
+}]</code></pre>
+    </div>
+
+    <div>
+      <h4>3 · relay matches, then seeking agent post-filters locally</h4>
+      <ul class="bullet-list" style="font-size: 0.6em;">
+        <li><b>Relay's index</b> covers <code>kind</code>, <code>pubkey</code>, and single-letter tags (<code>#t</code>, <code>#p</code>, <code>#e</code>, <code>#d</code>, <code>#a</code>). <code>#t: ["cars"]</code> is a fast index lookup, not a scan.</li>
+        <li><b>Stream:</b> matching events come back as <code>EVENT</code> messages, then <code>EOSE</code> (end of stored events), then real-time forwards while the subscription stays open.</li>
+        <li><b>Verify:</b> the seeking agent recomputes the schnorr signature on every event before trusting it.</li>
+        <li><b>Dedupe:</b> the same event can arrive from many relays — seeking agent dedupes by event <code>id</code>.</li>
+        <li><b>Post-filter:</b> multi-letter tags (<code>make</code>, <code>year</code>, <code>pack</code>) aren't indexed by most relays — the seeking agent narrows the superset locally.</li>
+      </ul>
+
+      <p class="small" style="margin-top: 0.6em;">
+        <b class="accent">Pubkey filtering exists too</b> —
+        <code>"authors": [...]</code> in a REQ to allowlist or exclude
+        specific signers. But that's identity-based filtering
+        <i>after</i> you already know which agents you want to follow
+        or block, not the primary way you find new ones.
+      </p>
+
+      <p class="small" style="margin-top: 0.5em;">
+        <b class="accent-2">Why this works without a central registry:</b>
+        the matching primitive <i>is</i> the relay's tag index, and any
+        number of relays can carry the same event. No single party
+        gatekeeps the directory.
+      </p>
+    </div>
+  </div>
+
+  <aside class="notes">
+    This slide answers the load-bearing question for any decentralised
+    system: how does discovery actually work? Three steps. One: the
+    offering agent publishes a signed event, kind 30402 per NIP-99. The
+    interesting part is the tag array. Generic searchable keywords go
+    in t tags — single-letter, indexed by every Nostr relay. Pack-
+    specific structured data goes in named tags like make, year, pack.
+    The mcp tag carries the URL the seeking agent dials after a match.
+    Two: the seeking agent opens a WebSocket to relays it trusts and
+    sends a REQ with a filter — kind 30402, tag #t cars, a since
+    timestamp. Three: the relay returns matching events from its
+    index; the seeking agent verifies the schnorr signature on each
+    one, dedupes by id (the same event can arrive from multiple
+    relays), and post-filters locally by structured tags the relay
+    didn't index. Tags are the directory, pubkey is identity. Pubkey
+    filtering — authors in the REQ — exists for allowlist or blocklist
+    after you already know who you want, but the primary way agents
+    find new agents is tag-index lookup on whatever relays both sides
+    share. And critically: the matching primitive is the relay's tag
+    index, so there's no central registry — any number of relays can
+    carry the same event.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 6. COMPOSABILITY (DOMAIN PACKS)                  -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 06 / composability</div>
+  <h2>One protocol, any domain.</h2>
+
+  <p class="lede">
+    The wire is universal; the <span class="accent">pack</span> is the
+    contract. A pack = the set of required tags on the discovery event
+    (NIP-99 schema) + the named MCP tools every offering agent must
+    expose + skills + a default grant policy. Adding a domain is writing
+    a YAML, a Python module, and two skill markdowns.
+    <span class="dim">No protocol-level change.</span>
+  </p>
+
+  <div style="margin-top: 1.2em;">
+    <h4>domains the pack abstraction already covers <span class="dim" style="font-weight: 400;">— scaffolded in the repo</span></h4>
+    <div class="grid-2" style="margin-top: 0.4em;">
+      <div class="card" style="padding: 0.5em 0.7em;">
+        <p style="font-size: 0.6em; margin: 0;"><b class="accent">ml-inference</b> ·
+        <span class="mono dim">model_family · ctx · price_per_1k</span><br>
+        <span class="mono">request_inference / quote_session</span></p>
+      </div>
+      <div class="card" style="padding: 0.5em 0.7em;">
+        <p style="font-size: 0.6em; margin: 0;"><b class="accent">data-licensing</b> ·
+        <span class="mono dim">category · size_gb · license_class</span><br>
+        <span class="mono">request_sample / request_schema / request_terms</span></p>
+      </div>
+      <div class="card" style="padding: 0.5em 0.7em;">
+        <p style="font-size: 0.6em; margin: 0;"><b class="accent">compute-jobs</b> ·
+        <span class="mono dim">hardware_class · region</span><br>
+        <span class="mono">request_quote / submit_job / fetch_artifact</span></p>
+      </div>
+      <div class="card" style="padding: 0.5em 0.7em;">
+        <p style="font-size: 0.6em; margin: 0;"><b class="accent">specialist-services</b> ·
+        <span class="mono dim">specialty · jurisdiction</span><br>
+        <span class="mono">request_cv / request_engagement_terms</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 1em;">
+    <h4>natural fits with no protocol home today</h4>
+    <p class="small" style="margin-top: 0.2em; line-height: 1.6;">
+      internal team task brokering &nbsp;·&nbsp; cross-lab dataset
+      exchange &nbsp;·&nbsp; supply-chain coordination between trading
+      partners &nbsp;·&nbsp; research collab + reviewer handoff
+      &nbsp;·&nbsp; federated tooling &nbsp;·&nbsp; on-call &amp;
+      incident handover &nbsp;·&nbsp; any domain where agents (in pairs,
+      fan-outs, or many-to-many) need to find each other and trade
+      structured information.
+    </p>
+  </div>
+
+  <aside class="notes">
+    The pack is the contract; the wire is universal. A pack is a
+    quadruple — tag schema, MCP tool surface, skills, default grant
+    policy — for one domain. Adding a domain is writing a YAML, a
+    Python module, two skill markdowns. No protocol change, no ecosystem
+    fork. The four packs already scaffolded in the repo are ml-inference,
+    data-licensing, compute-jobs, and specialist-services. The point of
+    listing the natural fits underneath is that those are use cases that
+    have no existing protocol home today — internal team task brokering,
+    cross-lab dataset exchange, supply-chain coordination, research
+    collab handoff, federated tooling, on-call handover. Same protocol
+    shape, just a different pack, often deployed against a private relay
+    node rather than the public commons. Cars-pack@1 is the working
+    reference because it exercises every protocol surface, but cars is
+    the working reference pack, not the limit of the thesis.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 5. ON THE WIRE / DEMO                            -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 07 / proof</div>
+  <h2>One session in detail — N concurrent sessions on the same substrate.</h2>
+
+  <p class="small" style="margin-top: -0.4em; margin-bottom: 0.4em;">
+    The diagram below traces a single peer-to-peer session end-to-end on
+    two laptops over public relays. The exact same loop runs in parallel
+    for every pair of agents that match —
+    <span class="accent">1:1, 1:N, N:M</span> all use this same shape,
+    just with more concurrent sessions overlaid on the substrate.
+  </p>
+
+  <div class="grid-2">
+    <div>
+      <h4>protocol sequence</h4>
+      <div class="diagram-frame">
+        <svg viewBox="0 0 540 460" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+          <defs>
+            <style>
+              .actor { font-family: ui-monospace, Menlo, monospace; font-size: 11px; fill: #eaeaea; font-weight: 600; }
+              .lane { stroke: #1f1f24; stroke-width: 1; stroke-dasharray: 2 4; }
+              .msg { stroke: #5b8def; stroke-width: 1.4; fill: none; marker-end: url(#h-arr); }
+              .msg-r { stroke: #a07dff; stroke-width: 1.4; fill: none; marker-end: url(#h-arr-r); }
+              .msg-lbl { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; fill: #eaeaea; }
+              .msg-sub { font-family: ui-monospace, Menlo, monospace; font-size: 8.5px; fill: #8a8a92; }
+              .step { font-family: ui-monospace, Menlo, monospace; font-size: 9px; fill: #5b8def; }
+              .actor-box { fill: #101014; stroke: #1f1f24; stroke-width: 1; }
+            </style>
+            <marker id="h-arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#5b8def"/>
+            </marker>
+            <marker id="h-arr-r" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#a07dff"/>
+            </marker>
+          </defs>
+
+          <rect x="20"  y="14" width="120" height="26" rx="4" class="actor-box"/>
+          <text x="80"  y="32" text-anchor="middle" class="actor">seeking agent</text>
+
+          <rect x="170" y="14" width="120" height="26" rx="4" class="actor-box"/>
+          <text x="230" y="32" text-anchor="middle" class="actor">Nostr relay</text>
+
+          <rect x="320" y="14" width="120" height="26" rx="4" class="actor-box"/>
+          <text x="380" y="32" text-anchor="middle" class="actor">offering agent</text>
+
+          <rect x="455" y="14" width="80"  height="26" rx="4" class="actor-box"/>
+          <text x="495" y="32" text-anchor="middle" class="actor">MCP</text>
+
+          <line x1="80"  y1="42" x2="80"  y2="450" class="lane"/>
+          <line x1="230" y1="42" x2="230" y2="450" class="lane"/>
+          <line x1="380" y1="42" x2="380" y2="450" class="lane"/>
+          <line x1="495" y1="42" x2="495" y2="450" class="lane"/>
+
+          <text x="6" y="74" class="step">1</text>
+          <line x1="80"  y1="70" x2="230" y2="70" class="msg"/>
+          <text x="92" y="64" class="msg-lbl">REQ tag-filter (NIP-99)</text>
+
+          <text x="6" y="114" class="step">2</text>
+          <line x1="230" y1="110" x2="80"  y2="110" class="msg-r"/>
+          <text x="92" y="104" class="msg-lbl">EVENT 30402 + mcp tag</text>
+
+          <text x="6" y="154" class="step">3</text>
+          <line x1="80"  y1="150" x2="230" y2="150" class="msg"/>
+          <text x="92" y="144" class="msg-lbl">NIP-17 sealed gift wrap</text>
+          <text x="92" y="160" class="msg-sub">inner rumor: session_token</text>
+
+          <text x="6" y="194" class="step">4</text>
+          <line x1="230" y1="190" x2="380" y2="190" class="msg"/>
+          <text x="240" y="184" class="msg-lbl">forwards 1059 to p-tag</text>
+
+          <text x="6" y="234" class="step">5</text>
+          <text x="100" y="228" class="msg-sub">offering agent unwraps · binds session_token ↔ seeking-agent pubkey</text>
+
+          <text x="6" y="274" class="step">6</text>
+          <line x1="80"  y1="270" x2="495" y2="270" class="msg"/>
+          <text x="92" y="264" class="msg-lbl">HTTP POST /mcp/sse  (Bearer)</text>
+          <text x="92" y="280" class="msg-sub">same origin · no 3rd-party host</text>
+
+          <text x="6" y="314" class="step">7</text>
+          <line x1="80"  y1="310" x2="495" y2="310" class="msg"/>
+          <text x="92" y="304" class="msg-lbl">tools/list  →  cars-pack@1 surface</text>
+
+          <text x="6" y="354" class="step">8</text>
+          <line x1="80"  y1="350" x2="495" y2="350" class="msg"/>
+          <text x="92" y="344" class="msg-lbl">tools/call request_photos</text>
+          <line x1="495" y1="375" x2="80"  y2="375" class="msg-r"/>
+          <text x="92" y="370" class="msg-lbl">→ ImageContent[6] + PDF</text>
+
+          <text x="6" y="414" class="step">9</text>
+          <text x="92" y="410" class="msg-sub">seeking agent SHA-256 verifies each block · caches locally</text>
+        </svg>
+      </div>
+    </div>
+
+    <div>
+      <h4>two terminals · two laptops · public relays</h4>
+      <div class="term"><span class="dim">$</span> python seller.py keygen
+<span class="ok">→ npub1jl7p... saved (mode 0600)</span>
+
+<span class="dim">$</span> python seller.py serve sample_car.toml
+<span class="dim">  computing NIP-13 PoW (20 bits)... 1.4s</span>
+<span class="ok">→ event 30402 published to:</span>
+<span class="ok">  wss://relay.damus.io  ✓</span>
+<span class="ok">  wss://nos.lol         ✓</span>
+
+<span class="dim">$</span> python seller.py serve
+<span class="dim">  FastMCP HTTP+SSE on :7799</span>
+<span class="warn">[request]</span> from npub1m2k7... session=a7c3b1
+<span class="warn">[grant ]</span> request_photos → confirm? <span class="ok">y</span>
+<span class="ok">[served]</span> 6 ImageContent (4.2 MB)
+<span class="ok">[served]</span> EmbeddedResource inspection.pdf
+</div>
+
+      <h4 style="margin-top: 0.5em;">what's shipped</h4>
+      <ul class="bullet-list" style="font-size: 0.55em;">
+        <li>MVP runs end-to-end: keygen, proof-of-work-mined publish (NIP-13), tag-filter subscribe, encrypted DM round-trip (NIP-17), MCP fetch with SHA-256 verify</li>
+        <li>cars-pack@1 reference domain: tag schema, three skills, six tools, vin-decoder-mcp</li>
+        <li>3 cross-domain capability MCPs implemented as package skeletons (reverse-image, market-comp, reputation)</li>
+        <li>4 sketched domains, Mode A relay runbook (deploys a private or operator node in &lt; 30 min), 16 architectural rules</li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="notes">
+    Left: the protocol sequence on the wire. The seeking agent subscribes by
+    tag filter, a matching event arrives, the seeking agent sends a NIP-17
+    sealed gift-wrap with a session token, the offering agent binds it to
+    the seeking agent's pubkey, MCP HTTP+SSE handshake, tools/list,
+    tool call, ImageContent and EmbeddedResource come back, the seeking
+    agent SHA-256-verifies each block. No third-party host anywhere in the
+    loop. Right: this is what the MVP looks like in two terminals on two
+    laptops. The relays here are public commons (damus.io, nos.lol) but the
+    same demo works against a private strfry node — the operator runbook
+    stands one up in under thirty minutes from a clean VPS. Below it, the
+    ground truth on what's shipped: MVP runs, cars-pack@1 is the reference
+    domain with full tag schema and tool surface, four sketched domains in
+    the repo, three cross-domain capability MCPs, sixteen architectural
+    rules in AGENTS.md governing the code. Cars is the working reference; the
+    reusable protocol is what ships.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 7. WHAT THIS IS FOR (people + devs)              -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 08 / what this is for</div>
+  <h2>Built for people, by people. For devs, by devs.</h2>
+
+  <p class="lede">
+    This isn't a defense-in-depth pitch. The substrate exists because two
+    audiences both deserve something better than what's on offer today —
+    real users running agents on their own machines, and developers
+    extending them with their own packs. <span class="accent">What we
+    want from Hermes is to coordinate on making it more so.</span>
+  </p>
+
+  <div class="grid-2" style="margin-top: 1em;">
+    <div class="card" style="border-color: #5b8def;">
+      <h3>for people</h3>
+      <ul class="bullet-list" style="font-size: 0.6em; margin-top: 0.4em;">
+        <li><b>Sovereign identity</b> — each user's keypair, on their machine. No recovery path through us. No central account to deplatform.</li>
+        <li><b>Your agent is your deputy</b> — it represents you, not a service business. Acts under your grants, no implicit fan-out from one yes.</li>
+        <li><b>Run your own node</b> — a team, a family, a research group, a consortium can stand up a private relay and use the same protocol without asking anyone's permission.</li>
+        <li><b>Your data stays yours</b> — discovery is signed events on a relay you choose; rich content flows agent-to-agent over MCP. Nothing central holds it.</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-color: #a07dff;">
+      <h3>for devs</h3>
+      <ul class="bullet-list" style="font-size: 0.6em; margin-top: 0.4em;">
+        <li><b>Plugin-shaped</b> — drops into Hermes via <code>PluginManager.discover_and_load</code>. No glue code. Plugins are role-scoped via <code>forbidden_toolsets</code>; CI lint catches violations.</li>
+        <li><b>Pack-shaped</b> — new domain = a YAML + a Python module + two skill markdowns. The wire never changes; the contract does.</li>
+        <li><b>Open primitives that any agent-coordination builder needs</b> — <code>input_safety</code> for sanitising untrusted text, <code>reverse-image-mcp</code>, <code>reputation-mcp</code>, <code>market-comp-mcp</code>. Reusable beyond chaos.</li>
+        <li><b>All MIT</b> — fork it, run it, change it. No per-deal cut, no lock-in, no telemetry-back-to-us.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="small" style="margin-top: 1em;">
+    <span class="dim">Security in one line: sovereign keys + untrusted-text
+    is wrapped in source-tagged <code>&lt;untrusted&gt;</code> blocks before
+    any model sees it + plugin role isolation enforced via Hermes's own
+    <code>forbidden_toolsets</code> field. The substrate doesn't impose
+    trust; it delegates it to whoever runs the relay and whoever installs
+    the plugin.</span>
+  </p>
+
+  <aside class="notes">
+    This slide is the ethos one — what chaos is actually for. Two
+    audiences, two cards. For people: sovereign keys (your identity, no
+    recovery through us), the agent is your deputy not an autonomous
+    service business, anyone can stand up a private relay node for a team
+    or research group, no central piece holds your data. For devs: it's
+    plugin-shaped — drops into Hermes via PluginManager.discover_and_load
+    with no glue code; it's pack-shaped — new domain is a YAML plus a
+    Python module plus two skill markdowns; it ships open primitives any
+    agent-coordination builder needs (input_safety, reverse-image-mcp,
+    reputation-mcp, market-comp-mcp); all MIT. The single line of
+    security at the bottom is the honest version: sovereign keys,
+    untrusted-text sandbox, plugin role isolation. The substrate doesn't
+    impose trust — it delegates it to operators and plugin installers.
+    What we want from Hermes is to coordinate on making this more useful,
+    not to wave defensive flags.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 7. WHERE CHAOS SITS IN THE FIELD (NEW)           -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 09 / landscape</div>
+  <h2>Where chaos sits — the substrate, not a single application.</h2>
+
+  <p class="lede">
+    The closest-adjacent open project uses overlapping primitives — Nostr,
+    MCP, NIP-90 — but makes a much narrower bet. chaos is the more
+    general layer: <span class="accent">a decentralised collaboration
+    substrate</span> that specific shape (and others) could
+    ride on.
+  </p>
+
+  <div class="grid-2" style="margin-top: 1em;">
+    <div class="card">
+      <h3 style="color: var(--ns-accent-2);">agent-services vending</h3>
+      <p class="dim mono" style="font-size:0.5em;">e.g. Elisym (elisym.network)</p>
+      <p>A narrow bet: agents publish capabilities · NIP-90 Data
+      Vending Machines · self-custodial Lightning settlement.
+      <span class="dim">Solves AI services for sats — inference jobs,
+      summarization. Money on the wire is part of the protocol.</span></p>
+    </div>
+
+    <div class="card" style="border-color: var(--ns-accent);">
+      <h3>decentralised remote agentic collaboration</h3>
+      <p class="dim mono" style="font-size:0.5em;">chaos</p>
+      <p>The substrate underneath. Any domain: dataset exchange,
+      distributed inference, internal team coordination, research
+      collab, federated tooling, marketplaces. Public commons or private
+      node. Rich content native (<code>ImageContent</code> /
+      <code>EmbeddedResource</code>).
+      <span class="accent">No money flow, no custodial platform in the
+      data path — discovery and peer transport only.</span></p>
+    </div>
+  </div>
+
+  <table class="compare-table" style="margin-top: 1em;">
+    <thead>
+      <tr>
+        <th>dimension</th>
+        <th class="col-a">chaos</th>
+        <th class="col-b">Elisym</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Scope</td><td class="yes">general collaboration substrate (any domain)</td><td class="mid">single shape: agent services for sats</td></tr>
+      <tr><td>Hermes runtime posture fit</td><td class="yes">native — uses Hermes plugin loader directly</td><td class="mid">indirect — separate Python SDK</td></tr>
+      <tr><td>Rich-content fidelity (photos / PDFs / datasets / artifacts)</td><td class="yes">native via <code>ImageContent</code> / <code>EmbeddedResource</code></td><td class="no">NIP-90 is text-output-shaped</td></tr>
+      <tr><td>Money / value on the wire</td><td class="yes">no — never custodial</td><td class="mid">yes — Lightning required</td></tr>
+      <tr><td>Public OR private deployment</td><td class="yes">same protocol on commons or private node (Mode A/B/C)</td><td class="mid">designed for the public commons</td></tr>
+      <tr><td>Domain extensibility</td><td class="yes">pack abstraction — any domain</td><td class="no">single NIP-90 shape</td></tr>
+      <tr><td>Plugin role isolation in Hermes</td><td class="yes"><code>forbidden_toolsets</code> + CI lint</td><td class="mid">n/a — wrapper integration</td></tr>
+    </tbody>
+  </table>
+
+  <p class="small" style="margin-top: 0.5em;">
+    <span class="accent">chaos and Elisym can coexist on the same Nostr
+    fabric.</span> Same identity, different event kinds. The frame is not
+    "chaos beats Elisym" — it's that <span class="accent-2">chaos is the
+    more general abstraction</span>, and Elisym is one specific shape an
+    agent could publish on top of it.
+  </p>
+
+  <aside class="notes">
+    I want to ground this in the field rather than hand-wave. Elisym is
+    the closest-adjacent open project: agents publish capabilities to
+    Nostr, customers send job requests as NIP-90 Data Vending Machine
+    kinds, self-custodial Lightning settles the work. It solves agent-
+    services-vending well — but it's a single specific shape with money
+    on the wire. chaos is the broader abstraction — a decentralised
+    collaboration substrate, no money flow, rich content native
+    over MCP, and crucially, it works the same way on a private node as
+    on the public commons. Three lines I'd focus on in the table: scope
+    (chaos covers any domain, Elisym covers the services-for-sats
+    shape); rich-content fidelity (photos and PDFs flow native over MCP
+    for us, NIP-90 is text-output-shaped); and public-or-private
+    deployment (chaos's same substrate runs on a team's private relay
+    node, which is the property that lets the protocol serve internal-
+    team and consortium use cases that public commons can't). chaos and
+    Elisym can coexist on the same Nostr fabric — this is positioning,
+    not zero-sum. The point for Hermes: the more general substrate is
+    the natural Hermes-native layer.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 8. BUILT ON HERMES                               -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 10 / built on Hermes</div>
+  <h2>This protocol is enabled by what Hermes provides.</h2>
+
+  <p class="lede">
+    chaos is not "compatible with" Hermes. It is <span class="accent">built
+    on</span> Hermes. Four specific Hermes properties make the design
+    possible.
+  </p>
+
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="card">
+      <h3>1 · zero-glue MCP integration</h3>
+      <p><span class="mono">tools/mcp_tool.py</span> (client) and
+      <span class="mono">tools/mcp_serve.py</span> (server). Both ends of
+      the peer transport ship with the runtime.
+      <span class="dim">We did not have to write a transport layer.</span></p>
+    </div>
+
+    <div class="card">
+      <h3>2 · plugin loader</h3>
+      <p><span class="mono">PluginManager.discover_and_load(...)</span>
+      reads <span class="mono">plugin.yaml</span>, attaches role-scoped
+      tools, isolates skills.
+      <span class="dim">Tested, contract holds.</span></p>
+    </div>
+
+    <div class="card">
+      <h3>3 · role isolation enforceable</h3>
+      <p>The <span class="mono">forbidden_toolsets</span> manifest field is
+      what makes Rule 11 (offering-side plugins cannot load seeking-side
+      capability MCPs) enforceable in code, not just policy.
+      <span class="dim">CI lint rejects violations.</span></p>
+    </div>
+
+    <div class="card">
+      <h3>4 · skills + grant policy</h3>
+      <p>Per-tool grants and skill-scoped system prompts are how we encode
+      pack-defined defaults declaratively.
+      <span class="dim">The pack ships skills; Hermes runs them.</span></p>
+    </div>
+  </div>
+
+  <p class="small" style="margin-top: 0.8em;">
+    Without Hermes we'd be writing an agent runtime <i>and</i> a coordination
+    protocol. With Hermes we get to focus on the protocol.
+    <span class="accent">That's the leverage we want to credit.</span>
+    Reverse-engineered contract documented in
+    <span class="mono">hermes_integration_notes.md</span>; we will keep it
+    up-to-date as the Hermes API evolves.
+  </p>
+
+  <aside class="notes">
+    Specific about what Hermes contributes. First, MCP integration zero-glue
+    — tools/mcp_tool.py and tools/mcp_serve.py ship with the runtime, so the
+    agent already speaks both ends of our peer transport. We didn't have to
+    write that. Second, the plugin loader — PluginManager.discover_and_load
+    reads plugin.yaml and gives us role-scoped toolsets and isolated skill
+    loading; we verified the contract works. Third, the forbidden_toolsets
+    manifest field is what makes plugin role isolation enforceable in code —
+    offering-side plugins literally can't load seeking-side capability MCPs. Fourth,
+    the per-tool grant policy and skill-triggering give us a place to express
+    pack-defined defaults declaratively. Without Hermes we'd be building two
+    things; with Hermes we get to focus on the protocol. We've reverse-
+    engineered the plugin contract and documented it in
+    hermes_integration_notes.md — happy to keep that up to date as the API
+    evolves, and to feed back any rough edges we hit.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 9. THE ASK — PARTNERSHIP                         -->
+<!-- ============================================== -->
+<section>
+  <div class="label">slide 11 / the ask</div>
+  <h2>Strategic partnership.</h2>
+
+  <p class="lede">
+    Three asks, ordered low-cost-to-high. None is investment. All three
+    benefit the Hermes ecosystem at least as much as they benefit chaos.
+  </p>
+
+  <div class="grid-3" style="margin-top: 1.2em;">
+    <div class="card" style="border-color: #5b8def;">
+      <h3>1 · review the design with us</h3>
+      <p>An honest read on whether the substrate is <i>useful</i>: the
+      pack abstraction, the plugin contract
+      (<code>PluginManager</code> + <code>forbidden_toolsets</code>),
+      MCP-as-peer-transport, sovereign keys, untrusted-text sandbox.
+      <span class="accent">Not a defensive audit — a design
+      conversation.</span> Tell us where the abstractions feel wrong
+      and where the friction is for someone trying to build on them.</p>
+      <p class="small" style="margin-top: 0.5em;">artefacts:
+      <span class="mono">PROTOCOL.md</span> ·
+      <span class="mono">PRD.md</span> ·
+      <span class="mono">hermes_integration_notes.md</span> ·
+      <span class="mono">AGENTS.md</span></p>
+    </div>
+
+    <div class="card" style="border-color: #a07dff;">
+      <h3>2 · ecosystem reference</h3>
+      <p>If the architecture passes the smell test, list chaos as a
+      reference protocol in the Hermes ecosystem docs and (separately)
+      <span class="accent">consider running a private chaos node for
+      Hermes's own internal coordination</span> — distributed inference
+      brokerage, dataset/model handoff between contributors, on-call
+      handover — anywhere Hermes-running collaborators (pairs, fan-outs,
+      or many-to-many) need to coordinate without SaaS.</p>
+      <p class="small" style="margin-top: 0.5em;">we keep the README's
+      <i>"built on Hermes"</i> section accurate as the Hermes API evolves.</p>
+    </div>
+
+    <div class="card" style="border-color: #6ad29a;">
+      <h3>3 · co-build the universal MCPs</h3>
+      <p>Three cross-domain primitives are the broader Hermes ecosystem's
+      problem too: <span class="mono">reverse-image-mcp</span> (perceptual
+      hash), <span class="mono">reputation-mcp</span> (layered trust
+      aggregation), <span class="mono">market-comp-mcp</span> (on-network
+      similarity). <span class="dim">Any serious agent-collaboration
+      protocol on Hermes hits these.</span></p>
+      <p class="small" style="margin-top: 0.5em;">protocol-universal, not
+      pack-specific · MIT · we'd love the design partnership.</p>
+    </div>
+  </div>
+
+  <p class="lede" style="margin-top: 1.2em;">
+    What we offer in return: depth on a Hermes-native general
+    collaboration protocol, public credit to Hermes, the working pack
+    abstraction any builder can reuse, and an open codebase to
+    coordinate against. Repo: <a class="mono accent" href="https://github.com/DemidovVladimir/chaos">github.com/DemidovVladimir/chaos</a>
+    &nbsp;·&nbsp; everything is MIT.
+  </p>
+
+  <aside class="notes">
+    Three asks, ordered by cost-to-you ascending. First — lowest-cost —
+    review the design with us. An honest read on whether these
+    abstractions hold up: the pack model, the plugin contract,
+    MCP-as-peer-transport, sovereign keys, the untrusted-text sandbox.
+    Not asking for a defensive audit; asking whether these are the right
+    opinions for a substrate. You think about agent UX at scale, and
+    we'd benefit enormously from that lens applied to ours. Second — if
+    the architecture passes the smell test — two things. One, a
+    reference protocol listing in your ecosystem docs, so Hermes users
+    hear "if you need agent-to-agent coordination, here's the canonical
+    Hermes-native answer". Two, separately, consider running a private
+    chaos node for Hermes's own internal coordination. Distributed
+    inference brokerage among contributors, dataset and model handoff,
+    on-call handover — anywhere Hermes-running collaborators need to
+    coordinate without standing up SaaS, in pairs or fan-outs or
+    many-to-many. That's a real-world dogfood that benefits both sides.
+    Third — longest shot — co-build the three cross-domain capability
+    MCPs: perceptual-hash content checks, layered trust aggregation,
+    on-network similarity comps. These aren't pack-specific; any serious
+    agent-collaboration application on Hermes hits them. Open-source
+    primitives the broader ecosystem can share. What we offer in return
+    is depth on a flagship Hermes-native protocol, public credit to
+    Hermes, the pack abstraction documented and reusable, and an open
+    codebase to coordinate against. All MIT.
+  </aside>
+</section>
+
+<!-- ============================================== -->
+<!-- 10. THANK YOU                                    -->
+<!-- ============================================== -->
+<section
+  data-background-color="#0a0a0c"
+  data-background-video="assets/chaos-closing.mp4"
+  data-background-video-loop="true"
+  data-background-video-muted="true"
+  data-background-opacity="0.45">
+  <div class="thanks thanks--over-video">
+    <h1 class="accent">thank you.</h1>
+    <p style="font-size: 0.85em; color: var(--ns-fg); margin-top: 0.5em;">
+      questions, critique, collaboration — all welcome.
+    </p>
+
+    <div style="margin-top: 3em; font-family: var(--ns-mono); font-size: 0.55em; color: var(--ns-dim); line-height: 1.8;">
+      repo &nbsp;·&nbsp; <a style="color: var(--ns-accent); text-decoration: none;" href="https://github.com/DemidovVladimir/chaos">github.com/DemidovVladimir/chaos</a><br>
+      docs &nbsp;·&nbsp; <span style="color: var(--ns-fg);">PRD.md · OVERVIEW.md · PROTOCOL.md · COMPETITIVE_LANDSCAPE.md</span><br>
+      protocol &nbsp;·&nbsp; <span style="color: var(--ns-fg);">decentralised &nbsp;·&nbsp; no data ownership &nbsp;·&nbsp; public commons or private node</span><br>
+      email &nbsp;·&nbsp; <span style="color: var(--ns-fg);">uncojet@gmail.com</span><br>
+    </div>
+
+    <p style="margin-top: 4em; font-size: 0.4em; color: var(--ns-dim); font-family: var(--ns-mono);">
+      may 2026 &nbsp;·&nbsp; MIT &nbsp;·&nbsp; chaos × Hermes
+    </p>
+  </div>
+  <aside class="notes">
+    Thank you. The repo URL on screen is the canonical entry point —
+    everything I described is in there, MIT licensed. I'd love to keep this
+    going async after the call: happy to walk through any specific module,
+    open issues against the security model, or pair on the universal MCPs.
+    Take the deck, poke at the code, send me holes you find. The whole point
+    of building this on three open standards is that nobody has to ask
+    anyone's permission to extend it — least of all, ourselves.
+  </aside>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: false,
+  controls: true,
+  progress: true,
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  backgroundTransition: 'none',
+  width: 1280,
+  height: 880,
+  margin: 0.04,
+  minScale: 0.2,
+  maxScale: 1.6,
+  pdfSeparateFragments: false,
+  plugins: [ RevealHighlight, RevealNotes ]
+});
+</script>
+
+</body>
+</html>
