@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>chaos — How discovery and communication work</title>
+<style>
+  :root {
+    --bg: #0c1018;
+    --bg2: #131826;
+    --bg3: #1a2030;
+    --line: #232a3d;
+    --ink: #e6e8ef;
+    --dim: #8b94a8;
+    --nostr: #f5b651;
+    --nostr-dim: rgba(245,182,81,0.15);
+    --nostr-line: rgba(245,182,81,0.4);
+    --mcp: #5ad7c7;
+    --mcp-dim: rgba(90,215,199,0.15);
+    --mcp-line: rgba(90,215,199,0.5);
+    --hermes: #b794f6;
+    --good: #6ee7a7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 -apple-system, system-ui, "Inter", "Helvetica Neue", sans-serif; }
+  body { padding: 56px 24px 96px; max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim);
+    margin: 56px 0 20px; font-weight: 600; }
+  h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600; letter-spacing: -0.01em; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 19px; color: var(--dim); margin: 0 0 8px; max-width: 760px; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em;
+    background: var(--bg3); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+  .meta { font-size: 12px; color: var(--dim); margin-top: 18px; font-family: ui-monospace, Menlo, monospace; }
+
+  /* TL;DR strip */
+  .tldr {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 28px;
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg2);
+  }
+  .tldr > div { padding: 20px 24px; }
+  .tldr .left { border-right: 1px solid var(--line); }
+  .tldr .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 6px; }
+  .tldr .left .label { color: var(--nostr); }
+  .tldr .right .label { color: var(--mcp); }
+  .tldr p { margin: 0; color: var(--dim); font-size: 14px; }
+  .tldr h3 { color: var(--ink); }
+
+  /* Sequence diagram */
+  .seq {
+    border: 1px solid var(--line); border-radius: 14px; padding: 24px 16px 20px;
+    background: var(--bg2); margin-top: 12px;
+  }
+  .seq-actors {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;
+  }
+  .actor {
+    text-align: center; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg3);
+    font-weight: 600; letter-spacing: -0.01em; font-size: 14px;
+  }
+  .actor .sub { display: block; color: var(--dim); font-size: 11px; font-weight: 400; margin-top: 2px; letter-spacing: 0; }
+  .actor.offering { border-color: rgba(110,231,167,0.35); }
+  .actor.offering .name { color: var(--good); }
+  .actor.relay { border-color: rgba(245,182,81,0.35); }
+  .actor.relay .name { color: var(--nostr); }
+  .actor.seeking { border-color: rgba(90,215,199,0.35); }
+  .actor.seeking .name { color: var(--mcp); }
+
+  /* Lane lines + steps */
+  .lanes {
+    position: relative; padding: 16px 0 12px;
+    background-image:
+      linear-gradient(to bottom, var(--line), var(--line));
+    background-size: 1px 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .lanes::before, .lanes::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line);
+  }
+  .lanes::before { left: calc(100%/6); }
+  .lanes::after { right: calc(100%/6); }
+
+  .step {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center;
+    margin: 14px 0; min-height: 56px; position: relative;
+  }
+  .arrow {
+    grid-column: var(--from-col) / span var(--span);
+    position: relative; padding: 12px 16px;
+    border-radius: 10px; font-size: 13px;
+    border: 1px solid; font-weight: 500;
+  }
+  .arrow .label { display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 4px; opacity: 0.85; font-weight: 600; }
+  .arrow .what { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+  /* Direction indicators */
+  .arrow.lr::after, .arrow.rl::before {
+    content: ""; position: absolute; top: 50%; transform: translateY(-50%);
+    border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+  }
+  .arrow.lr::after { right: -1px; border-left: 9px solid currentColor; }
+  .arrow.rl::before { left: -1px; border-right: 9px solid currentColor; }
+  .arrow.lr::before, .arrow.rl::after { display: none; }
+
+  .arrow.nostr { background: var(--nostr-dim); border-color: var(--nostr-line); color: var(--nostr); }
+  .arrow.nostr .what { color: rgba(245,182,81,0.7); }
+  .arrow.mcp { background: var(--mcp-dim); border-color: var(--mcp-line); color: var(--mcp); }
+  .arrow.mcp .what { color: rgba(90,215,199,0.7); }
+
+  .phase-label {
+    grid-column: 1 / -1; padding: 14px 0 4px; text-align: center;
+    color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
+    border-top: 1px dashed var(--line); margin-top: 18px;
+  }
+  .phase-label:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+
+  /* What flows through what */
+  .pipes {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .pipe {
+    border: 1px solid var(--line); border-radius: 12px; padding: 18px 22px; background: var(--bg2);
+  }
+  .pipe.relay { border-color: rgba(245,182,81,0.3); }
+  .pipe.relay h3 { color: var(--nostr); }
+  .pipe.direct { border-color: rgba(90,215,199,0.3); }
+  .pipe.direct h3 { color: var(--mcp); }
+  .pipe ul { margin: 8px 0 0; padding: 0; list-style: none; }
+  .pipe ul li { padding: 6px 0; border-top: 1px dashed var(--line); font-size: 14px; color: var(--ink);
+    display: flex; align-items: baseline; gap: 12px; }
+  .pipe ul li:first-child { border-top: 0; }
+  .pipe ul li .tag { font-size: 11px; padding: 2px 7px; border-radius: 4px;
+    font-family: ui-monospace, Menlo, monospace; flex: 0 0 auto; font-weight: 600; }
+  .pipe.relay ul li .tag { background: rgba(245,182,81,0.12); color: var(--nostr); }
+  .pipe.direct ul li .tag { background: rgba(90,215,199,0.12); color: var(--mcp); }
+
+  /* Smoke-test grounding */
+  .grounded {
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 26px; font-family: ui-monospace, Menlo, monospace; font-size: 13px;
+    line-height: 1.7; color: var(--ink); overflow-x: auto;
+  }
+  .grounded .k { color: var(--dim); }
+  .grounded .v { color: var(--good); }
+  .grounded .vn { color: var(--nostr); }
+  .grounded .vm { color: var(--mcp); }
+  .grounded .comment { color: #4f5870; font-style: italic; }
+
+  .why-split {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  }
+  .why-card {
+    border: 1px solid var(--line); background: var(--bg2); border-radius: 12px; padding: 16px 18px;
+  }
+  .why-card .num { font-family: ui-monospace, Menlo, monospace; color: var(--nostr); font-size: 12px; }
+  .why-card h3 { font-size: 15px; margin-top: 4px; margin-bottom: 6px; }
+  .why-card p { margin: 0; color: var(--dim); font-size: 13.5px; line-height: 1.5; }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 16px 64px; }
+    h1 { font-size: 28px; }
+    .tldr { grid-template-columns: 1fr; }
+    .tldr .left { border-right: 0; border-bottom: 1px solid var(--line); }
+    .pipes, .why-split { grid-template-columns: 1fr; }
+    .seq-actors { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 1fr; }
+    .arrow { grid-column: 1 / -1; }
+    .arrow.lr::after, .arrow.rl::before { display: none; }
+    .lanes::before, .lanes::after { display: none; }
+    .lanes { background: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>How chaos discovers and talks</h1>
+<p class="lede">Two transports. One protocol. The relay carries the signed metadata; the
+direct MCP channel carries the binary content. This is the wire-level walkthrough.</p>
+<div class="meta">chaos · protocol mechanics · grounded in the smoke test we just ran</div>
+
+<div class="tldr">
+  <div class="left">
+    <div class="label">Discovery + first contact</div>
+    <h3>Through the relay</h3>
+    <p>Listings (NIP-99) and encrypted DMs (NIP-04 / NIP-17) are signed Nostr events.
+    Both flow over a WebSocket to one or more public relays. Relays index, store,
+    and forward.</p>
+  </div>
+  <div class="right">
+    <div class="label">Rich content delivery</div>
+    <h3>Direct, no relay</h3>
+    <p>Once the two agents have agreed to talk, the seeking agent opens an MCP HTTP+SSE
+    session straight to the offering agent&rsquo;s server. Photos, PDFs, and tool calls
+    flow over that direct channel. The relay never sees them.</p>
+  </div>
+</div>
+
+<h2>The four phases, on the wire</h2>
+
+<div class="seq">
+  <div class="seq-actors">
+    <div class="actor offering"><span class="name">Offering Agent</span><span class="sub">publishes a listing, runs an MCP server</span></div>
+    <div class="actor relay"><span class="name">Relay (Nostr)</span><span class="sub">strfry / damus / nos.lol &mdash; federated</span></div>
+    <div class="actor seeking"><span class="name">Seeking Agent</span><span class="sub">subscribes by tags, opens MCP sessions</span></div>
+  </div>
+
+  <div class="lanes">
+
+    <div class="phase-label">Phase A &mdash; Publish</div>
+    <div class="step">
+      <div class="arrow nostr lr" style="--from-col:1; --span:2">
+        <span class="label">1. PUBLISH NIP-99 event</span>
+        kind 30402, signed by offering, mined ≥ 20 PoW bits
+        <span class="what">tags: [pack=cars-pack@1, t=cars, t=mazda, mcp=https://my-tunnel/sse, …]</span>
+      </div>
+    </div>
+
+    <div class="phase-label">Phase B &mdash; Subscribe &amp; match</div>
+    <div class="step">
+      <div class="arrow nostr rl" style="--from-col:2; --span:2">
+        <span class="label">2. SUBSCRIBE filter</span>
+        relay holds a long-lived WebSocket, pushes matching events
+        <span class="what">REQ &lt;subid&gt; { kinds: [30402], "#t": ["cars","mazda"] }</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="arrow nostr lr" style="--from-col:2; --span:2">
+        <span class="label">3. PUSH event to seeking</span>
+        seeking sees: title, tags, mcp URL, offering pubkey
+        <span class="what">EVENT &lt;subid&gt; { kind:30402, pubkey:3b39fbe35b…, tags:[…, ["mcp", "https://…"]] }</span>
+      </div>
+    </div>
+
+    <div class="phase-label">Phase C &mdash; First contact (encrypted DMs)</div>
+    <div class="step">
+      <div class="arrow nostr rl" style="--from-col:2; --span:2">
+        <span class="label">4. INQUIRY DM</span>
+        kind 4 event, ciphertext encrypted to offering&rsquo;s pubkey
+        <span class="what">NIP-04 (MVP) or NIP-17 sealed gift-wrap (production)</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="arrow nostr lr" style="--from-col:1; --span:2">
+        <span class="label">5. PUSH DM to offering</span>
+        offering decrypts with its private key; relay never reads plaintext
+        <span class="what">offering subscribes to its own kind-4 inbox</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="arrow nostr lr" style="--from-col:1; --span:2">
+        <span class="label">6. REPLY DM</span>
+        same encryption, opposite direction
+        <span class="what">offering can attach a session token here for granular MCP access</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="arrow nostr rl" style="--from-col:2; --span:2">
+        <span class="label">7. PUSH reply to seeking</span>
+        relay forwards ciphertext only
+        <span class="what">at this point both agents have each other&rsquo;s pubkey</span>
+      </div>
+    </div>
+
+    <div class="phase-label">Phase D &mdash; Direct MCP (relay bypassed)</div>
+    <div class="step">
+      <div class="arrow mcp lr" style="--from-col:1; --span:3">
+        <span class="label">8. MCP HTTP+SSE session</span>
+        seeking opens a direct connection to the URL from step 3
+        <span class="what">tools/list → 6 tools  ·  request_photos → ImageContent[…]  ·  request_inspection_report → EmbeddedResource</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="arrow mcp rl" style="--from-col:1; --span:3">
+        <span class="label">9. BINARY CONTENT FLOWS BACK</span>
+        photos as base64 ImageContent, PDFs as EmbeddedResource, all SHA-256 verified
+        <span class="what">no relay involvement — bytes go offering → seeking, peer-to-peer over HTTPS</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<h2>What goes over each pipe</h2>
+
+<div class="pipes">
+  <div class="pipe relay">
+    <h3>Through the relay (Nostr)</h3>
+    <ul>
+      <li><span class="tag">kind 30402</span><span>NIP-99 classified listing — small JSON, ≤ 8&nbsp;KB</span></li>
+      <li><span class="tag">kind 4</span><span>NIP-04 encrypted DM (ciphertext only)</span></li>
+      <li><span class="tag">kind 1059</span><span>NIP-17 sealed gift-wrap DM (production)</span></li>
+      <li><span class="tag">kind 30410+</span><span>peer attestations / reputation events</span></li>
+      <li><span class="tag">kind 30430</span><span>admin-agent decisions (opt-in trust)</span></li>
+      <li><span class="tag">kind 30402</span><span>republish for status changes (reserved / sold)</span></li>
+    </ul>
+  </div>
+  <div class="pipe direct">
+    <h3>Direct, no relay (MCP)</h3>
+    <ul>
+      <li><span class="tag">tools/list</span><span>names + schemas of the offering&rsquo;s exposed tools</span></li>
+      <li><span class="tag">tools/call</span><span>structured tool invocations (e.g. <code>request_photos</code>)</span></li>
+      <li><span class="tag">ImageContent</span><span>photos as inline base64 PNG/JPEG blocks</span></li>
+      <li><span class="tag">EmbeddedResource</span><span>inspection PDFs, service-history scans, anything binary</span></li>
+      <li><span class="tag">resources/read</span><span>fallback for payloads &gt; 10&nbsp;MB (still on the same MCP server)</span></li>
+    </ul>
+  </div>
+</div>
+
+<h2>Why split it like this</h2>
+
+<div class="why-split">
+  <div class="why-card">
+    <div class="num">01</div>
+    <h3>The relay never sees photos</h3>
+    <p>Binary content stays between the two agents. The relay holds only signed metadata and DM ciphertexts. No data custody.</p>
+  </div>
+  <div class="why-card">
+    <div class="num">02</div>
+    <h3>Spam-resistant by construction</h3>
+    <p>NIP-13 PoW gates the discovery layer. The relay is the choke point, so attackers pay PoW per listing. The MCP channel is private — no spam surface.</p>
+  </div>
+  <div class="why-card">
+    <div class="num">03</div>
+    <h3>Granular consent</h3>
+    <p>The DM exchange is the handshake. The offering agent can issue a session token in step 6 that gates which MCP tools the seeking agent gets to call.</p>
+  </div>
+</div>
+
+<h2>What it looked like in our smoke test</h2>
+
+<div class="grounded">
+<span class="comment"># Phase A — offering published the listing to 4 relays</span>
+event id     = <span class="vn">f8711652f17d…</span>
+kind         = <span class="vn">30402</span>
+offering pk  = <span class="v">3b39fbe35b9bdd9e…</span>  <span class="comment"># the offering agent&rsquo;s npub</span>
+mcp tag      = <span class="vm">http://127.0.0.1:8765/sse</span>  <span class="comment"># localhost — only because both terminals are on one machine</span>
+pack tag     = <span class="vn">cars-pack@1</span>
+
+<span class="comment"># Phase B — seeking subscribed and got the match</span>
+filter       = { kinds: [30402], "#t": ["cars","mazda"] }
+match arrived → "2018 Mazda 6 hatchback" · €15000 · Prague
+seeking pk   = <span class="v">d0f9c73018791325…</span>
+
+<span class="comment"># Phase C — would be: NIP-04 DM round-trip via the same relays
+# Phase D — would be: seeking opens MCP at the mcp tag URL above
+#                     and pulls photos + inspection over the direct channel
+#                     bytes never touch any relay</span>
+</div>
+
+<p style="color:var(--dim); font-size:13.5px; margin-top:14px">
+In production, the <code>mcp</code> tag would point to a public URL like
+<code>https://my-tunnel.cloudflare.com/sse</code> (Cloudflare Tunnel, Tailscale Funnel,
+or your own ingress). The seeking agent connects to that URL directly, peer-to-peer.
+The relay&rsquo;s job ends after step 7.
+</p>
+
+</body>
+</html>

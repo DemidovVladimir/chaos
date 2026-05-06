@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>chaos — How NIP-13 PoW protects the relay</title>
+<style>
+  :root {
+    --bg: #0c1018;
+    --bg2: #131826;
+    --bg3: #1a2030;
+    --line: #232a3d;
+    --ink: #e6e8ef;
+    --dim: #8b94a8;
+    --nostr: #f5b651;
+    --mcp: #5ad7c7;
+    --good: #6ee7a7;
+    --warn: #ffc857;
+    --bad: #f17775;
+    --hermes: #b794f6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 -apple-system, system-ui, "Inter", "Helvetica Neue", sans-serif; }
+  body { padding: 56px 24px 96px; max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim);
+    margin: 56px 0 20px; font-weight: 600; }
+  h3 { font-size: 17px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.01em; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 19px; color: var(--dim); margin: 0 0 8px; max-width: 760px; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em;
+    background: var(--bg3); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+  .meta { font-size: 12px; color: var(--dim); margin-top: 18px; font-family: ui-monospace, Menlo, monospace; }
+
+  /* TL;DR */
+  .tldr {
+    border: 1px solid var(--line); border-radius: 14px; background: var(--bg2);
+    padding: 22px 26px; margin-top: 28px; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start;
+  }
+  .tldr .badge {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--nostr);
+    border: 1px solid rgba(245,182,81,0.4); padding: 6px 10px; border-radius: 6px; white-space: nowrap;
+  }
+  .tldr p { margin: 0; color: var(--ink); font-size: 16px; line-height: 1.55; }
+  .tldr p .em { color: var(--nostr); font-weight: 600; }
+
+  /* Algorithm flow */
+  .flow {
+    border: 1px solid var(--line); border-radius: 14px; background: var(--bg2);
+    padding: 26px; display: grid; gap: 14px;
+  }
+  .step-box {
+    display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items: center;
+    padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg3);
+    font-size: 14px;
+  }
+  .step-box .n {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--bg2);
+    border: 1px solid var(--nostr); color: var(--nostr); font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-family: ui-monospace, Menlo, monospace;
+  }
+  .step-box .body strong { display: block; color: var(--ink); margin-bottom: 2px; }
+  .step-box .body span { color: var(--dim); font-size: 13px; }
+  .step-box .pip { font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    color: var(--nostr); padding: 4px 8px; background: rgba(245,182,81,0.1); border-radius: 4px; }
+  .arrow-down {
+    margin: -4px 0 -4px 26px; color: var(--line); font-size: 16px; line-height: 1;
+  }
+  .loopback {
+    margin-top: 4px; padding: 10px 16px 10px 70px; font-size: 13px; color: var(--bad);
+    border-left: 3px solid var(--bad); border-radius: 0 6px 6px 0; background: rgba(241,119,117,0.06);
+  }
+
+  /* Hash visualization */
+  .hash-vis {
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 26px;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .hash-row { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 8px 0;
+    align-items: baseline; border-top: 1px dashed var(--line); }
+  .hash-row:first-child { border-top: 0; }
+  .hash-row .lab { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; }
+  .hash-row .val { color: var(--ink); font-size: 14px; word-break: break-all; }
+  .hash-row .val .lz { color: var(--good); font-weight: 700; }
+  .hash-row .val .nonlz { color: var(--bad); }
+  .hash-row .val .rest { color: var(--dim); }
+  .hash-note { font-family: -apple-system, system-ui, sans-serif; color: var(--dim); font-size: 13.5px;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .hash-note strong { color: var(--ink); }
+
+  /* Cost table */
+  .costs {
+    width: 100%; border-collapse: collapse; border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; background: var(--bg2);
+  }
+  .costs th, .costs td { padding: 12px 16px; border-top: 1px solid var(--line); text-align: left; font-size: 14px; }
+  .costs th { background: var(--bg3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--dim); border-top: 0; font-weight: 600; }
+  .costs td:first-child { font-family: ui-monospace, Menlo, monospace; color: var(--nostr); font-weight: 600; }
+  .costs tr.target { background: rgba(245,182,81,0.07); }
+  .costs tr.target td:first-child::after { content: " ◀ chaos floor"; color: var(--nostr); font-size: 11px; font-family: -apple-system, sans-serif; font-weight: 400; letter-spacing: 0.05em; }
+  .costs td .num { font-family: ui-monospace, Menlo, monospace; }
+  .costs td.honest { color: var(--good); }
+  .costs td.spam { color: var(--bad); }
+
+  /* Prevent / not prevent */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pcard {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); padding: 20px 22px;
+  }
+  .pcard.good { border-color: rgba(110,231,167,0.3); }
+  .pcard.bad  { border-color: rgba(241,119,117,0.3); }
+  .pcard h3 { margin-bottom: 10px; }
+  .pcard.good h3 { color: var(--good); }
+  .pcard.bad h3  { color: var(--bad); }
+  .pcard ul { list-style: none; padding: 0; margin: 0; }
+  .pcard li { padding: 8px 0; border-top: 1px dashed var(--line); font-size: 14px; color: var(--ink);
+    display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: baseline; }
+  .pcard li:first-child { border-top: 0; }
+  .pcard li .mark { font-family: ui-monospace, Menlo, monospace; font-weight: 700; }
+  .pcard.good li .mark { color: var(--good); }
+  .pcard.bad li .mark { color: var(--bad); }
+  .pcard li span.note { color: var(--dim); display: block; font-size: 13px; margin-top: 2px; }
+
+  /* Layered defense */
+  .layers {
+    border: 1px solid var(--line); border-radius: 14px; background: var(--bg2); padding: 22px 26px;
+    display: grid; gap: 10px;
+  }
+  .layer-row {
+    display: grid; grid-template-columns: 80px 1fr auto; gap: 18px; align-items: center;
+    padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg3);
+  }
+  .layer-row .n { color: var(--hermes); font-family: ui-monospace, Menlo, monospace; font-weight: 700; font-size: 14px; }
+  .layer-row .body strong { display: block; color: var(--ink); margin-bottom: 2px; font-size: 15px; }
+  .layer-row .body span { color: var(--dim); font-size: 13px; }
+  .layer-row .tag { font-size: 11px; padding: 4px 9px; border-radius: 999px; font-weight: 600;
+    color: var(--hermes); border: 1px solid rgba(183,148,246,0.4); }
+
+  /* Current state */
+  .state {
+    border: 1px solid rgba(255,200,87,0.3); border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,200,87,0.04), transparent);
+    padding: 24px 28px;
+  }
+  .state h3 { color: var(--warn); }
+  .state-row { display: grid; grid-template-columns: 200px 1fr auto; gap: 16px; padding: 10px 0;
+    border-top: 1px dashed var(--line); align-items: baseline; font-size: 14px; }
+  .state-row:first-of-type { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 14px; }
+  .state-row code { font-size: 12.5px; }
+  .state-row .where { color: var(--dim); font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+  .state-row .what { color: var(--ink); }
+  .state-row .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .state-row .pill.skip { color: var(--bad); border: 1px solid rgba(241,119,117,0.4); background: rgba(241,119,117,0.08); }
+  .state-row .pill.stub { color: var(--warn); border: 1px solid rgba(255,200,87,0.4); background: rgba(255,200,87,0.08); }
+  .state-row .pill.live { color: var(--good); border: 1px solid rgba(110,231,167,0.4); background: rgba(110,231,167,0.08); }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 16px 64px; }
+    h1 { font-size: 28px; }
+    .tldr { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .step-box { grid-template-columns: 36px 1fr; }
+    .step-box .pip { grid-column: 1 / -1; justify-self: start; }
+    .layer-row { grid-template-columns: 1fr; }
+    .state-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>How NIP-13 PoW protects the relay</h1>
+<p class="lede">A short walkthrough of the spam gate — what it is, how it&rsquo;s computed,
+why 20 bits, and what attacks it does and doesn&rsquo;t prevent.</p>
+<div class="meta">chaos · spec: NIP-13 · default 20 bits per AGENTS.md rule 10</div>
+
+<div class="tldr">
+  <span class="badge">TL;DR</span>
+  <p>Each listing publish must include a <span class="em">nonce</span> chosen so the event&rsquo;s
+  SHA-256 id has at least <span class="em">20 leading zero bits</span>. Finding such a nonce takes
+  ~1&nbsp;million SHA-256 attempts on average — a fraction of a second for an honest publisher,
+  hours for a spammer trying to flood. The relay rejects events without enough leading zeros.</p>
+</div>
+
+<h2>The mining loop, in five steps</h2>
+
+<div class="flow">
+  <div class="step-box">
+    <div class="n">1</div>
+    <div class="body">
+      <strong>Build the unsigned event</strong>
+      <span>kind=30402, the listing tags, the offering pubkey, created_at, content</span>
+    </div>
+    <div class="pip">build_event()</div>
+  </div>
+  <div class="arrow-down">│</div>
+  <div class="step-box">
+    <div class="n">2</div>
+    <div class="body">
+      <strong>Add a nonce tag</strong>
+      <span><code>["nonce", "<n>", "20"]</code> — the second field is the iterating value, the third declares the target</span>
+    </div>
+    <div class="pip">tags.append</div>
+  </div>
+  <div class="arrow-down">│</div>
+  <div class="step-box">
+    <div class="n">3</div>
+    <div class="body">
+      <strong>Compute the canonical event id</strong>
+      <span>SHA-256 of the JSON-serialized <code>[0, pubkey, created_at, kind, tags, content]</code></span>
+    </div>
+    <div class="pip">SHA-256</div>
+  </div>
+  <div class="arrow-down">│</div>
+  <div class="step-box">
+    <div class="n">4</div>
+    <div class="body">
+      <strong>Count leading zero bits in the id</strong>
+      <span>If &ge; 20, mining is done. If &lt; 20, increment the nonce value and loop.</span>
+    </div>
+    <div class="pip">leading_zeros</div>
+  </div>
+  <div class="loopback">↑ loop back to step 3 with nonce + 1 (~1M iterations on average for 20 bits)</div>
+  <div class="step-box">
+    <div class="n">5</div>
+    <div class="body">
+      <strong>Sign and publish</strong>
+      <span>Schnorr-sign the final id, ship it to the relay over WebSocket</span>
+    </div>
+    <div class="pip">sign() &middot; publish()</div>
+  </div>
+</div>
+
+<h2>How &ldquo;20 bits&rdquo; is measured</h2>
+
+<div class="hash-vis">
+  <div class="hash-row">
+    <div class="lab">Without PoW</div>
+    <div class="val">your smoke-test event<br>
+      <span class="nonlz">f871</span><span class="rest">1652f17d…</span>
+      <span style="color:var(--dim);font-size:12px;display:block;margin-top:6px">
+        starts with <code>f</code> — that&rsquo;s <code>1111</code> in binary — <strong style="color:var(--bad)">0 leading zero bits</strong>
+      </span>
+    </div>
+  </div>
+  <div class="hash-row">
+    <div class="lab">20-bit PoW (min)</div>
+    <div class="val">
+      <span class="lz">00000</span><span class="nonlz">7</span><span class="rest">b8a4f3e2c1d0…</span>
+      <span style="color:var(--dim);font-size:12px;display:block;margin-top:6px">
+        five hex zeros = 20 zero bits. The next char must be <code>0–7</code>
+        (top bit is 0). <strong style="color:var(--good)">≥ 20 leading zero bits ✓</strong>
+      </span>
+    </div>
+  </div>
+  <div class="hash-row">
+    <div class="lab">24-bit PoW</div>
+    <div class="val">
+      <span class="lz">000000</span><span class="rest">a7b8c2d1e0…</span>
+      <span style="color:var(--dim);font-size:12px;display:block;margin-top:6px">
+        six hex zeros = 24 zero bits. 16× harder to find than 20 bits.
+      </span>
+    </div>
+  </div>
+  <p class="hash-note">
+    <strong>Quick mental model:</strong> each hex character is 4 bits. 20 bits ≈ 5 hex zeros.
+    Each additional bit doubles the expected work to find a valid id. So 20 → 21 bits is
+    2× cost, 20 → 24 is 16×, 20 → 28 is 256×.
+  </p>
+</div>
+
+<h2>The economics — why 20 bits</h2>
+
+<table class="costs">
+  <thead><tr>
+    <th>Bits</th>
+    <th>Avg attempts</th>
+    <th>~Time per event<br><span style="color:var(--dim);font-weight:400;text-transform:none">(modern laptop, Python)</span></th>
+    <th>Honest user<br><span style="color:var(--dim);font-weight:400;text-transform:none">(1 listing)</span></th>
+    <th>Spammer<br><span style="color:var(--dim);font-weight:400;text-transform:none">(1000 listings)</span></th>
+  </tr></thead>
+  <tbody>
+    <tr><td>8</td>  <td><span class="num">~256</span></td>     <td><span class="num">&lt; 1 ms</span></td>  <td class="honest">imperceptible</td>     <td class="honest">trivial</td></tr>
+    <tr><td>16</td> <td><span class="num">~65,536</span></td>  <td><span class="num">~50 ms</span></td>    <td class="honest">imperceptible</td>     <td>~50 sec</td></tr>
+    <tr class="target"><td>20</td> <td><span class="num">~1,048,576</span></td> <td><span class="num">~500 ms – 2 s</span></td> <td class="honest">tolerable</td> <td class="spam">~10 min – 30 min</td></tr>
+    <tr><td>24</td> <td><span class="num">~16.7 M</span></td>   <td><span class="num">~8 – 30 s</span></td> <td>annoying</td>             <td class="spam">~2 – 8 hours</td></tr>
+    <tr><td>28</td> <td><span class="num">~268 M</span></td>    <td><span class="num">~2 – 8 min</span></td> <td class="spam">painful</td> <td class="spam">~33 – 130 hours</td></tr>
+  </tbody>
+</table>
+
+<p style="margin-top:14px;color:var(--dim);font-size:14px;max-width:760px">
+  20 bits is the chosen sweet spot: barely noticeable for an honest publisher posting one or two
+  listings a week, but enough to make a 1000-listing flood take 10+ minutes per pubkey of pure CPU work.
+  Higher bits (24, 28) push spammer cost up but also start to hurt honest publishers on weak hardware
+  and mobile devices.
+</p>
+
+<h2>What it prevents — and what it doesn&rsquo;t</h2>
+
+<div class="grid2">
+  <div class="pcard good">
+    <h3>Stops</h3>
+    <ul>
+      <li><span class="mark">✓</span><div><strong>Single-key flood spam</strong>
+        <span class="note">Each event costs CPU. Linear in volume.</span></div></li>
+      <li><span class="mark">✓</span><div><strong>Cheap-key sybil spam</strong>
+        <span class="note">Generating a new pubkey is free, but each event still requires its own PoW.</span></div></li>
+      <li><span class="mark">✓</span><div><strong>Relay DB-fill via volume</strong>
+        <span class="note">Spammer must spend &ge; 1M hashes per row written.</span></div></li>
+      <li><span class="mark">✓</span><div><strong>Race-to-publish duplicates</strong>
+        <span class="note">Forging tens of variants of the same listing is now expensive.</span></div></li>
+    </ul>
+  </div>
+  <div class="pcard bad">
+    <h3>Doesn&rsquo;t stop</h3>
+    <ul>
+      <li><span class="mark">✗</span><div><strong>Botnet-distributed spam</strong>
+        <span class="note">If 10k bots each pay PoW, the network sees high-volume valid traffic.</span></div></li>
+      <li><span class="mark">✗</span><div><strong>Network-layer DDoS</strong>
+        <span class="note">TCP flood, slowloris, BGP attacks — that&rsquo;s a CDN / firewall job.</span></div></li>
+      <li><span class="mark">✗</span><div><strong>Subscription flooding</strong>
+        <span class="note">PoW is on publish. REQ filters need separate per-connection rate limits.</span></div></li>
+      <li><span class="mark">✗</span><div><strong>Smart low-volume spam</strong>
+        <span class="note">An attacker posting 10 fake listings a day pays ~5 sec total. PoW is a volume gate.</span></div></li>
+    </ul>
+  </div>
+</div>
+
+<h2>PoW is one of four layered defenses</h2>
+
+<div class="layers">
+  <div class="layer-row">
+    <div class="n">L1</div>
+    <div class="body">
+      <strong>NIP-13 Proof of Work</strong>
+      <span>Cost-per-publish gate. The thing this doc is about.</span>
+    </div>
+    <span class="tag">computational</span>
+  </div>
+  <div class="layer-row">
+    <div class="n">L2</div>
+    <div class="body">
+      <strong>Paid relays</strong>
+      <span>Some operators charge a one-time pubkey-registration fee. Real money, not just CPU.</span>
+    </div>
+    <span class="tag">financial</span>
+  </div>
+  <div class="layer-row">
+    <div class="n">L3</div>
+    <div class="body">
+      <strong>NIP-51 mute lists</strong>
+      <span>Each user&rsquo;s agent locally filters out pubkeys it doesn&rsquo;t want to see. No platform-level censorship.</span>
+    </div>
+    <span class="tag">user-side</span>
+  </div>
+  <div class="layer-row">
+    <div class="n">L4</div>
+    <div class="body">
+      <strong>Pubkey reputation history</strong>
+      <span>Cumulative trust signal: NIP-58 badges, peer attestations, NIP-02 web of trust. Slow attackers can&rsquo;t fake age.</span>
+    </div>
+    <span class="tag">temporal</span>
+  </div>
+</div>
+
+<p style="margin-top:14px;color:var(--dim);font-size:14px;max-width:760px">
+  None of these alone is a gatekeeper. PoW makes spam cost CPU; paid relays make it cost money;
+  mute lists let users opt out; reputation makes brand-new pubkeys low-trust by default.
+  An attacker has to defeat all four to flood the network meaningfully.
+</p>
+
+<h2>Where it actually lives in the chaos repo</h2>
+
+<div class="state">
+  <h3>The current build is half-implemented</h3>
+  <p style="color:var(--ink); margin-bottom: 0">The 20-bit floor is a <em>rule</em> in <code>AGENTS.md</code>. The implementation status varies by component:</p>
+
+  <div class="state-row">
+    <div class="where">mvp/agent_offering.py</div>
+    <div class="what">No PoW code at all — the publish flow goes straight from build → sign → ship.
+      Documented in <code>mvp/README.md</code> line 253: <em>&ldquo;The MVP skips NIP-13.&rdquo;</em></div>
+    <span class="pill skip">SKIPS PoW</span>
+  </div>
+
+  <div class="state-row">
+    <div class="where">agent/src/chaos_agent/<br>publish.py</div>
+    <div class="what">Function signatures defined: <code>build_event</code>, <code>mine_pow</code>, <code>publish</code>.
+      All currently raise <code>NotImplementedError</code>. <code>DEFAULT_POW_BITS = 20</code> is set.</div>
+    <span class="pill stub">STUB</span>
+  </div>
+
+  <div class="state-row">
+    <div class="where">operator/cars/<br>(strfry config)</div>
+    <div class="what">The Mode A relay deployment configures strfry to <em>reject</em> kind-30402 events
+      with fewer than 20 leading zero bits. Choke point at the relay, not the publisher.</div>
+    <span class="pill live">ENFORCED</span>
+  </div>
+
+  <div class="state-row">
+    <div class="where">public Nostr commons<br>(damus, nos.lol, …)</div>
+    <div class="what">Most public relays don&rsquo;t enforce PoW for arbitrary kinds. That&rsquo;s why your
+      smoke-test event id <code>f8711652f17d…</code> (zero leading zeros) was accepted — they&rsquo;re lenient by default.</div>
+    <span class="pill skip">NOT ENFORCED</span>
+  </div>
+</div>
+
+<p style="margin-top:18px; color:var(--dim); font-size:14px; max-width:760px">
+  The takeaway: the <em>protocol design</em> mandates 20-bit PoW, the <em>operator-run relay</em>
+  enforces it, but the MVP scripts and the public relays we&rsquo;re testing against don&rsquo;t.
+  Closing this gap is on the &ldquo;queued&rdquo; list — implementing <code>mine_pow</code> in
+  <code>agent/src/chaos_agent/publish.py</code> is the next concrete step before the production
+  agent migrates off the MVP scripts.
+</p>
+
+</body>
+</html>

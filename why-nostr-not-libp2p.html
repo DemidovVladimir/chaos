@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>chaos — Why Nostr, not libp2p</title>
+<style>
+  :root {
+    --bg: #0c1018;
+    --bg2: #131826;
+    --bg3: #1a2030;
+    --line: #232a3d;
+    --ink: #e6e8ef;
+    --dim: #8b94a8;
+    --nostr: #f5b651;
+    --mcp: #5ad7c7;
+    --hermes: #b794f6;
+    --reject: #f17775;
+    --good: #6ee7a7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 -apple-system, system-ui, "Inter", "Helvetica Neue", sans-serif; }
+  body { padding: 56px 24px 96px; max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 38px; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 700; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim);
+    margin: 64px 0 20px; font-weight: 600; }
+  h3 { font-size: 18px; margin: 0 0 6px; font-weight: 600; letter-spacing: -0.01em; }
+  p { margin: 0 0 12px; color: var(--ink); }
+  .lede { font-size: 19px; color: var(--dim); margin: 0 0 8px; max-width: 720px; }
+  .meta { font-size: 12px; color: var(--dim); margin-top: 20px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.92em;
+    background: var(--bg3); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+
+  /* Hero split */
+  .split {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch; gap: 0;
+    margin-top: 28px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    background: var(--bg2);
+  }
+  .split > div { padding: 22px 24px; }
+  .split .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 6px; }
+  .split .nostr-side { border-right: 1px solid var(--line); }
+  .split .nostr-side .label { color: var(--nostr); }
+  .split .mcp-side .label { color: var(--mcp); }
+  .split .axis { writing-mode: vertical-rl; text-orientation: mixed;
+    background: var(--bg3); color: var(--dim); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; padding: 12px 8px; }
+  .split h3 { margin-bottom: 4px; }
+  .split p { font-size: 14px; color: var(--dim); margin: 0; }
+  .split .row { display: flex; gap: 14px; align-items: baseline; padding: 6px 0; border-top: 1px dashed var(--line); margin-top: 10px; font-size: 13px; }
+  .split .row:first-of-type { border-top: 0; margin-top: 6px; }
+  .split .row .k { color: var(--ink); flex: 0 0 110px; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; }
+  .split .row .v { color: var(--dim); }
+
+  /* Need vs offer table */
+  .needs {
+    display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 0;
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg2);
+  }
+  .needs > div { padding: 14px 18px; border-top: 1px solid var(--line); font-size: 14px; }
+  .needs > div.head { border-top: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--dim); padding: 12px 18px; background: var(--bg3); font-weight: 600; }
+  .needs .nostr-h { color: var(--nostr); }
+  .needs .libp2p-h { color: var(--reject); }
+  .needs .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    margin-right: 8px; vertical-align: 1px; font-weight: 600; }
+  .pill.prim { background: rgba(110,231,167,0.13); color: var(--good); border: 1px solid rgba(110,231,167,0.3); }
+  .pill.diy { background: rgba(241,119,117,0.10); color: var(--reject); border: 1px solid rgba(241,119,117,0.3); }
+  .needs .what { color: var(--ink); }
+
+  /* Reason cards */
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .card {
+    border: 1px solid var(--line); background: var(--bg2); border-radius: 12px; padding: 18px 20px;
+    position: relative; min-height: 142px;
+  }
+  .card .num { position: absolute; top: 14px; right: 18px; color: var(--nostr); font-size: 13px;
+    font-family: ui-monospace, Menlo, monospace; opacity: 0.7; }
+  .card h3 { color: var(--nostr); font-size: 15px; margin-bottom: 8px; }
+  .card p { font-size: 14px; color: var(--ink); margin: 0; }
+  .card p .dim { color: var(--dim); }
+
+  /* libp2p concession */
+  .concession {
+    border: 1px solid var(--line); background: linear-gradient(180deg, rgba(241,119,117,0.04), transparent);
+    border-radius: 14px; padding: 22px 24px; display: grid; grid-template-columns: auto 1fr; gap: 22px;
+    align-items: start;
+  }
+  .concession .badge { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--reject); border: 1px solid rgba(241,119,117,0.4); padding: 6px 10px; border-radius: 6px;
+    align-self: start; white-space: nowrap; }
+  .concession h3 { color: var(--ink); margin-bottom: 6px; }
+  .concession p { color: var(--dim); font-size: 14.5px; margin: 0; }
+  .concession blockquote { border-left: 2px solid var(--reject); padding: 6px 0 6px 14px; margin: 12px 0 0;
+    color: var(--ink); font-style: italic; font-size: 13.5px; }
+
+  /* Alternatives table */
+  .alts { width: 100%; border-collapse: collapse; border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    background: var(--bg2); }
+  .alts th, .alts td { text-align: left; padding: 12px 18px; border-top: 1px solid var(--line); font-size: 14px; }
+  .alts th { background: var(--bg3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--dim); border-top: 0; font-weight: 600; }
+  .alts td:first-child { color: var(--nostr); font-family: ui-monospace, Menlo, monospace; font-size: 13px; white-space: nowrap; }
+  .alts td:nth-child(2) { color: var(--ink); }
+  .alts td:nth-child(3) { color: var(--dim); }
+
+  /* Final stack */
+  .stack {
+    border: 1px solid var(--line); border-radius: 14px; padding: 28px; background: var(--bg2);
+    display: grid; gap: 12px;
+  }
+  .layer {
+    border-radius: 10px; padding: 14px 18px; display: grid; grid-template-columns: 130px 1fr auto; gap: 16px;
+    align-items: center; border: 1px solid var(--line); background: var(--bg3);
+  }
+  .layer .name { font-weight: 700; letter-spacing: -0.01em; font-size: 16px; }
+  .layer .role { color: var(--dim); font-size: 13.5px; }
+  .layer .tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; padding: 4px 10px;
+    border-radius: 999px; font-weight: 600; }
+  .layer.nostr { border-color: rgba(245,182,81,0.35); }
+  .layer.nostr .name { color: var(--nostr); }
+  .layer.nostr .tag { color: var(--nostr); border: 1px solid rgba(245,182,81,0.35); }
+  .layer.mcp { border-color: rgba(90,215,199,0.35); }
+  .layer.mcp .name { color: var(--mcp); }
+  .layer.mcp .tag { color: var(--mcp); border: 1px solid rgba(90,215,199,0.35); }
+  .layer.hermes { border-color: rgba(183,148,246,0.35); }
+  .layer.hermes .name { color: var(--hermes); }
+  .layer.hermes .tag { color: var(--hermes); border: 1px solid rgba(183,148,246,0.35); }
+
+  .tldr { font-size: 22px; line-height: 1.45; color: var(--ink); margin: 28px 0 0; letter-spacing: -0.01em; }
+  .tldr .nostr-c { color: var(--nostr); }
+  .tldr .mcp-c { color: var(--mcp); }
+  .tldr .hermes-c { color: var(--hermes); }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
+
+  @media (max-width: 720px) {
+    body { padding: 32px 16px 64px; }
+    h1 { font-size: 28px; }
+    .split { grid-template-columns: 1fr; }
+    .split .nostr-side { border-right: 0; border-bottom: 1px solid var(--line); }
+    .split .axis { writing-mode: horizontal-tb; padding: 8px; }
+    .needs { grid-template-columns: 1fr; }
+    .needs > div { border-left: 0 !important; }
+    .cards { grid-template-columns: 1fr; }
+    .concession { grid-template-columns: 1fr; }
+    .layer { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Why Nostr, not libp2p</h1>
+<p class="lede">The chaos protocol picks discovery and transport as separate problems
+and gives each one the right tool. This is the short version of why.</p>
+<div class="meta">chaos · architecture decision record · D1 from PRD.md §12</div>
+
+<h2>The core insight</h2>
+<p style="max-width:720px">Discovery and transport look like the same problem, so most projects
+pick one tool to do both. They&rsquo;re not. chaos splits them.</p>
+
+<div class="split">
+  <div class="nostr-side">
+    <div class="label">Discovery layer</div>
+    <h3>Nostr</h3>
+    <p>Lightweight signed metadata. Tag-indexed pub/sub. Federated relays. Sovereign keys.</p>
+    <div class="row"><span class="k">moves</span><span class="v">JSON events &le; 8&nbsp;KB</span></div>
+    <div class="row"><span class="k">primitive</span><span class="v">NIP-99 classified listings</span></div>
+    <div class="row"><span class="k">spam gate</span><span class="v">NIP-13 PoW &ge; 20 bits</span></div>
+    <div class="row"><span class="k">trust</span><span class="v">NIP-58 badges, NIP-51 mute lists</span></div>
+  </div>
+  <div class="axis">vs</div>
+  <div class="mcp-side">
+    <div class="label">Transport layer</div>
+    <h3>MCP</h3>
+    <p>Direct agent-to-agent tool calls. Native binary content. Structured request/response.</p>
+    <div class="row"><span class="k">moves</span><span class="v">photos, PDFs, anything binary</span></div>
+    <div class="row"><span class="k">primitive</span><span class="v">ImageContent / EmbeddedResource</span></div>
+    <div class="row"><span class="k">delivery</span><span class="v">offering &rarr; seeking, no third party</span></div>
+    <div class="row"><span class="k">surface</span><span class="v">named tools per vertical pack</span></div>
+  </div>
+</div>
+
+<p style="margin-top:18px;color:var(--dim);font-size:14px">
+libp2p tries to solve both problems with one tool. It does neither in the shape we need.
+</p>
+
+<h2>What discovery actually needs &mdash; and where it comes from</h2>
+
+<div class="needs">
+  <div class="head">Need</div>
+  <div class="head nostr-h">Nostr</div>
+  <div class="head libp2p-h">libp2p</div>
+
+  <div class="what">Tag-indexed search<br><span style="color:var(--dim);font-size:12.5px">"find me events matching kind=30402, #t=cars,mazda"</span></div>
+  <div><span class="pill prim">primitive</span>Relays index by tags. NIP-99 defines the listing event.</div>
+  <div><span class="pill diy">build it</span>Gossipsub propagates messages, doesn&rsquo;t index. Build the relay yourself.</div>
+
+  <div class="what">Sovereign identity<br><span style="color:var(--dim);font-size:12.5px">user owns their key, no recovery, no custody</span></div>
+  <div><span class="pill prim">primitive</span>secp256k1 + BIP-340 Schnorr. NIP-05, NIP-58, NIP-51 layered on top.</div>
+  <div><span class="pill diy">build it</span>Peer ID is network identity, not user identity. No reputation primitives.</div>
+
+  <div class="what">Federation that already exists<br><span style="color:var(--dim);font-size:12.5px">independently-operated discovery nodes, day one</span></div>
+  <div><span class="pill prim">primitive</span>Hundreds of public relays serving millions of users today.</div>
+  <div><span class="pill diy">bootstrap</span>No comparable public commons. Months of community work to seed it.</div>
+
+  <div class="what">Spam resistance<br><span style="color:var(--dim);font-size:12.5px">anyone can publish &mdash; how do you stop the flood?</span></div>
+  <div><span class="pill prim">primitive</span>NIP-13 PoW + paid relays + NIP-51 mute lists, layered.</div>
+  <div><span class="pill diy">tune it</span>Gossipsub peer scoring exists but tuning is on you.</div>
+
+  <div class="what">Simple ops for relay operators<br><span style="color:var(--dim);font-size:12.5px">community runs it on $5 VPSes, not k8s clusters</span></div>
+  <div><span class="pill prim">primitive</span>strfry: one Go binary, ~50&nbsp;MB RAM, WebSocket on 443.</div>
+  <div><span class="pill diy">heavy</span>DHT participation, gossipsub state, NAT traversal. Real surface area.</div>
+
+  <div class="what">Works through every firewall<br><span style="color:var(--dim);font-size:12.5px">hotel wifi, corporate proxy, captive portal</span></div>
+  <div><span class="pill prim">primitive</span>WebSocket on TCP/443. Zero exotic transport.</div>
+  <div><span class="pill diy">brittle</span>QUIC / WebRTC / hole punching. Sophisticated, sometimes broken.</div>
+</div>
+
+<h2>The five reasons, one card each</h2>
+
+<div class="cards">
+  <div class="card">
+    <span class="num">01</span>
+    <h3>Tag-indexed subscription is a primitive</h3>
+    <p>Nostr relays are <em>built</em> to index events by tags. With libp2p
+    we&rsquo;d be reinventing the relay we already get for free.</p>
+  </div>
+  <div class="card">
+    <span class="num">02</span>
+    <h3>The federation already runs</h3>
+    <p>Modes B and C of our deployment plan assume independent community relays.
+    With Nostr those exist today and our smoke test publishes to them right now.</p>
+  </div>
+  <div class="card">
+    <span class="num">03</span>
+    <h3>Sovereign identity by design</h3>
+    <p>Nostr was built around &ldquo;users own their keys.&rdquo;
+    That maps 1:1 to AGENTS.md Rule 3. libp2p has peer IDs &mdash; not the same thing.</p>
+  </div>
+  <div class="card">
+    <span class="num">04</span>
+    <h3>Operators can run a relay on a $5 VPS</h3>
+    <p>strfry is one Go binary. The easier we make running a relay,
+    the more independent operators federate, the more decentralised the network actually is in practice.</p>
+  </div>
+  <div class="card" style="grid-column: 1 / -1">
+    <span class="num">05</span>
+    <h3>WebSocket on 443 just works, everywhere</h3>
+    <p>Through firewalls, NATs, captive portals, corporate proxies, mobile hotspots.
+    For a protocol that has to run on a developer&rsquo;s laptop on coffee-shop wifi
+    &mdash; which is exactly the smoke test we&rsquo;re running now &mdash; that matters enormously.</p>
+  </div>
+</div>
+
+<h2>What libp2p IS good at &mdash; and why we still defer it</h2>
+
+<div class="concession">
+  <div class="badge">Deferred,<br>not excluded</div>
+  <div>
+    <h3>True multi-party gossip (gossipsub)</h3>
+    <p>If chaos ever needs many-to-many consensus &mdash; a swarm of agents
+    collaboratively deciding something &mdash; gossipsub is genuinely the right
+    primitive. We&rsquo;re explicit about this in the protocol doc:</p>
+    <blockquote>
+      &ldquo;True multi-party consensus is not in scope for v1&ndash;v3. If we ever
+      need it, that&rsquo;s a separate layer above MCP using libp2p / gossipsub.
+      The current design doesn&rsquo;t preclude this &mdash; it just doesn&rsquo;t ship it.&rdquo;
+      <br><span style="color:var(--dim);font-size:12px;font-style:normal">&mdash; PROTOCOL.md, line 349</span>
+    </blockquote>
+  </div>
+</div>
+
+<h2>The other alternatives we ruled out</h2>
+
+<table class="alts">
+  <thead><tr><th>Alternative</th><th>Why it sounds plausible</th><th>Why it doesn&rsquo;t fit</th></tr></thead>
+  <tbody>
+    <tr><td>Supabase / API + DB</td><td>Easy to ship, lots of tooling.</td><td>Violates Rule 1 (no central registry) and Rule 5 (no data custody). The thing we&rsquo;re explicitly trying to <em>not</em> be.</td></tr>
+    <tr><td>ActivityPub</td><td>Federated, signed, mature.</td><td>Designed for social-media federation (posts, follows). Not classified-listing tag search. Square peg.</td></tr>
+    <tr><td>Matrix</td><td>Federated, encrypted, room-based.</td><td>Heavy rooms with persistent history. Overkill for ephemeral listings.</td></tr>
+    <tr><td>IPFS / IPNS</td><td>Decentralised, content-addressed.</td><td>Great for static published content. Bad for &ldquo;find me things matching these tags right now.&rdquo; IPNS is slow.</td></tr>
+    <tr><td>Custom gossip</td><td>Maximum control.</td><td>Reinventing transport AND indexing AND identity AND spam resistance ourselves. No.</td></tr>
+  </tbody>
+</table>
+
+<h2>The shape we ended up with</h2>
+
+<div class="stack">
+  <div class="layer hermes">
+    <span class="name">Hermes</span>
+    <span class="role">Agent runtime &middot; plugin host &middot; skill layer &middot; MCP client</span>
+    <span class="tag">runtime</span>
+  </div>
+  <div class="layer mcp">
+    <span class="name">MCP</span>
+    <span class="role">Direct agent-to-agent transport &middot; ImageContent &middot; EmbeddedResource</span>
+    <span class="tag">delivery</span>
+  </div>
+  <div class="layer nostr">
+    <span class="name">Nostr</span>
+    <span class="role">NIP-99 listings &middot; tag-indexed pub/sub &middot; federated relays &middot; sovereign keys</span>
+    <span class="tag">discovery</span>
+  </div>
+</div>
+
+<p class="tldr">
+  <span class="nostr-c">Nostr discovers.</span>
+  <span class="mcp-c">MCP delivers.</span>
+  <span class="hermes-c">Hermes runs it.</span>
+  <br>
+  <span style="color:var(--dim);font-size:16px">Composed, the system is smaller and more decentralised than either tool alone would produce.</span>
+</p>
+
+</body>
+</html>
