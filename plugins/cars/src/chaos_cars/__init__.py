@@ -243,15 +243,23 @@ def register(ctx: Any) -> None:
                 skill_name, skill_path,
             )
 
-    # 2. Slash command — `/cars`
-    try:
-        ctx.register_command(
-            "cars",
-            handler=_slash_status,
-            description="chaos cars status and shortcuts.",
+    # 2. Slash command — `/cars` (only if Hermes still exposes register_command;
+    #    current Hermes versions removed this method, so we guard with hasattr
+    #    instead of relying on the try/except to swallow an AttributeError).
+    if hasattr(ctx, "register_command"):
+        try:
+            ctx.register_command(
+                "cars",
+                handler=_slash_status,
+                description="chaos cars status and shortcuts.",
+            )
+        except Exception as exc:
+            logger.warning("cars: register_command failed: %s", exc)
+    else:
+        logger.info(
+            "cars: ctx.register_command not available on this Hermes version; "
+            "skipping slash-command registration. CLI subcommand still works."
         )
-    except Exception as exc:
-        logger.warning("cars: register_command failed: %s", exc)
 
     # 3. CLI subcommand — `hermes cars …`
     try:
